@@ -17,6 +17,7 @@ import com.augustopalhardi.manutencao.dao.CadastroUsuarioDao;
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.LoginService;
+import com.augustopalhardi.manutencao.util.Navegacao;
 
 @Named("loginUsuarioBean")
 @SessionScoped
@@ -94,14 +95,8 @@ public class LoginUsuarioBean implements Serializable {
 				LOGGER.info("Login realizado com sucesso para: {}", usuario.getNome());
 
 				// Redirecionamento baseado no tipo de usuário
-				String url;
-				if (usuario.getTipoUsuario() == TipoUsuario.ADMINISTRADOR) {
-					url = context.getExternalContext().getRequestContextPath() + "/home/homeAdm.xhtml";
-				} else if (usuario.getTipoUsuario() == TipoUsuario.TECNICO) {
-					url = context.getExternalContext().getRequestContextPath() + "/home/homeTecnico.xhtml";
-				} else {
-					url = context.getExternalContext().getRequestContextPath() + "/home/homeUser.xhtml";
-				}
+				String url = context.getExternalContext().getRequestContextPath()
+						+ Navegacao.paginaInicial(usuario.getTipoUsuario());
 
 				LOGGER.info("Redirecionando para: {}", url);
 				context.getExternalContext().redirect(url);
@@ -137,7 +132,7 @@ public class LoginUsuarioBean implements Serializable {
 			// Invalida a sessão
 			FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
 
-			return "/index.xhtml?faces-redirect=true";
+			return "/index.xhtml?faces-redirect=true&sessao=encerrada";
 
 		} catch (Exception e) {
 			LOGGER.error("Erro durante o logout: ", e);

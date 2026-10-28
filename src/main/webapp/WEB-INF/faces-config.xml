@@ -12,6 +12,12 @@
 			<default-locale>pt_BR</default-locale>
 		</locale-config>
 		
-	</application>		
+	</application>
+
+	<!-- Permite que o PrimeFaces trate exceções de requisições ajax
+	     (p:ajaxExceptionHandler em /WEB-INF/includes/tratamentoErros.xhtml) -->
+	<factory>
+		<exception-handler-factory>org.primefaces.application.exceptionhandler.PrimeExceptionHandlerFactory</exception-handler-factory>
+	</factory>
 
 </faces-config>

@@ -35,6 +35,7 @@ import com.augustopalhardi.manutencao.model.TipoManutencaoReferencia;
 import com.augustopalhardi.manutencao.service.ManterCadastroMaquinaEquipamentoService;
 import com.augustopalhardi.manutencao.service.ManterControleStatusManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.util.Uploads;
 
 @Named
@@ -519,6 +520,8 @@ public class CadastroMaquinaEquipamentoBean implements Serializable {
 					LOGGER.info("Foto salva: {}", nomeArquivo);
 				} catch (Exception e) {
 					LOGGER.error("Erro ao fazer upload da foto: ", e);
+					Mensagens.aviso("Foto não salva",
+							"Não foi possível salvar a foto. O equipamento será salvo sem ela; tente enviá-la novamente.");
 				}
 			}
 

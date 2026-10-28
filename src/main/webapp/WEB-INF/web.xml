@@ -54,6 +54,6 @@
 	</error-page>
 	<error-page>
 		<exception-type>javax.faces.application.ViewExpiredException</exception-type>
-		<location>/index.xhtml</location>
+		<location>/index.xhtml?sessao=expirada</location>
 	</error-page>
 </web-app>

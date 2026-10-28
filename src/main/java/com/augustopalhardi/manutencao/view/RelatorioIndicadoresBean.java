@@ -39,6 +39,7 @@ import com.augustopalhardi.manutencao.service.ManterPeriodoTrabalhoManutencaoSer
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisServicosService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.util.Json;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.view.dto.ConfiabilidadeCategoria;
 
 @Named
@@ -181,6 +182,8 @@ public class RelatorioIndicadoresBean implements Serializable {
 			} catch (NumberFormatException e) {
 				filtroDataInicio = null;
 				filtroDataFim = null;
+				Mensagens.aviso("Período inválido",
+						"O período escolhido não é válido. O relatório foi gerado sem filtro de data.");
 			}
 		} else {
 			filtroDataInicio = null;
@@ -213,6 +216,8 @@ public class RelatorioIndicadoresBean implements Serializable {
 
 		} catch (Exception e) {
 			LOG.error("Erro ao aplicar filtros do relatório: ", e);
+			Mensagens.erro("Não foi possível gerar o relatório",
+					"Ocorreu um erro ao aplicar os filtros. Os indicadores exibidos podem estar desatualizados.");
 		}
 	}
 

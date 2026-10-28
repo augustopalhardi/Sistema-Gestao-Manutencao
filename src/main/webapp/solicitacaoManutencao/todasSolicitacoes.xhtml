@@ -303,7 +303,9 @@
 	</div>
 
 	<div class="container">
-		<p:growl id="messages" showDetail="true" life="4500" sticky="false"/>
+		<p:growl id="messages" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 		<h:form id="filtrosForm">
 			<div class="filtros-section">
@@ -770,5 +772,7 @@
 			</p:panel>
 		</h:form>
 	</p:dialog>
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

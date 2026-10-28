@@ -258,7 +258,9 @@
 			<h2 class="section-title">Nova Solicitação de Manutenção Predial</h2>
 
 			<h:form id="cadastroForm" enctype="multipart/form-data">
-				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 				<div class="field">
 					<label for="solicitante">Solicitante:</label>
@@ -605,5 +607,7 @@
 	<!-- ✅ Dialog GLOBAL de imagem: mostra a foto e a ficha do local -->
 	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

@@ -2,7 +2,8 @@
 <html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:p="http://primefaces.org/ui">
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
 <h:head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,7 +23,7 @@
 	</div>
 
 	<div class="header-actions">
-		<h:link outcome="/home/homeAdm.html" styleClass="exit-button" value="Voltar" />
+		<h:link outcome="#{navegacaoBean.paginaInicial}" styleClass="exit-button" value="Voltar" />
 	</div>
 
 	<div class="container">
@@ -32,7 +33,9 @@
 			<h2 class="section-title">Cadastrar Novo Email</h2>
 			
 			<h:form id="formCadastro">
-				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 				<div class="p-fluid">
 					<div class="p-field">
@@ -146,5 +149,7 @@
 			</h:form>
 		</div>
 	</div>
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

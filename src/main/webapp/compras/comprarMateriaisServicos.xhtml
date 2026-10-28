@@ -61,13 +61,15 @@
 	</div>
 	<div class="header-actions">
 		<h:form style="margin: 0;">
-			<h:button outcome="/home/homeAdm.xhtml" styleClass="back-button"
+			<h:button outcome="#{navegacaoBean.paginaInicial}" styleClass="back-button"
 				value="Voltar" />
 		</h:form>
 	</div>
 
 	<div class="container">
-		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 		<h:form id="formSolicitacoes">
 
@@ -747,5 +749,7 @@
 		</h:form>
 	</p:dialog>
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

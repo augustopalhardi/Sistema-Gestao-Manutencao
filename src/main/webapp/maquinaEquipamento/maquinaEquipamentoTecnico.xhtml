@@ -206,6 +206,9 @@ xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 </h:head>
 
 <h:body>
+	<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+		<p:autoUpdate />
+	</p:growl>
 <div class="header">
 <h1>Cadastro de Máquinas e Equipamentos</h1>
 </div>
@@ -463,5 +466,7 @@ styleClass="custom-datatable">
 	     /includes/visualizarImagemDialog.xhtml (embutido no include de
 	     detalhes da manutencao acima). -->
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

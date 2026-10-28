@@ -14,14 +14,16 @@
 </h:head>
 
 <h:body>
-	<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" />
+	<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 	<div class="header">
 		<h1>Cadastro de Locais</h1>
 	</div>
 
 	<div class="header-actions">
-		<h:link outcome="/home/homeAdm.html" styleClass="exit-button" value="Voltar" />
+		<h:link outcome="#{navegacaoBean.paginaInicial}" styleClass="exit-button" value="Voltar" />
 	</div>
 
 	<div class="container">
@@ -275,5 +277,7 @@
 	<!-- Dialog global de imagem -->
 	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

@@ -2,7 +2,8 @@
 <html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:p="http://primefaces.org/ui">
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
 <h:head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -105,13 +106,15 @@
 </h:head>
 
 <h:body>
-		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 	<div class="header">
 		<h1>Cadastro de Usuários</h1>
 	</div>
 	<div class="header-actions">
-		<h:link outcome="/home/homeAdm.xhtml" styleClass="exit-button"
+		<h:link outcome="#{navegacaoBean.paginaInicial}" styleClass="exit-button"
 			value="Voltar" />
 	</div>
 
@@ -467,5 +470,7 @@
 		</h:form>
 	</p:dialog>
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

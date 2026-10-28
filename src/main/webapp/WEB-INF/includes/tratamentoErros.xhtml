@@ -1,0 +1,55 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+	<!--
+		Tratamento global de erros em requisições ajax.
+
+		Sem isto, uma exceção não prevista num clique ajax deixa a tela
+		parada, como se o botão não tivesse feito nada. Aqui:
+		  - sessão/página expirada  -> volta ao login com o aviso de sessão expirada;
+		  - qualquer outro erro     -> diálogo "Erro inesperado".
+		Depende do PrimeExceptionHandlerFactory registrado no faces-config.xml.
+	-->
+	<!--
+		Os avisos de navegação (?sessao=expirada, ?acesso=negado...) só devem
+		aparecer uma vez. Depois de exibidos, o parâmetro sai da URL para que
+		o botão "Voltar" do navegador não repita a mensagem.
+	-->
+	<script>
+		(function () {
+			if (!window.history || !window.history.replaceState || !window.URLSearchParams) {
+				return;
+			}
+			var params = new URLSearchParams(window.location.search);
+			if (params.has('sessao') || params.has('acesso')) {
+				params.delete('sessao');
+				params.delete('acesso');
+				var query = params.toString();
+				window.history.replaceState(null, document.title,
+					window.location.pathname + (query ? '?' + query : '') + window.location.hash);
+			}
+		})();
+	</script>
+
+	<p:ajaxExceptionHandler type="javax.faces.application.ViewExpiredException"
+		onexception="window.location.href = '#{request.contextPath}/index.xhtml?sessao=expirada';" />
+
+	<p:ajaxExceptionHandler type="java.lang.Throwable" update="dlgErroInesperado"
+		onexception="PF('dlgErroInesperado').show();" />
+
+	<p:dialog id="dlgErroInesperado" widgetVar="dlgErroInesperado" header="Erro inesperado"
+		modal="true" resizable="false" draggable="false" responsive="true" width="420">
+		<p style="margin-top: 0;">
+			Não foi possível concluir esta ação. Tente novamente; se o problema
+			continuar, avise o administrador do sistema.
+		</p>
+		<p style="font-size: 0.8em; color: var(--cor-texto-suave, #718096); word-break: break-word;">
+			Detalhe técnico: #{pfExceptionHandler.type}
+		</p>
+		<p:button value="Fechar" onclick="PF('dlgErroInesperado').hide(); return false;"
+			styleClass="ui-button-secondary" />
+	</p:dialog>
+
+</ui:composition>

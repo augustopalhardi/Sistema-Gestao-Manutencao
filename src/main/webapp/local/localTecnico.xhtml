@@ -27,6 +27,9 @@
 </h:head>
 
 <h:body>
+	<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+		<p:autoUpdate />
+	</p:growl>
 	<div class="header">
 		<h1>Cadastro de Locais</h1>
 	</div>
@@ -252,5 +255,7 @@
 	     global de imagem vem embutido neste include. -->
 	<ui:include src="/includes/detalhesManutencaoDialog.xhtml" />
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

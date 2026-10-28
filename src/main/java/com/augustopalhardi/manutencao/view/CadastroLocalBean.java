@@ -215,11 +215,17 @@ public class CadastroLocalBean implements Serializable {
 				try {
 					File file = new File(UPLOAD_DIRECTORY + local.getUrlFoto());
 
-					if (file.exists() && file.delete()) {
-						LOGGER.info("Arquivo de foto excluído: {}", file.getAbsolutePath());
+					if (file.exists()) {
+						if (file.delete()) {
+							LOGGER.info("Arquivo de foto excluído: {}", file.getAbsolutePath());
+						} else {
+							LOGGER.warn("Não foi possível excluir o arquivo: {}", file.getAbsolutePath());
+							Mensagens.aviso("A foto do local não pôde ser removida do servidor.");
+						}
 					}
 				} catch (Exception e) {
 					LOGGER.error("Erro ao excluir arquivo de foto: ", e);
+					Mensagens.aviso("A foto do local não pôde ser removida do servidor.");
 				}
 			}
 

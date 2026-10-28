@@ -31,6 +31,7 @@ import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.ManterCadastroLocalService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
 import com.augustopalhardi.manutencao.service.NotificacaoService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.util.Uploads;
 import com.augustopalhardi.manutencao.util.ValidadorEmail;
 
@@ -257,6 +258,8 @@ public class SolicitacaoManutencaoPredialBean implements Serializable {
 
 			if (id == null) {
 				LOGGER.warn("Sugestão '{}' não encontrada no mapa de busca rápida", selecionado);
+				Mensagens.aviso("Local não encontrado",
+						"Não foi possível identificar o local escolhido. Selecione-o na lista.");
 				return;
 			}
 
@@ -265,6 +268,7 @@ public class SolicitacaoManutencaoPredialBean implements Serializable {
 
 		} catch (Exception e) {
 			LOGGER.error("Erro ao selecionar local pela busca rápida: ", e);
+			Mensagens.erro("Não foi possível selecionar o local pela busca. Selecione-o na lista.");
 		}
 	}
 
@@ -275,6 +279,8 @@ public class SolicitacaoManutencaoPredialBean implements Serializable {
 		if (getLocalSelecionado() == null) {
 			LOGGER.warn("Local #{} não está entre os locais ativos", id);
 			this.localSelecionadoId = null;
+			Mensagens.aviso("Local desativado", "O local #" + id + " está desativado no cadastro e não pode"
+					+ " receber solicitações. Reative-o em Locais ou escolha outro.");
 			return;
 		}
 
@@ -521,6 +527,8 @@ public class SolicitacaoManutencaoPredialBean implements Serializable {
 					origemPreventivaId, localId);
 		} catch (Exception e) {
 			LOGGER.error("Erro ao pre-preencher solicitacao a partir da preventiva: ", e);
+			Mensagens.aviso("Preenchimento automático falhou",
+					"Não foi possível preencher os dados da preventiva. Preencha o formulário manualmente.");
 		}
 	}
 
@@ -637,11 +645,12 @@ public class SolicitacaoManutencaoPredialBean implements Serializable {
 			// ========================================
 			String emailSolicitante = resolverEmailSolicitante();
 
+			boolean administradoresAvisados = false;
 			try {
-				notificacaoService.notificarNovaManutencao("Manutenção Predial", descricao, nomeLocal, solicitante,
-						emailSolicitante);
+				administradoresAvisados = notificacaoService.notificarNovaManutencao("Manutenção Predial", descricao, nomeLocal,
+						solicitante, emailSolicitante);
 
-				LOGGER.info("Notificações enviadas com sucesso (administradores e solicitante)");
+				LOGGER.info("Notificações agendadas (administradores avisados: {})", administradoresAvisados);
 
 			} catch (Exception e) {
 				LOGGER.error("Erro ao enviar notificações por email (processo principal não foi afetado)", e);
@@ -649,6 +658,11 @@ public class SolicitacaoManutencaoPredialBean implements Serializable {
 
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso!",
 					"Solicitação de manutenção predial cadastrada com sucesso!"));
+
+			if (!administradoresAvisados) {
+				Mensagens.aviso("E-mail não enviado", "A solicitação foi registrada, mas nenhum administrador foi"
+						+ " avisado por e-mail. Verifique a Configuração de E-mail.");
+			}
 
 			LOGGER.info("Solicitação cadastrada - Solicitante: {}, Registrado por: {}", solicitante,
 					usuarioLogado.getNome());

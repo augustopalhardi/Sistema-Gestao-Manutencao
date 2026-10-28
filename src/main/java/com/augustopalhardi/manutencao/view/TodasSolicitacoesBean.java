@@ -575,6 +575,10 @@ public class TodasSolicitacoesBean implements Serializable {
 			if (sucesso) {
 				registrarHistoricoReprogramacao(dataAnterior);
 				finalizarReprogramacao();
+			} else {
+				adicionarMensagemErro("Solicitação não encontrada",
+						"A solicitação não existe mais e não foi reprogramada. Atualize a página.");
+				FacesContext.getCurrentInstance().validationFailed();
 			}
 
 		} catch (Exception e) {
@@ -662,6 +666,9 @@ public class TodasSolicitacoesBean implements Serializable {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Erro ao registrar histórico: ", e);
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
+					"Histórico não registrado",
+					"A data foi alterada, mas o registro no histórico de reprogramações falhou."));
 		}
 	}
 
@@ -837,6 +844,8 @@ public class TodasSolicitacoesBean implements Serializable {
 		this.cancelamentoPermitido = false;
 
 		if (solicitacaoSelecionada == null) {
+			adicionarMensagemErro("Solicitação não encontrada",
+					"A solicitação #" + id + " não existe mais. Atualize a página.");
 			FacesContext.getCurrentInstance().validationFailed();
 			return;
 		}
@@ -939,22 +948,29 @@ public class TodasSolicitacoesBean implements Serializable {
 		Long solicitacaoId = null;
 		TipoManutencaoReferencia tipoControle = null;
 
-		if ("MÁQUINA".equals(tipoSolicitacaoSelecionada)) {
-			SolicitacaoManutencaoMaquina m = (SolicitacaoManutencaoMaquina) solicitacaoSelecionada;
-			m.setCancelada(true);
-			m.setMotivoCancelamento(motivoCancelamento.trim());
-			m.setDataCancelamento(new Date());
-			manterSolicitacaoManutencaoMaquinaService.salvar(m);
-			solicitacaoId = m.getId();
-			tipoControle = TipoManutencaoReferencia.MAQUINA;
-		} else {
-			SolicitacaoManutencaoPredial p = (SolicitacaoManutencaoPredial) solicitacaoSelecionada;
-			p.setCancelada(true);
-			p.setMotivoCancelamento(motivoCancelamento.trim());
-			p.setDataCancelamento(new Date());
-			manterSolicitacaoManutencaoPredialService.salvar(p);
-			solicitacaoId = p.getId();
-			tipoControle = TipoManutencaoReferencia.PREDIAL;
+		try {
+			if ("MÁQUINA".equals(tipoSolicitacaoSelecionada)) {
+				SolicitacaoManutencaoMaquina m = (SolicitacaoManutencaoMaquina) solicitacaoSelecionada;
+				m.setCancelada(true);
+				m.setMotivoCancelamento(motivoCancelamento.trim());
+				m.setDataCancelamento(new Date());
+				manterSolicitacaoManutencaoMaquinaService.salvar(m);
+				solicitacaoId = m.getId();
+				tipoControle = TipoManutencaoReferencia.MAQUINA;
+			} else {
+				SolicitacaoManutencaoPredial p = (SolicitacaoManutencaoPredial) solicitacaoSelecionada;
+				p.setCancelada(true);
+				p.setMotivoCancelamento(motivoCancelamento.trim());
+				p.setDataCancelamento(new Date());
+				manterSolicitacaoManutencaoPredialService.salvar(p);
+				solicitacaoId = p.getId();
+				tipoControle = TipoManutencaoReferencia.PREDIAL;
+			}
+		} catch (Exception e) {
+			LOGGER.error("Erro ao cancelar solicitação: ", e);
+			adicionarMensagemErro("Erro ao cancelar", "A solicitação não foi cancelada: " + e.getMessage());
+			FacesContext.getCurrentInstance().validationFailed();
+			return;
 		}
 
 		// Atualiza o ControleStatusManutencao para CANCELADA
@@ -966,8 +982,12 @@ public class TodasSolicitacoesBean implements Serializable {
 					tipoControle);
 		} catch (Exception e) {
 			LOGGER.error("Erro ao atualizar ControleStatusManutencao para CANCELADA: ", e);
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
+					"Cancelamento parcial", "A solicitação #" + solicitacaoId
+							+ " foi cancelada, mas pode continuar aparecendo no painel do técnico. Avise o administrador."));
 		}
 
+		adicionarMensagemSucesso("Solicitação #" + solicitacaoId + " cancelada.");
 		finalizarCancelamento();
 	}
 

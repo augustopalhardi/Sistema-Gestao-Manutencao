@@ -29,6 +29,7 @@ import com.augustopalhardi.manutencao.service.ManterPeriodoTrabalhoManutencaoSer
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisServicosService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.util.Uploads;
 
 /**
@@ -115,6 +116,8 @@ public class DetalhesManutencaoBean implements Serializable {
 			calcularDadosDerivados();
 		} catch (Exception e) {
 			LOG.error("Erro ao abrir detalhes da manutenção {} ({}): ", id, tipo, e);
+			Mensagens.erro("Não foi possível carregar os detalhes",
+					"Ocorreu um erro ao carregar a manutenção #" + id + ". Algumas informações podem não aparecer.");
 		}
 	}
 
@@ -130,6 +133,7 @@ public class DetalhesManutencaoBean implements Serializable {
 			tipoRef = TipoManutencaoReferencia.valueOf(tipoNormalizado);
 		} catch (Exception e) {
 			LOG.error("Tipo de manutenção inválido: {}", tipo);
+			Mensagens.erro("Não foi possível abrir os detalhes da manutenção #" + id + ".");
 			return;
 		}
 		abrirDetalhes(id, tipoRef);

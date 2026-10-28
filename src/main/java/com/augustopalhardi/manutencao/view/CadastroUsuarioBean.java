@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.ManterCadastroUsuarioService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.util.Uploads;
 
 @Named
@@ -351,11 +352,16 @@ public class CadastroUsuarioBean implements Serializable {
 					File fileToDelete = new File(Uploads.diretorio(Uploads.USUARIOS)
 							+ usuario.getUrlFoto().substring(usuario.getUrlFoto().lastIndexOf("/") + 1));
 					if (fileToDelete.exists()) {
-						fileToDelete.delete();
-						LOGGER.info("Arquivo de foto excluído: {}", fileToDelete.getAbsolutePath());
+						if (fileToDelete.delete()) {
+							LOGGER.info("Arquivo de foto excluído: {}", fileToDelete.getAbsolutePath());
+						} else {
+							LOGGER.warn("Não foi possível excluir o arquivo: {}", fileToDelete.getAbsolutePath());
+							Mensagens.aviso("A foto do usuário não pôde ser removida do servidor.");
+						}
 					}
 				} catch (Exception e) {
 					LOGGER.warn("Erro ao excluir arquivo de foto: {}", e.getMessage());
+					Mensagens.aviso("A foto do usuário não pôde ser removida do servidor.");
 				}
 			}
 

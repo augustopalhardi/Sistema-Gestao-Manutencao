@@ -19,8 +19,8 @@ import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.augustopalhardi.manutencao.model.ConfiguracaoEmail;
 import com.augustopalhardi.manutencao.dao.ConfiguracaoEmailDao;
+import com.augustopalhardi.manutencao.model.ConfiguracaoEmail;
 import com.augustopalhardi.manutencao.util.Config;
 
 /**
@@ -78,8 +78,8 @@ public class NotificacaoService {
 	 * Método existente - mantém compatibilidade com código antigo Chama o novo
 	 * método passando null para emailSolicitante
 	 */
-	public void notificarNovaManutencao(String tipoManutencao, String descricao, String local, String solicitante) {
-		notificarNovaManutencao(tipoManutencao, descricao, local, solicitante, null);
+	public boolean notificarNovaManutencao(String tipoManutencao, String descricao, String local, String solicitante) {
+		return notificarNovaManutencao(tipoManutencao, descricao, local, solicitante, null);
 	}
 
 	/**
@@ -94,9 +94,14 @@ public class NotificacaoService {
 	 * @param local            Nome do local ou máquina onde ocorreu o problema
 	 * @param solicitante      Nome do usuário que reportou o problema
 	 * @param emailSolicitante Email de quem criou a solicitação (pode ser null)
+	 * @return {@code true} se o aviso aos administradores foi agendado;
+	 *         {@code false} se não há administrador configurado para receber
+	 *         ou se o agendamento falhou — a tela usa isso para alertar o
+	 *         usuário de que ninguém foi avisado
 	 */
-	public void notificarNovaManutencao(String tipoManutencao, String descricao, String local, String solicitante,
+	public boolean notificarNovaManutencao(String tipoManutencao, String descricao, String local, String solicitante,
 			String emailSolicitante) {
+		boolean administradoresAvisados = false;
 		try {
 			logger.info("=== AGENDANDO NOTIFICAÇÕES ===");
 			logger.info("Tipo: {}", tipoManutencao);
@@ -121,6 +126,7 @@ public class NotificacaoService {
 
 				logger.info("Agendando envio para {} administrador(es)", destinatariosAdm.size());
 				executorEmailService.executar(() -> enviarLote(destinatariosAdm, assuntoAdm, corpoAdm, "ADM"));
+				administradoresAvisados = true;
 			}
 
 			// ----------------------------------------------------------
@@ -145,7 +151,9 @@ public class NotificacaoService {
 		} catch (Exception e) {
 			logger.error("Erro ao agendar notificações de manutenção", e);
 			// Não propaga a exceção - erro no envio de email não deve impactar cadastro
+			return false;
 		}
+		return administradoresAvisados;
 	}
 
 	/**
@@ -468,8 +476,10 @@ public class NotificacaoService {
 	 *
 	 * Mesma estratégia — consulta os destinatários aqui e manda o
 	 * envio para segundo plano.
+	 *
+	 * @return {@code true} se o aviso foi agendado para ao menos um destinatário
 	 */
-	public void notificarSolicitacaoCompra(String tipoSolicitacao, String descricaoSolicitacao, String nomeReferencia,
+	public boolean notificarSolicitacaoCompra(String tipoSolicitacao, String descricaoSolicitacao, String nomeReferencia,
 			Long idManutencao, String tipoManutencao, String tecnicoSolicitante) {
 		try {
 			logger.info("Agendando notificação de solicitação de compra...");
@@ -478,7 +488,7 @@ public class NotificacaoService {
 
 			if (destinatarios.isEmpty()) {
 				logger.warn("Nenhum email configurado para receber notificações de solicitação de compra");
-				return;
+				return false;
 			}
 
 			final String assunto = "🛒 Nova Solicitação de Compra - " + tipoSolicitacao;
@@ -486,9 +496,11 @@ public class NotificacaoService {
 					idManutencao, tipoManutencao, tecnicoSolicitante);
 
 			executorEmailService.executar(() -> enviarLote(destinatarios, assunto, corpo, "COMPRA"));
+			return true;
 
 		} catch (Exception e) {
 			logger.error("Erro ao agendar notificação de solicitação de compra", e);
+			return false;
 		}
 	}
 

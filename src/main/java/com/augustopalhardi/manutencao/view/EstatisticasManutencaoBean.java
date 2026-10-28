@@ -41,6 +41,7 @@ import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisSe
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
 import com.augustopalhardi.manutencao.util.Json;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.view.dto.ConfiabilidadeCategoria;
 import com.augustopalhardi.manutencao.view.dto.ItemEstatistica;
 
@@ -213,6 +214,7 @@ public class EstatisticasManutencaoBean implements Serializable {
 				filtroDataInicio = cal.getTime();
 			} catch (NumberFormatException e) {
 				LOG.warn("Valor de período predefinido inválido: {}", filtroPeriodo);
+				Mensagens.aviso("Período inválido", "O período escolhido não é válido. Os filtros de data foram mantidos.");
 			}
 		}
 		aplicarFiltros();
@@ -245,6 +247,8 @@ public class EstatisticasManutencaoBean implements Serializable {
 
 		} catch (Exception e) {
 			LOG.error("Erro ao aplicar filtros: ", e);
+			Mensagens.erro("Não foi possível atualizar o dashboard",
+					"Ocorreu um erro ao aplicar os filtros. Os números exibidos podem estar desatualizados.");
 		}
 	}
 

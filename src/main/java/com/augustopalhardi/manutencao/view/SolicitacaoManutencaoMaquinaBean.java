@@ -33,6 +33,7 @@ import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.ManterCadastroMaquinaEquipamentoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.NotificacaoService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.util.Uploads;
 import com.augustopalhardi.manutencao.util.ValidadorEmail;
 
@@ -500,6 +501,8 @@ public class SolicitacaoManutencaoMaquinaBean implements Serializable {
 
 			if (id == null) {
 				LOGGER.warn("Sugestão '{}' não encontrada no mapa de busca rápida", selecionado);
+				Mensagens.aviso("Máquina não encontrada",
+						"Não foi possível identificar a máquina escolhida. Selecione pela categoria.");
 				return;
 			}
 
@@ -508,6 +511,7 @@ public class SolicitacaoManutencaoMaquinaBean implements Serializable {
 
 		} catch (Exception e) {
 			LOGGER.error("Erro ao selecionar máquina pela busca rápida: ", e);
+			Mensagens.erro("Não foi possível selecionar a máquina pela busca. Selecione pela categoria.");
 		}
 	}
 
@@ -523,6 +527,8 @@ public class SolicitacaoManutencaoMaquinaBean implements Serializable {
 		if (maquina == null) {
 			LOGGER.warn("Máquina #{} não está entre as máquinas ativas", id);
 			this.maquinaSelecionadaId = null;
+			Mensagens.aviso("Máquina desativada", "A máquina #" + id + " está desativada no cadastro e não pode"
+					+ " receber solicitações. Reative-a em Máquinas/Equipamentos ou escolha outra.");
 			return;
 		}
 
@@ -726,6 +732,8 @@ public class SolicitacaoManutencaoMaquinaBean implements Serializable {
 					origemPreventivaId, maquinaId);
 		} catch (Exception e) {
 			LOGGER.error("Erro ao pre-preencher solicitacao a partir da preventiva: ", e);
+			Mensagens.aviso("Preenchimento automático falhou",
+					"Não foi possível preencher os dados da preventiva. Preencha o formulário manualmente.");
 		}
 	}
 
@@ -853,11 +861,12 @@ public class SolicitacaoManutencaoMaquinaBean implements Serializable {
 			// ========================================
 			// ENVIAR NOTIFICAÇÕES
 			// ========================================
+			boolean administradoresAvisados = false;
 			try {
-				notificacaoService.notificarNovaManutencao("Manutenção de Máquina", descricao, nomeMaquina, solicitante,
-						emailSolicitante);
+				administradoresAvisados = notificacaoService.notificarNovaManutencao("Manutenção de Máquina", descricao, nomeMaquina,
+						solicitante, emailSolicitante);
 
-				LOGGER.info("Notificações enviadas com sucesso (administradores e solicitante)");
+				LOGGER.info("Notificações agendadas (administradores avisados: {})", administradoresAvisados);
 
 			} catch (Exception e) {
 				LOGGER.error("Erro ao enviar notificações por email (processo principal não foi afetado)", e);
@@ -869,6 +878,11 @@ public class SolicitacaoManutencaoMaquinaBean implements Serializable {
 
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso!",
 					"Solicitação de manutenção de máquina cadastrada com sucesso!"));
+
+			if (!administradoresAvisados) {
+				Mensagens.aviso("E-mail não enviado", "A solicitação foi registrada, mas nenhum administrador foi"
+						+ " avisado por e-mail. Verifique a Configuração de E-mail.");
+			}
 
 			LOGGER.info("Solicitação cadastrada - Solicitante: {}, Registrado por: {}", solicitante,
 					usuarioLogado.getNome());

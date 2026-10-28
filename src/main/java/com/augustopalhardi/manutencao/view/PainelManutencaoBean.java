@@ -42,6 +42,7 @@ import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisSe
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
 import com.augustopalhardi.manutencao.service.NotificacaoService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.util.Uploads;
 import com.augustopalhardi.manutencao.view.dto.ItemManutencao;
 import com.augustopalhardi.manutencao.view.dto.PeriodoTrabalho;
@@ -671,6 +672,8 @@ public class PainelManutencaoBean implements Serializable {
 
 		} catch (Exception e) {
 			LOGGER.error("Erro ao preparar finalização da manutenção: ", e);
+			Mensagens.aviso("Dados anteriores não carregados",
+					"Não foi possível carregar os períodos e a solução já lançados. Confira os dados antes de salvar.");
 			if (this.periodosTrabalho.isEmpty()) {
 				this.periodosTrabalho.add(new PeriodoTrabalho());
 			}
@@ -902,6 +905,7 @@ public class PainelManutencaoBean implements Serializable {
 
 			if (periodosTrabalho == null || periodosTrabalho.isEmpty()) {
 				LOGGER.warn("Lista de períodos está vazia ou nula");
+				Mensagens.aviso("Não há períodos para remover.");
 				return;
 			}
 
@@ -914,6 +918,7 @@ public class PainelManutencaoBean implements Serializable {
 
 			if (index < 0 || index >= periodosTrabalho.size()) {
 				LOGGER.warn("Índice inválido: " + index + ". Tamanho da lista: " + periodosTrabalho.size());
+				Mensagens.aviso("Período não encontrado. Feche e abra novamente a finalização.");
 				return;
 			}
 
@@ -1230,10 +1235,11 @@ public class PainelManutencaoBean implements Serializable {
 				atualizarStatusManutencaoParaAguardandoCompra();
 
 				// ADICIONAR ESTE BLOCO - ENVIO DE NOTIFICAÇÃO POR EMAIL
+				boolean compraAvisada = false;
 				try {
 					String maquinaOuLocal = obterNomeMaquinaOuLocal();
 
-					notificacaoService.notificarSolicitacaoCompra(tipoSolicitacaoCompra.getDescricao(),
+					compraAvisada = notificacaoService.notificarSolicitacaoCompra(tipoSolicitacaoCompra.getDescricao(),
 							descricaoSolicitacaoCompra.trim(), tecnicoSolicitante.getNome(), itemSelecionado.getId(),
 							itemSelecionado.getTipo(), maquinaOuLocal);
 
@@ -1249,6 +1255,11 @@ public class PainelManutencaoBean implements Serializable {
 						"Solicitação Enviada com Sucesso!",
 						"ID da Solicitacao: " + novaSolicitacao.getId() + ". "
 								+ "A manutenção foi pausada e aguarda processamento da compra pelo administrador."));
+
+				if (!compraAvisada) {
+					Mensagens.aviso("E-mail não enviado", "A solicitação de compra foi registrada, mas ninguém foi"
+							+ " avisado por e-mail. Verifique a Configuração de E-mail.");
+				}
 
 				LOGGER.info("Solicitacao de compra criada com sucesso - ID: {}, Manutencao: {} ({}), Tecnico: {}",
 						novaSolicitacao.getId(), itemSelecionado.getId(), itemSelecionado.getTipo(),
@@ -2133,13 +2144,21 @@ public class PainelManutencaoBean implements Serializable {
 					prepararInicioManutencao(itemEncontrado);
 					deveAbrirIniciar = true;
 					LOGGER.info("Item preparado para iniciar automaticamente: ID " + abrirIniciarId);
+				} else if (itemEncontrado != null) {
+					deveAbrirIniciar = false;
+					LOGGER.info("Item já iniciado, não abrindo dialog: ID " + abrirIniciarId);
+					Mensagens.aviso("Manutenção já iniciada", "A manutenção preventiva #" + abrirIniciarId
+							+ " já foi iniciada ou finalizada. Ela aparece na aba correspondente do painel.");
 				} else {
 					deveAbrirIniciar = false;
-					LOGGER.info("Item já iniciado ou não encontrado, não abrindo dialog: ID " + abrirIniciarId);
+					LOGGER.info("Item não encontrado, não abrindo dialog: ID " + abrirIniciarId);
+					Mensagens.aviso("Manutenção não encontrada", "A manutenção preventiva #" + abrirIniciarId
+							+ " não está disponível neste painel. Ela pode ter sido cancelada.");
 				}
 			} catch (Exception e) {
 				LOGGER.error("Erro ao preparar item para iniciar: ", e);
 				deveAbrirIniciar = false;
+				Mensagens.erro("Não foi possível abrir o início da manutenção #" + abrirIniciarId + ".");
 			}
 		}
 		// Limpar parâmetros para não reabrir ao recarregar

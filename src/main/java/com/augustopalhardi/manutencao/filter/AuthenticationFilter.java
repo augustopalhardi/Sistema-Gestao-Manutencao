@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.TipoUsuario;
+import com.augustopalhardi.manutencao.util.Navegacao;
 
 /**
  * Filtro de segurança que implementa AUTENTICAÇÃO (login) e AUTORIZAÇÃO
@@ -50,7 +51,7 @@ public class AuthenticationFilter implements Filter {
 		if (isPaginaPublica) {
 			if (loggedIn && (requestURI.endsWith("/index.xhtml") || requestURI.endsWith("/login.xhtml"))) {
 				// Usuário logado tentando acessar login? Manda para a home.
-				res.sendRedirect(getHomePageParaUsuario(usuarioLogado.getTipoUsuario(), contextPath));
+				redirecionar(req, res, getHomePageParaUsuario(usuarioLogado.getTipoUsuario(), contextPath));
 			} else {
 				// Página pública, deixa passar (CSS, JS, etc.)
 				chain.doFilter(request, response);
@@ -89,13 +90,33 @@ public class AuthenticationFilter implements Filter {
 			} else {
 				// --- ACESSO NEGADO ---
 				// O usuário está logado, mas tentou acessar uma página que não pode.
-				// Redireciona para a home page DELE.
-				res.sendRedirect(getHomePageParaUsuario(tipoUsuario, contextPath));
+				// Redireciona para a home page DELE, avisando o motivo.
+				redirecionar(req, res, getHomePageParaUsuario(tipoUsuario, contextPath) + "?acesso=negado");
 			}
 
 		} else {
-			// Não é página pública E não está logado. Redireciona para o index.
-			res.sendRedirect(contextPath + "/index.xhtml");
+			// Não é página pública E não está logado. Redireciona para o login,
+			// avisando quando o motivo é uma sessão que expirou.
+			boolean sessaoExpirou = req.getRequestedSessionId() != null && !req.isRequestedSessionIdValid();
+			redirecionar(req, res, contextPath + "/index.xhtml" + (sessaoExpirou ? "?sessao=expirada" : ""));
+		}
+	}
+
+	/**
+	 * Redireciona respeitando o tipo de requisição. Num clique ajax do JSF, um
+	 * 302 comum é seguido pelo navegador "por baixo" e a tela simplesmente não
+	 * reage; por isso a resposta vira um {@code <redirect>} do protocolo ajax
+	 * do JSF, que o PrimeFaces executa.
+	 */
+	private void redirecionar(HttpServletRequest req, HttpServletResponse res, String url) throws IOException {
+		if ("partial/ajax".equals(req.getHeader("Faces-Request"))) {
+			res.setContentType("text/xml");
+			res.setCharacterEncoding("UTF-8");
+			res.getWriter().printf(
+					"<?xml version=\"1.0\" encoding=\"UTF-8\"?><partial-response><redirect url=\"%s\"></redirect></partial-response>",
+					url);
+		} else {
+			res.sendRedirect(url);
 		}
 	}
 
@@ -154,20 +175,7 @@ public class AuthenticationFilter implements Filter {
 	 * Retorna a URL da home page correta para o tipo de usuário.
 	 */
 	private String getHomePageParaUsuario(TipoUsuario tipo, String contextPath) {
-		String basePath = contextPath + "/home/";
-		if (tipo == null) {
-			return contextPath + "/index.xhtml";
-		}
-		switch (tipo) {
-		case ADMINISTRADOR:
-			return basePath + "homeAdm.xhtml";
-		case TECNICO:
-			return basePath + "homeTecnico.xhtml";
-		case FUNCIONARIO:
-			return basePath + "homeUser.xhtml";
-		default:
-			return contextPath + "/index.xhtml";
-		}
+		return contextPath + Navegacao.paginaInicial(tipo);
 	}
 
 	@Override

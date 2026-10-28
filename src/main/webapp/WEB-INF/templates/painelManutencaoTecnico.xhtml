@@ -31,7 +31,9 @@
 <ui:insert name="metadata" />
 
 <h:body>
-		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+			<p:autoUpdate />
+		</p:growl>
 
 		<!-- Só a preventiva abre o diálogo "Iniciar" direto pelo link do cronograma -->
 		<c:if test="#{tipoPainel eq 'PREVENTIVA'}">
@@ -57,7 +59,7 @@
 		<h1>Painel de Manutenções</h1>
 	</div>
 	<div class="header-actions">
-		<h:link outcome="/home/homeTecnico.xhtml" styleClass="exit-button"
+		<h:link outcome="#{navegacaoBean.paginaInicial}" styleClass="exit-button"
 			value="Voltar" />
 	</div>
 
@@ -1274,5 +1276,7 @@
 		</h:form>
 	</p:dialog>
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>

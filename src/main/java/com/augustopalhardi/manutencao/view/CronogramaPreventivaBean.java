@@ -30,6 +30,7 @@ import com.augustopalhardi.manutencao.model.TipoManutencaoReferencia;
 import com.augustopalhardi.manutencao.service.ManterControleStatusManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.util.Mensagens;
 import com.augustopalhardi.manutencao.view.dto.GrupoMes;
 import com.augustopalhardi.manutencao.view.dto.ItemPreventiva;
 
@@ -621,6 +622,7 @@ public class CronogramaPreventivaBean implements Serializable {
 
 	public String redirecionarParaIniciar() {
 		if (itemParaIniciar == null) {
+			Mensagens.aviso("Nenhuma manutenção selecionada para iniciar. Clique novamente em \"Iniciar\".");
 			return null;
 		}
 		String pagina = "/solicitacaoManutencao/manutencaoTecnico/manutencaoTecnicoPreventiva.xhtml";

@@ -16,6 +16,9 @@
 </h:head>
 
 <h:body>
+	<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" redisplay="false">
+		<p:autoUpdate />
+	</p:growl>
 	<div class="header">
 		<h1>Consulta de Técnicos</h1>
 	</div>
@@ -269,5 +272,7 @@
 	<!-- ===== DIALOG DE DETALHES (componente reutilizável) ===== -->
 	<ui:include src="/includes/detalhesManutencaoDialog.xhtml"/>
 
+
+	<ui:include src="/WEB-INF/includes/tratamentoErros.xhtml" />
 </h:body>
 </html>
