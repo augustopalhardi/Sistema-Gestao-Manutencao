@@ -1,7 +1,5 @@
 package com.augustopalhardi.manutencao.view;
 
-import com.augustopalhardi.manutencao.util.Uploads;
-
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,12 +24,12 @@ import org.slf4j.LoggerFactory;
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.HistoricoReprogramacao;
-import com.augustopalhardi.manutencao.model.TipoManutencaoReferencia;
 import com.augustopalhardi.manutencao.model.PeriodoTrabalhoManutencao;
 import com.augustopalhardi.manutencao.model.SolicitacaoCompraMateriaisServicos;
 import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoMaquina;
 import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoPredial;
 import com.augustopalhardi.manutencao.model.TipoManutencao;
+import com.augustopalhardi.manutencao.model.TipoManutencaoReferencia;
 import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.ManterControleStatusManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterHistoricoReprogramacaoService;
@@ -39,6 +37,7 @@ import com.augustopalhardi.manutencao.service.ManterPeriodoTrabalhoManutencaoSer
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisServicosService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.util.Uploads;
 
 @Named
 @ViewScoped

@@ -1,7 +1,5 @@
 package com.augustopalhardi.manutencao.view;
 
-import com.augustopalhardi.manutencao.util.Uploads;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,6 +32,7 @@ import com.augustopalhardi.manutencao.service.ManterCadastroLocalService;
 import com.augustopalhardi.manutencao.service.ManterControleStatusManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
 import com.augustopalhardi.manutencao.util.Mensagens;
+import com.augustopalhardi.manutencao.util.Uploads;
 
 @Named
 @ViewScoped

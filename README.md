@@ -28,7 +28,7 @@ Desenvolvido como projeto freelance para uma empresa do setor industrial, onde e
 
 **A solução:** um sistema que centraliza o fluxo, do chamado ao fechamento, e transforma o histórico operacional em indicadores.
 
-Em números: cerca de 21 mil linhas de Java em 67 classes e 27 telas JSF.
+Em números: cerca de 21 mil linhas de Java em 76 classes, 27 telas JSF e 25 testes automatizados.
 
 ---
 
@@ -90,12 +90,13 @@ Arquitetura em camadas, com injeção de dependências via CDI:
 src/main/java/com/augustopalhardi/manutencao/
 ├── model/       Entidades JPA e enums
 ├── dao/         Acesso a dados (consultas JPQL)
-├── service/     Regras de negócio e notificações
+├── service/     Regras de negócio, notificações e cálculo dos indicadores
 ├── view/        Managed beans do JSF (um por tela)
+│   └── dto/     Objetos de apoio às telas (linhas de tabela, itens de gráfico)
 ├── filter/      Autenticação e autorização por perfil
 ├── listener/    Inicialização da aplicação (fuso horário)
 ├── servlet/     Entrega das fotos enviadas pelos usuários
-└── util/        Configuração, uploads, validação de e-mail, mensagens
+└── util/        Configuração, uploads, JSON dos gráficos, validação de e-mail
     └── jpa/     Produtor de EntityManager e interceptor transacional
 
 src/main/webapp/
@@ -107,7 +108,10 @@ src/main/webapp/
 ├── maquinaEquipamento/, local/, usuario/, tecnico/   Cadastros e consultas
 ├── conta/, email/           Minha conta e configuração de notificações
 ├── error/                   Páginas 404 e 500
-└── resources/               CSS e imagens
+├── WEB-INF/templates/       Template do painel do técnico (corretiva, preventiva e preditiva)
+└── resources/               CSS (com tema.css centralizando as cores) e imagens
+
+src/test/java/               Testes JUnit 5 (indicadores, validação de e-mail, uploads)
 ```
 
 ### Decisões técnicas
@@ -125,6 +129,12 @@ src/main/webapp/
 **Senhas com BCrypt.** As senhas são gravadas como hash BCrypt e conferidas com `BCrypt.checkpw`, tanto no login quanto na troca de senha.
 
 **Identificação padronizada de equipamentos.** Havia oito formatos diferentes de exibir uma máquina espalhados pelo sistema. Foram unificados em um único método na entidade, usado em telas, e-mails e relatórios.
+
+**Indicadores com regra única e testada.** MTTR, MTBF e confiabilidade eram calculados em dois beans diferentes, com código duplicado. As fórmulas foram para a classe `CalculoIndicadores`: funções puras, sem acesso a banco, usadas pelo dashboard e pelo relatório e cobertas por testes automatizados.
+
+**Uma tela, três painéis.** Os painéis de manutenção corretiva, preventiva e preditiva eram três arquivos de ~1.200 linhas quase idênticos. Hoje são um template Facelets parametrizado; as páginas só informam o tipo e os parâmetros de entrada.
+
+**Tema de cores centralizado.** As cores das folhas de estilo vivem em variáveis CSS no `tema.css`, em vez de códigos hexadecimais espalhados por 20 arquivos.
 
 **Validação de e-mail com sugestão de correção.** Detecta erros comuns de digitação no domínio (`gmial.com`, `hotmial.com`, `.con`) por distância de edição e sugere a correção, sem "corrigir" domínios corporativos legítimos.
 
@@ -158,7 +168,15 @@ mvn clean package
 
 Copie `target/gestao-manutencao.war` para a pasta `webapps/` do Tomcat. A aplicação responde em `http://localhost:8080/gestao-manutencao`.
 
-**5. Primeiro acesso.** Com o banco vazio, a tela de login mostra o botão **CRIAR CONTA**, que cadastra o primeiro usuário.
+**5. Testes:**
+
+```bash
+mvn test
+```
+
+Os testes usam um `config.properties` fictício em `src/test/resources` e não precisam de banco de dados.
+
+**6. Primeiro acesso.** Com o banco vazio, a tela de login mostra o botão **CRIAR CONTA**, que cadastra o primeiro usuário.
 
 ---
 

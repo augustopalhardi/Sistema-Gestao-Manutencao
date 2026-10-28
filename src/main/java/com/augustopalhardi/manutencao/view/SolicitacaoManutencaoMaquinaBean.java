@@ -1,9 +1,5 @@
 package com.augustopalhardi.manutencao.view;
 
-import com.augustopalhardi.manutencao.model.TipoUsuario;
-
-import com.augustopalhardi.manutencao.util.Uploads;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.Normalizer;
@@ -33,9 +29,11 @@ import com.augustopalhardi.manutencao.model.CadastroMaquinaEquipamento;
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoMaquina;
 import com.augustopalhardi.manutencao.model.TipoManutencao;
+import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.ManterCadastroMaquinaEquipamentoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.NotificacaoService;
+import com.augustopalhardi.manutencao.util.Uploads;
 import com.augustopalhardi.manutencao.util.ValidadorEmail;
 
 @Named

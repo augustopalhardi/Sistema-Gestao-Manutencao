@@ -6,8 +6,8 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f8f9fa;
-    color: #212529;
+    background-color: var(--cor-fundo-claro);
+    color: var(--cor-texto-escuro);
     line-height: 1.6;
 }
 
@@ -24,26 +24,26 @@ body {
 }
 
 .ui-messages .ui-messages-error {
-    background-color: #fecaca !important;
-    border: 1px solid #dc2626 !important;
+    background-color: var(--cor-perigo-clara) !important;
+    border: 1px solid var(--cor-perigo) !important;
     color: #7f1d1d !important;
 }
 
 .ui-messages .ui-messages-info {
-    background-color: #bfdbfe !important;
-    border: 1px solid #2563eb !important;
+    background-color: var(--cor-primaria-borda) !important;
+    border: 1px solid var(--cor-primaria) !important;
     color: #1e3a8a !important;
 }
 
 .ui-messages .ui-messages-success {
-    background-color: #bbf7d0 !important;
-    border: 1px solid #16a34a !important;
+    background-color: var(--cor-sucesso-clara) !important;
+    border: 1px solid var(--cor-sucesso) !important;
     color: #14532d !important;
 }
 
 .ui-messages .ui-messages-warn {
-    background-color: #fed7aa !important;
-    border: 1px solid #ea580c !important;
+    background-color: var(--cor-alerta-laranja-clara) !important;
+    border: 1px solid var(--cor-alerta-laranja) !important;
     color: #7c2d12 !important;
 }
 
@@ -57,7 +57,7 @@ body {
 /* Card de Solicitação */
 .solicitacao-card {
     background: white;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cor-borda);
     border-radius: 4px;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -76,20 +76,20 @@ body {
     align-items: start;
     margin-bottom: 1.25rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--cor-borda);
 }
 
 .solicitacao-id {
     font-size: 1.125rem;
     font-weight: 700;
-    color: #2d3748;
+    color: var(--cor-texto);
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 .solicitacao-id i {
-    color: #2563eb;
+    color: var(--cor-primaria);
     font-size: 1rem;
 }
 
@@ -99,7 +99,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.375rem 0.875rem;
-    background: #dbeafe;
+    background: var(--cor-primaria-clara);
     color: #1e40af;
     border-radius: 20px;
     font-size: 0.8125rem;
@@ -143,16 +143,16 @@ body {
 }
 
 .info-item-solicitacao {
-    background: #f7fafc;
+    background: var(--cor-fundo-suave);
     padding: 0.875rem;
     border-radius: 4px;
-    border-left: 3px solid #cbd5e0;
+    border-left: 3px solid var(--cor-borda-forte);
 }
 
 .info-item-solicitacao .label {
     display: block;
     font-size: 0.75rem;
-    color: #718096;
+    color: var(--cor-texto-suave);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 0.375rem;
@@ -162,21 +162,21 @@ body {
 .info-item-solicitacao .value {
     display: block;
     font-size: 0.9375rem;
-    color: #2d3748;
+    color: var(--cor-texto);
     font-weight: 500;
 }
 
 /* Descrição Detalhada */
 .descricao-detalhada {
-    background: #f7fafc;
+    background: var(--cor-fundo-suave);
     padding: 1.25rem;
     border-radius: 4px;
     margin-bottom: 1.25rem;
-    border-left: 4px solid #2563eb;
+    border-left: 4px solid var(--cor-primaria);
 }
 
 .descricao-detalhada h4 {
-    color: #2d3748;
+    color: var(--cor-texto);
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
@@ -186,11 +186,11 @@ body {
 }
 
 .descricao-detalhada h4 i {
-    color: #2563eb;
+    color: var(--cor-primaria);
 }
 
 .descricao-texto {
-    color: #4a5568;
+    color: var(--cor-texto-medio);
     line-height: 1.6;
     font-size: 0.9375rem;
     white-space: pre-wrap;
@@ -198,15 +198,15 @@ body {
 
 /* Info Processamento */
 .info-processamento {
-    background: #f7fafc;
+    background: var(--cor-fundo-suave);
     padding: 1.25rem;
     border-radius: 4px;
     margin-bottom: 1.25rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cor-borda);
 }
 
 .valor-destaque {
-    color: #16a34a !important;
+    color: var(--cor-sucesso) !important;
     font-weight: 700 !important;
     font-size: 1.125rem !important;
 }
@@ -216,25 +216,25 @@ body {
     padding: 1rem;
     background: white;
     border-radius: 4px;
-    border-left: 4px solid #ea580c;
+    border-left: 4px solid var(--cor-alerta-laranja);
 }
 
 .observacoes-adm strong {
     display: block;
-    color: #2d3748;
+    color: var(--cor-texto);
     margin-bottom: 0.5rem;
     font-size: 0.9375rem;
 }
 
 .observacoes-adm p {
     margin: 0;
-    color: #4a5568;
+    color: var(--cor-texto-medio);
     line-height: 1.6;
 }
 
 /* Bloco de motivo/detalhes de cancelamento (pendente ou compra já processada) */
 .observacoes-cancelamento {
-    border-left-color: #dc2626;
+    border-left-color: var(--cor-perigo);
 }
 
 .info-cancelamento-detalhes {
@@ -243,13 +243,13 @@ body {
     gap: 1.25rem;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--cor-borda);
     font-size: 0.875rem;
-    color: #4a5568;
+    color: var(--cor-texto-medio);
 }
 
 .info-cancelamento-detalhes i {
-    color: #dc2626;
+    color: var(--cor-perigo);
     margin-right: 0.25rem;
 }
 
@@ -259,12 +259,12 @@ body {
     gap: 0.75rem;
     justify-content: flex-end;
     padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--cor-borda);
 }
 
 .ui-button-success {
-    background-color: #16a34a !important;
-    border-color: #16a34a !important;
+    background-color: var(--cor-sucesso) !important;
+    border-color: var(--cor-sucesso) !important;
     color: white !important;
     padding: 0.625rem 1.25rem !important;
     border-radius: 4px !important;
@@ -273,15 +273,15 @@ body {
 }
 
 .ui-button-success:hover {
-    background-color: #15803d !important;
-    border-color: #15803d !important;
+    background-color: var(--cor-sucesso-escura) !important;
+    border-color: var(--cor-sucesso-escura) !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(22, 163, 74, 0.3) !important;
 }
 
 .ui-button-danger {
-    background-color: #dc2626 !important;
-    border-color: #dc2626 !important;
+    background-color: var(--cor-perigo) !important;
+    border-color: var(--cor-perigo) !important;
     color: white !important;
     padding: 0.625rem 1.25rem !important;
     border-radius: 4px !important;
@@ -302,25 +302,25 @@ body {
     padding: 4rem 2rem;
     border-radius: 4px;
     text-align: center;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cor-borda);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .empty-state i {
     font-size: 4rem;
-    color: #cbd5e0;
+    color: var(--cor-borda-forte);
     margin-bottom: 1.5rem;
 }
 
 .empty-state h3 {
-    color: #2d3748;
+    color: var(--cor-texto);
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
 }
 
 .empty-state p {
-    color: #718096;
+    color: var(--cor-texto-suave);
     font-size: 1rem;
     margin: 0;
 }
@@ -338,7 +338,7 @@ body {
 }
 
 .ui-dialog .ui-dialog-titlebar {
-    background: #1a202c !important;
+    background: var(--cor-texto-forte) !important;
     color: white !important;
     border-radius: 4px 4px 0 0 !important;
     padding: 1.25rem !important;
@@ -371,23 +371,23 @@ body {
 }
 
 .ui-dialog .ui-dialog-content::-webkit-scrollbar-track {
-    background: #f7fafc;
+    background: var(--cor-fundo-suave);
     border-radius: 4px;
 }
 
 .ui-dialog .ui-dialog-content::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
+    background: var(--cor-borda-forte);
     border-radius: 4px;
 }
 
 .ui-dialog .ui-dialog-content::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0;
+    background: var(--cor-texto-apagado);
 }
 
 /* Scrollbar para Firefox */
 .ui-dialog .ui-dialog-content {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e0 #f7fafc;
+    scrollbar-color: var(--cor-borda-forte) var(--cor-fundo-suave);
 }
 
 /* Dialog Content */
@@ -397,7 +397,7 @@ body {
 
 /* Info Header Dialog */
 .info-header-dialog {
-    background: #1a202c;
+    background: var(--cor-texto-forte);
     color: white;
     padding: 1.5rem;
     border-radius: 4px;
@@ -448,15 +448,15 @@ body {
 
 /* Form Section Dialog */
 .form-section-dialog {
-    background: #f7fafc;
+    background: var(--cor-fundo-suave);
     padding: 1.5rem;
     border-radius: 4px;
     margin-bottom: 1.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cor-borda);
 }
 
 .form-section-dialog h4 {
-    color: #2d3748;
+    color: var(--cor-texto);
     margin: 0 0 1.5rem 0;
     font-weight: 600;
     font-size: 1.0625rem;
@@ -473,7 +473,7 @@ body {
 .field-group label {
     display: block;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--cor-texto);
     margin-bottom: 0.5rem;
     font-size: 0.9375rem;
 }
@@ -485,7 +485,7 @@ body {
 .ui-inputnumber {
     width: 100% !important;
     padding: 0.75rem !important;
-    border: 1px solid #cbd5e0 !important;
+    border: 1px solid var(--cor-borda-forte) !important;
     border-radius: 4px !important;
     font-size: 0.9rem !important;
     transition: all 0.2s ease !important;
@@ -494,7 +494,7 @@ body {
 .ui-inputfield:focus, 
 .ui-selectonemenu:focus, 
 .ui-inputtextarea:focus {
-    border-color: #2563eb !important;
+    border-color: var(--cor-primaria) !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
     outline: none !important;
 }
@@ -502,30 +502,30 @@ body {
 .ui-inputnumber-input {
     width: 100% !important;
     padding: 0.75rem !important;
-    border: 1px solid #cbd5e0 !important;
+    border: 1px solid var(--cor-borda-forte) !important;
     border-radius: 4px !important;
     font-size: 0.9rem !important;
 }
 
 .ui-inputnumber-input:focus {
-    border-color: #2563eb !important;
+    border-color: var(--cor-primaria) !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
     outline: none !important;
 }
 
 /* Alerts */
 .alert-info {
-    background: #dbeafe;
-    border-left: 4px solid #2563eb;
+    background: var(--cor-primaria-clara);
+    border-left: 4px solid var(--cor-primaria);
     padding: 1rem;
     border-radius: 4px;
     margin-bottom: 1.5rem;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--cor-primaria-borda);
 }
 
 .alert-danger {
-    background: #fecaca;
-    border-left: 4px solid #dc2626;
+    background: var(--cor-perigo-clara);
+    border-left: 4px solid var(--cor-perigo);
     padding: 1rem;
     border-radius: 4px;
     margin-bottom: 1.5rem;
@@ -573,11 +573,11 @@ body {
 
 .info-solicitacao {
     margin-bottom: 1.5rem;
-    color: #4a5568;
+    color: var(--cor-texto-medio);
     padding: 1rem;
-    background: #f7fafc;
+    background: var(--cor-fundo-suave);
     border-radius: 4px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cor-borda);
 }
 
 /* Dialog Actions */
@@ -586,12 +586,12 @@ body {
     gap: 0.75rem;
     justify-content: flex-end;
     padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--cor-borda);
 }
 
 .ui-button-secondary {
-    background-color: #718096 !important;
-    border-color: #718096 !important;
+    background-color: var(--cor-texto-suave) !important;
+    border-color: var(--cor-texto-suave) !important;
     color: white !important;
     padding: 0.625rem 1.25rem !important;
     border-radius: 4px !important;
@@ -600,8 +600,8 @@ body {
 }
 
 .ui-button-secondary:hover {
-    background-color: #4a5568 !important;
-    border-color: #4a5568 !important;
+    background-color: var(--cor-texto-medio) !important;
+    border-color: var(--cor-texto-medio) !important;
 }
 
 /* Responsivo */
@@ -739,40 +739,40 @@ body {
 .ui-growl-item-container.ui-growl-message-info .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-info .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-info .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Erro - Vermelho === */
 .ui-growl-item-container.ui-growl-message-error {
-    background: #c0392b !important;
+    background: var(--cor-perigo-escura) !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-title,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Aviso - Laranja/Âmbar === */
 .ui-growl-item-container.ui-growl-message-warn {
-    background: #e67e22 !important;
+    background: var(--cor-alerta-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-title,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Cores por tipo === */
 
 /* Sucesso - verde */
 .ui-growl-item-container.ui-growl-message-info {
-    border-left-color: #28a745 !important;
+    border-left-color: var(--cor-sucesso-2) !important;
     background: #f6fff8 !important;
 }
 .ui-growl-item-container.ui-growl-message-info .ui-growl-image {
-    color: #28a745 !important;
+    color: var(--cor-sucesso-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-info .ui-growl-title {
     color: #1a5c2a !important;
@@ -780,11 +780,11 @@ body {
 
 /* Erro - vermelho */
 .ui-growl-item-container.ui-growl-message-error {
-    border-left-color: #dc3545 !important;
+    border-left-color: var(--cor-perigo-2) !important;
     background: #fff8f8 !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-image {
-    color: #dc3545 !important;
+    color: var(--cor-perigo-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-title {
     color: #7a1020 !important;
@@ -792,7 +792,7 @@ body {
 
 /* Aviso - amarelo */
 .ui-growl-item-container.ui-growl-message-warn {
-    border-left-color: #ffc107 !important;
+    border-left-color: var(--cor-alerta) !important;
     background: #fffdf0 !important;
 }
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-image {

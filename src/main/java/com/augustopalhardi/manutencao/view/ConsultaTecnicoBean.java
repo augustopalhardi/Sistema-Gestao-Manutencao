@@ -1,14 +1,12 @@
 package com.augustopalhardi.manutencao.view;
 
-import com.augustopalhardi.manutencao.util.Uploads;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
-import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.ControleStatusManutencao.StatusManutencao;
+import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.HistoricoReprogramacao;
 import com.augustopalhardi.manutencao.model.PeriodoTrabalhoManutencao;
 import com.augustopalhardi.manutencao.model.SolicitacaoCompraMateriaisServicos;
@@ -39,6 +37,8 @@ import com.augustopalhardi.manutencao.service.ManterPeriodoTrabalhoManutencaoSer
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisServicosService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.util.Uploads;
+import com.augustopalhardi.manutencao.view.dto.ItemManutencaoTecnico;
 
 @Named
 @ViewScoped
@@ -719,59 +719,4 @@ public class ConsultaTecnicoBean implements Serializable {
 
 	// ===== CLASSE INTERNA =====
 
-	public static class ItemManutencaoTecnico implements Serializable {
-		private static final long serialVersionUID = 1L;
-
-		private Long solicitacaoId;
-		private TipoManutencaoReferencia tipoManutencaoRef;
-		private String tipoManutencao;
-		private String descricao;
-		private String equipamentoLocal;
-		private Date dataManutencao;
-		private StatusManutencao status;
-		private double horasTecnico;
-		private boolean cancelada;
-		private String urlFoto;
-		private String solicitante;
-		private String observacoes;
-
-		// Campos específicos de máquina
-		private boolean risco;
-		private String descrRisco;
-		private boolean operando;
-		private String descrOperando;
-
-		public Long getSolicitacaoId() { return solicitacaoId; }
-		public void setSolicitacaoId(Long solicitacaoId) { this.solicitacaoId = solicitacaoId; }
-		public TipoManutencaoReferencia getTipoManutencaoRef() { return tipoManutencaoRef; }
-		public void setTipoManutencaoRef(TipoManutencaoReferencia tipoManutencaoRef) { this.tipoManutencaoRef = tipoManutencaoRef; }
-		public String getTipoManutencao() { return tipoManutencao; }
-		public void setTipoManutencao(String tipoManutencao) { this.tipoManutencao = tipoManutencao; }
-		public String getDescricao() { return descricao; }
-		public void setDescricao(String descricao) { this.descricao = descricao; }
-		public String getEquipamentoLocal() { return equipamentoLocal; }
-		public void setEquipamentoLocal(String equipamentoLocal) { this.equipamentoLocal = equipamentoLocal; }
-		public Date getDataManutencao() { return dataManutencao; }
-		public void setDataManutencao(Date dataManutencao) { this.dataManutencao = dataManutencao; }
-		public StatusManutencao getStatus() { return status; }
-		public void setStatus(StatusManutencao status) { this.status = status; }
-		public double getHorasTecnico() { return horasTecnico; }
-		public void setHorasTecnico(double horasTecnico) { this.horasTecnico = horasTecnico; }
-		public boolean isCancelada() { return cancelada; }
-		public void setCancelada(boolean cancelada) { this.cancelada = cancelada; }
-		public String getUrlFoto() { return urlFoto; }
-		public void setUrlFoto(String urlFoto) { this.urlFoto = urlFoto; }
-		public String getSolicitante() { return solicitante; }
-		public void setSolicitante(String solicitante) { this.solicitante = solicitante; }
-		public String getObservacoes() { return observacoes; }
-		public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
-		public boolean isRisco() { return risco; }
-		public void setRisco(boolean risco) { this.risco = risco; }
-		public String getDescrRisco() { return descrRisco; }
-		public void setDescrRisco(String descrRisco) { this.descrRisco = descrRisco; }
-		public boolean isOperando() { return operando; }
-		public void setOperando(boolean operando) { this.operando = operando; }
-		public String getDescrOperando() { return descrOperando; }
-		public void setDescrOperando(String descrOperando) { this.descrOperando = descrOperando; }
-	}
 }

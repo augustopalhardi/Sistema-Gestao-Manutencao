@@ -1,7 +1,5 @@
 package com.augustopalhardi.manutencao.view;
 
-import com.augustopalhardi.manutencao.util.Uploads;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.TipoUsuario;
 import com.augustopalhardi.manutencao.service.ManterCadastroUsuarioService;
+import com.augustopalhardi.manutencao.util.Uploads;
 
 @Named
 @ViewScoped

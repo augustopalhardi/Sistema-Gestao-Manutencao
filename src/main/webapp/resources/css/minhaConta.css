@@ -7,14 +7,14 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f8f9fa;
+    background-color: var(--cor-fundo-claro);
     min-height: 100vh;
-    color: #212529;
+    color: var(--cor-texto-escuro);
 }
 
 /* Header */
 .header {
-    background: #1a202c;
+    background: var(--cor-texto-forte);
     color: white;
     padding: 2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -83,20 +83,20 @@ body {
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #e9ecef;
+    border: 4px solid var(--cor-fundo-cinza);
 }
 
 .no-photo {
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    background-color: #e9ecef;
+    background-color: var(--cor-fundo-cinza);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 4rem;
     color: #adb5bd;
-    border: 4px solid #dee2e6;
+    border: 4px solid var(--cor-borda-clara);
 }
 
 .user-info-header {
@@ -105,7 +105,7 @@ body {
 
 .user-name {
     font-size: 1.75rem;
-    color: #2c3e50;
+    color: var(--cor-marca);
     font-weight: 600;
     margin-bottom: 0.75rem;
 }
@@ -150,11 +150,11 @@ body {
 
 .section-title {
     font-size: 1.25rem;
-    color: #2c3e50;
+    color: var(--cor-marca);
     font-weight: 600;
     margin-bottom: 1.5rem;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid var(--cor-fundo-cinza);
 }
 
 /* Form Grid */
@@ -180,10 +180,10 @@ body {
 /* Info Value (Modo Visualização) */
 .info-value {
     padding: 0.75rem 1rem;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background-color: var(--cor-fundo-claro);
+    border: 1px solid var(--cor-fundo-cinza);
     border-radius: 4px;
-    color: #2c3e50;
+    color: var(--cor-marca);
     font-size: 0.95rem;
 }
 
@@ -211,8 +211,8 @@ body {
 }
 
 .input-disabled {
-    background-color: #e9ecef !important;
-    color: #6c757d !important;
+    background-color: var(--cor-fundo-cinza) !important;
+    color: var(--cor-cinza) !important;
     cursor: not-allowed !important;
 }
 
@@ -220,7 +220,7 @@ body {
 .password-section {
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 2px solid #e9ecef;
+    border-top: 2px solid var(--cor-fundo-cinza);
 }
 
 /* Alert Info */
@@ -247,7 +247,7 @@ body {
     justify-content: center;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--cor-fundo-cinza);
 }
 
 /* Buttons */
@@ -271,9 +271,9 @@ body {
 
 .btn-success {
     padding: 0.875rem 2rem !important;
-    background-color: #28a745 !important;
+    background-color: var(--cor-sucesso-2) !important;
     color: white !important;
-    border: 1px solid #28a745 !important;
+    border: 1px solid var(--cor-sucesso-2) !important;
     border-radius: 4px !important;
     font-weight: 500 !important;
     font-size: 1rem !important;
@@ -289,9 +289,9 @@ body {
 
 .btn-secondary {
     padding: 0.875rem 2rem !important;
-    background-color: #6c757d !important;
+    background-color: var(--cor-cinza) !important;
     color: white !important;
-    border: 1px solid #6c757d !important;
+    border: 1px solid var(--cor-cinza) !important;
     border-radius: 4px !important;
     font-weight: 500 !important;
     font-size: 1rem !important;
@@ -307,9 +307,9 @@ body {
 
 .btn-remove-photo {
     padding: 0.5rem 1rem !important;
-    background-color: #dc3545 !important;
+    background-color: var(--cor-perigo-2) !important;
     color: white !important;
-    border: 1px solid #dc3545 !important;
+    border: 1px solid var(--cor-perigo-2) !important;
     border-radius: 4px !important;
     font-size: 0.875rem !important;
     margin-top: 0.5rem !important;
@@ -525,40 +525,40 @@ body {
 .ui-growl-item-container.ui-growl-message-info .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-info .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-info .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Erro - Vermelho === */
 .ui-growl-item-container.ui-growl-message-error {
-    background: #c0392b !important;
+    background: var(--cor-perigo-escura) !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-title,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Aviso - Laranja/Âmbar === */
 .ui-growl-item-container.ui-growl-message-warn {
-    background: #e67e22 !important;
+    background: var(--cor-alerta-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-title,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Cores por tipo === */
 
 /* Sucesso - verde */
 .ui-growl-item-container.ui-growl-message-info {
-    border-left-color: #28a745 !important;
+    border-left-color: var(--cor-sucesso-2) !important;
     background: #f6fff8 !important;
 }
 .ui-growl-item-container.ui-growl-message-info .ui-growl-image {
-    color: #28a745 !important;
+    color: var(--cor-sucesso-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-info .ui-growl-title {
     color: #1a5c2a !important;
@@ -566,11 +566,11 @@ body {
 
 /* Erro - vermelho */
 .ui-growl-item-container.ui-growl-message-error {
-    border-left-color: #dc3545 !important;
+    border-left-color: var(--cor-perigo-2) !important;
     background: #fff8f8 !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-image {
-    color: #dc3545 !important;
+    color: var(--cor-perigo-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-title {
     color: #7a1020 !important;
@@ -578,7 +578,7 @@ body {
 
 /* Aviso - amarelo */
 .ui-growl-item-container.ui-growl-message-warn {
-    border-left-color: #ffc107 !important;
+    border-left-color: var(--cor-alerta) !important;
     background: #fffdf0 !important;
 }
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-image {

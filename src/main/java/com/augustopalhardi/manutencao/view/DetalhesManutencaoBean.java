@@ -1,7 +1,5 @@
 package com.augustopalhardi.manutencao.view;
 
-import com.augustopalhardi.manutencao.util.Uploads;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.augustopalhardi.manutencao.model.CadastroLocal;
 import com.augustopalhardi.manutencao.model.CadastroMaquinaEquipamento;
-import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.ControleStatusManutencao.StatusManutencao;
+import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.HistoricoReprogramacao;
 import com.augustopalhardi.manutencao.model.PeriodoTrabalhoManutencao;
 import com.augustopalhardi.manutencao.model.SolicitacaoCompraMateriaisServicos;
@@ -31,6 +29,7 @@ import com.augustopalhardi.manutencao.service.ManterPeriodoTrabalhoManutencaoSer
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisServicosService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.util.Uploads;
 
 /**
  * Bean central e reutilizável para o dialog de detalhes de manutenção.

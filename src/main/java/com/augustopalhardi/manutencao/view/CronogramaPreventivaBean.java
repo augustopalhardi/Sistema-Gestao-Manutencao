@@ -21,8 +21,8 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.ControleStatusManutencao.StatusManutencao;
+import com.augustopalhardi.manutencao.model.ControleStatusManutencao;
 import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoMaquina;
 import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoPredial;
 import com.augustopalhardi.manutencao.model.TipoManutencao;
@@ -30,6 +30,8 @@ import com.augustopalhardi.manutencao.model.TipoManutencaoReferencia;
 import com.augustopalhardi.manutencao.service.ManterControleStatusManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.view.dto.GrupoMes;
+import com.augustopalhardi.manutencao.view.dto.ItemPreventiva;
 
 @Named
 @ViewScoped
@@ -608,146 +610,7 @@ public class CronogramaPreventivaBean implements Serializable {
 
 	// ========== Classe interna para representar um grupo de mês no cronograma
 	// ==========
-	public static class GrupoMes implements Serializable {
-		private static final long serialVersionUID = 1L;
-
-		private String mesAno;
-		private List<ItemPreventiva> itens;
-
-		public GrupoMes(String mesAno, List<ItemPreventiva> itens) {
-			this.mesAno = mesAno;
-			this.itens = itens;
-		}
-
-		public String getMesAno() {
-			return mesAno;
-		}
-
-		public void setMesAno(String mesAno) {
-			this.mesAno = mesAno;
-		}
-
-		public List<ItemPreventiva> getItens() {
-			return itens;
-		}
-
-		public void setItens(List<ItemPreventiva> itens) {
-			this.itens = itens;
-		}
-
-		public int getQuantidade() {
-			return itens != null ? itens.size() : 0;
-		}
-	}
-
 	// ========== Classe interna para representar um item do cronograma ==========
-	public static class ItemPreventiva implements Serializable {
-		private static final long serialVersionUID = 1L;
-
-		private Long id;
-		private String categoria; // "MAQUINA" ou "PREDIAL"
-		private String descricao;
-		private Date dataPrevista;
-		private String observacoes;
-		private StatusManutencao status;
-		private String localOuMaquina;
-		private String solicitante;
-		private boolean atrasada;
-		private Date dataConclusao;
-
-		public Long getId() {
-			return id;
-		}
-
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public String getCategoria() {
-			return categoria;
-		}
-
-		public void setCategoria(String categoria) {
-			this.categoria = categoria;
-		}
-
-		public String getDescricao() {
-			return descricao;
-		}
-
-		public void setDescricao(String descricao) {
-			this.descricao = descricao;
-		}
-
-		public Date getDataPrevista() {
-			return dataPrevista;
-		}
-
-		public void setDataPrevista(Date dataPrevista) {
-			this.dataPrevista = dataPrevista;
-		}
-
-		public String getObservacoes() {
-			return observacoes;
-		}
-
-		public void setObservacoes(String observacoes) {
-			this.observacoes = observacoes;
-		}
-
-		public StatusManutencao getStatus() {
-			return status;
-		}
-
-		public void setStatus(StatusManutencao status) {
-			this.status = status;
-		}
-
-		public String getLocalOuMaquina() {
-			return localOuMaquina;
-		}
-
-		public void setLocalOuMaquina(String localOuMaquina) {
-			this.localOuMaquina = localOuMaquina;
-		}
-
-		public String getSolicitante() {
-			return solicitante;
-		}
-
-		public void setSolicitante(String solicitante) {
-			this.solicitante = solicitante;
-		}
-
-		public boolean isAtrasada() {
-			return atrasada;
-		}
-
-		public void setAtrasada(boolean atrasada) {
-			this.atrasada = atrasada;
-		}
-
-		public Date getDataConclusao() {
-			return dataConclusao;
-		}
-
-		public void setDataConclusao(Date dataConclusao) {
-			this.dataConclusao = dataConclusao;
-		}
-
-		/**
-		 * Referência (id + tipo) usada para abrir o diálogo de detalhes,
-		 * reaproveitando o método prepararDetalhes(Map) do TodasSolicitacoesBean
-		 * — o mesmo usado na página "Todas as Solicitações".
-		 */
-		public Map<String, Object> getDetalhesRef() {
-			Map<String, Object> ref = new HashMap<>();
-			ref.put("id", id);
-			ref.put("tipo", "MAQUINA".equals(categoria) ? "MÁQUINA" : "PREDIAL");
-			return ref;
-		}
-	}
-
 	// ========== MÉTODOS PARA REDIRECIONAR PARA INICIAR MANUTENÇÃO ==========
 
 	private ItemPreventiva itemParaIniciar;

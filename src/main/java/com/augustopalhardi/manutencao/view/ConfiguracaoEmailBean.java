@@ -11,8 +11,8 @@ import javax.inject.Named;
 
 import org.apache.log4j.Logger;
 
-import com.augustopalhardi.manutencao.model.ConfiguracaoEmail;
 import com.augustopalhardi.manutencao.model.ConfiguracaoEmail.TipoNotificacao;
+import com.augustopalhardi.manutencao.model.ConfiguracaoEmail;
 import com.augustopalhardi.manutencao.service.ManterConfiguracaoEmailService;
 
 @Named

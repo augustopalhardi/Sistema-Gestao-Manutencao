@@ -33,12 +33,16 @@ import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoMaquina;
 import com.augustopalhardi.manutencao.model.SolicitacaoManutencaoPredial;
 import com.augustopalhardi.manutencao.model.TipoManutencao;
 import com.augustopalhardi.manutencao.model.TipoManutencaoReferencia;
+import com.augustopalhardi.manutencao.service.CalculoIndicadores;
 import com.augustopalhardi.manutencao.service.ManterCadastroMaquinaEquipamentoService;
 import com.augustopalhardi.manutencao.service.ManterControleStatusManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterPeriodoTrabalhoManutencaoService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoCompraMateriaisServicosService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoMaquinaService;
 import com.augustopalhardi.manutencao.service.ManterSolicitacaoManutencaoPredialService;
+import com.augustopalhardi.manutencao.util.Json;
+import com.augustopalhardi.manutencao.view.dto.ConfiabilidadeCategoria;
+import com.augustopalhardi.manutencao.view.dto.ItemEstatistica;
 
 @Named
 @ViewScoped
@@ -46,7 +50,6 @@ public class EstatisticasManutencaoBean implements Serializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EstatisticasManutencaoBean.class);
 	private static final long serialVersionUID = 1L;
-	private static final double HORAS_UTEIS_POR_DIA = 8.0;
 
 	@Inject
 	private ManterSolicitacaoManutencaoMaquinaService manterMaquinaService;
@@ -472,51 +475,28 @@ public class EstatisticasManutencaoBean implements Serializable {
 		Set<Long> idsMaquina = maquinasFiltradasSemCanceladas.stream().map(SolicitacaoManutencaoMaquina::getId)
 				.collect(Collectors.toSet());
 
-		double totalHorasReparo = 0;
-		int numReparosConcluidos = 0;
-
+		List<Double> horasPorReparo = new ArrayList<>();
 		for (Long id : idsMaquina) {
 			ControleStatusManutencao controle = buscarControle(id, TipoManutencaoReferencia.MAQUINA);
 			if (controle != null && controle.getStatus() == ControleStatusManutencao.StatusManutencao.CONCLUIDA) {
-				double horas = todosPeriodos.stream()
+				horasPorReparo.add(todosPeriodos.stream()
 						.filter(p -> p.getSolicitacaoId().equals(id)
 								&& p.getTipoManutencao() == TipoManutencaoReferencia.MAQUINA
 								&& filtrarPorData(p.getDataHoraInicio()))
-						.mapToDouble(PeriodoTrabalhoManutencao::getDuracaoEmHoras).sum();
-				if (horas > 0) {
-					totalHorasReparo += horas;
-					numReparosConcluidos++;
-				}
+						.mapToDouble(PeriodoTrabalhoManutencao::getDuracaoEmHoras).sum());
 			}
 		}
 
-		mttr = numReparosConcluidos > 0 ? totalHorasReparo / numReparosConcluidos : 0;
+		mttr = CalculoIndicadores.mttr(horasPorReparo);
 	}
 
 	private void calcularMTBF() {
-		Map<Long, List<SolicitacaoManutencaoMaquina>> porMaquina = maquinasFiltradasSemCanceladas.stream()
+		Map<Long, List<Date>> falhasPorMaquina = maquinasFiltradasSemCanceladas.stream()
 				.filter(m -> m.getMaquina() != null && m.getDataManutencao() != null)
-				.collect(Collectors.groupingBy(m -> m.getMaquina().getId()));
+				.collect(Collectors.groupingBy(m -> m.getMaquina().getId(),
+						Collectors.mapping(SolicitacaoManutencaoMaquina::getDataManutencao, Collectors.toList())));
 
-		double totalHorasEntreFalhas = 0;
-		int totalIntervalos = 0;
-
-		for (List<SolicitacaoManutencaoMaquina> manutencoes : porMaquina.values()) {
-			if (manutencoes.size() < 2)
-				continue;
-			manutencoes.sort(Comparator.comparing(SolicitacaoManutencaoMaquina::getDataManutencao));
-			for (int i = 1; i < manutencoes.size(); i++) {
-				long diff = manutencoes.get(i).getDataManutencao().getTime()
-						- manutencoes.get(i - 1).getDataManutencao().getTime();
-				double horas = converterParaHorasUteis(diff);
-				if (horas > 0) {
-					totalHorasEntreFalhas += horas;
-					totalIntervalos++;
-				}
-			}
-		}
-
-		mtbf = totalIntervalos > 0 ? totalHorasEntreFalhas / totalIntervalos : 0;
+		mtbf = CalculoIndicadores.mtbf(falhasPorMaquina.values());
 	}
 
 	private void calcularAvariasPorCategoria() {
@@ -872,36 +852,17 @@ public class EstatisticasManutencaoBean implements Serializable {
 						TipoManutencaoReferencia.MAQUINA);
 				if (controle != null && m.getDataManutencao() != null) {
 					Date dataFim = controle.getDataConclusao() != null ? controle.getDataConclusao() : new Date();
-					long diff = dataFim.getTime() - m.getDataManutencao().getTime();
-					double horasParada = converterParaHorasUteis(diff);
-					if (horasParada > 0)
-						totalHorasParada += horasParada;
+					totalHorasParada += CalculoIndicadores.horasUteisEntre(m.getDataManutencao(), dataFim);
 				}
 			}
 
-			double confiabilidade;
-			if (horasTotalPeriodo > 0) {
-				confiabilidade = ((horasTotalPeriodo - totalHorasParada) / horasTotalPeriodo) * 100;
-				confiabilidade = Math.max(0, Math.min(100, confiabilidade));
-			} else {
-				// Sem período definido e sem manutenções: 100%
-				confiabilidade = manutencoes.isEmpty() ? 100.0 : 0.0;
-			}
-
-			confiabilidadePorMaquina.put(nomeMaquina, Math.round(confiabilidade * 100.0) / 100.0);
+			confiabilidadePorMaquina.put(nomeMaquina,
+					CalculoIndicadores.confiabilidade(horasTotalPeriodo, totalHorasParada, !manutencoes.isEmpty()));
 		}
 
 		// Ordena do menor para o maior (piores primeiro)
-		confiabilidadePorMaquina = confiabilidadePorMaquina.entrySet().stream().sorted(Map.Entry.comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-
-		// *** Calcula média geral por máquina: soma / quantidade ***
-		if (!confiabilidadePorMaquina.isEmpty()) {
-			double soma = confiabilidadePorMaquina.values().stream().mapToDouble(Double::doubleValue).sum();
-			mediaGeralConfiabilidadeMaquina = Math.round((soma / confiabilidadePorMaquina.size()) * 100.0) / 100.0;
-		} else {
-			mediaGeralConfiabilidadeMaquina = 0;
-		}
+		confiabilidadePorMaquina = CalculoIndicadores.ordenadoCrescente(confiabilidadePorMaquina);
+		mediaGeralConfiabilidadeMaquina = CalculoIndicadores.media(confiabilidadePorMaquina.values());
 	}
 
 	private double calcularHorasTotalPeriodo() {
@@ -916,16 +877,7 @@ public class EstatisticasManutencaoBean implements Serializable {
 		}
 		fim = filtroDataFim != null ? filtroDataFim : new Date();
 		long diff = fim.getTime() - inicio.getTime();
-		return converterParaHorasUteis(diff);
-	}
-
-	/**
-	 * Converte uma diferença em milissegundos para horas úteis (dias de 8h). Cada
-	 * 24h de calendário = 8h úteis.
-	 */
-	private double converterParaHorasUteis(long diffMs) {
-		double diasCalendario = diffMs / (1000.0 * 60 * 60 * 24);
-		return diasCalendario * HORAS_UTEIS_POR_DIA;
+		return CalculoIndicadores.horasUteis(diff);
 	}
 
 	private void calcularPioresAtores() {
@@ -939,8 +891,7 @@ public class EstatisticasManutencaoBean implements Serializable {
 		long totalMaq = maquinasFiltradasSemCanceladas.size();
 		if (totalMaq > 0) {
 			for (Map.Entry<String, Long> entry : pioresAtores.entrySet()) {
-				double pct = (entry.getValue() * 100.0) / totalMaq;
-				pioresAtoresPorcentagem.put(entry.getKey(), Math.round(pct * 100.0) / 100.0);
+				pioresAtoresPorcentagem.put(entry.getKey(), CalculoIndicadores.percentual(entry.getValue(), totalMaq));
 			}
 		}
 	}
@@ -957,8 +908,8 @@ public class EstatisticasManutencaoBean implements Serializable {
 		long totalMaq = maquinasFiltradasSemCanceladas.size();
 		if (totalMaq > 0) {
 			for (Map.Entry<String, Long> entry : pioresAtoresPorCategoria.entrySet()) {
-				double pct = (entry.getValue() * 100.0) / totalMaq;
-				pioresAtoresCategoriaPorcentagem.put(entry.getKey(), Math.round(pct * 100.0) / 100.0);
+				pioresAtoresCategoriaPorcentagem.put(entry.getKey(),
+						CalculoIndicadores.percentual(entry.getValue(), totalMaq));
 			}
 		}
 	}
@@ -1032,45 +983,25 @@ public class EstatisticasManutencaoBean implements Serializable {
 						TipoManutencaoReferencia.MAQUINA);
 				if (controle != null && m.getDataManutencao() != null) {
 					Date dataFim = controle.getDataConclusao() != null ? controle.getDataConclusao() : new Date();
-					long diff = dataFim.getTime() - m.getDataManutencao().getTime();
-					double horasParada = converterParaHorasUteis(diff);
-					if (horasParada > 0)
-						totalHorasParada += horasParada;
+					totalHorasParada += CalculoIndicadores.horasUteisEntre(m.getDataManutencao(), dataFim);
 				}
 			}
 
-			double horasTotalPeriodo = horasTotalPeriodoBase * qtdMaquinasUnicasCadastradas;
-			double confiabilidade;
-
-			if (horasTotalPeriodo > 0) {
-				confiabilidade = ((horasTotalPeriodo - totalHorasParada) / horasTotalPeriodo) * 100;
-				confiabilidade = Math.max(0, Math.min(100, confiabilidade));
-			} else {
-				// Sem período: categorias sem manutenção = 100%
-				confiabilidade = manutencoes.isEmpty() ? 100.0 : 0.0;
-			}
+			double confiabilidade = CalculoIndicadores.confiabilidade(
+					horasTotalPeriodoBase * qtdMaquinasUnicasCadastradas, totalHorasParada, !manutencoes.isEmpty());
 
 			ConfiabilidadeCategoria item = new ConfiabilidadeCategoria();
 			item.setCategoria(categoria);
 			item.setQuantidadeManutencoes(qtd);
-			item.setConfiabilidade(Math.round(confiabilidade * 100.0) / 100.0);
+			item.setConfiabilidade(confiabilidade);
 			confiabilidadePorCategoriaLista.add(item);
 		}
 
 		// Ordena do menor para o maior
 		confiabilidadePorCategoriaLista.sort(Comparator.comparingDouble(ConfiabilidadeCategoria::getConfiabilidade));
 
-		// *** Média geral de categorias: soma / quantidade ***
-		if (!confiabilidadePorCategoriaLista.isEmpty()) {
-			double soma = 0;
-			for (ConfiabilidadeCategoria item : confiabilidadePorCategoriaLista) {
-				soma += item.getConfiabilidade();
-			}
-			mediaGeralConfiabilidadeCategoria = Math.round((soma / confiabilidadePorCategoriaLista.size()) * 100.0)
-					/ 100.0;
-		} else {
-			mediaGeralConfiabilidadeCategoria = 0;
-		}
+		mediaGeralConfiabilidadeCategoria = CalculoIndicadores.media(confiabilidadePorCategoriaLista.stream()
+				.map(ConfiabilidadeCategoria::getConfiabilidade).collect(Collectors.toList()));
 
 		// Mantém compatibilidade: mediaGeralConfiabilidade aponta para a média de
 		// categorias
@@ -1220,43 +1151,43 @@ public class EstatisticasManutencaoBean implements Serializable {
 	// ==================== MÉTODOS JSON ====================
 
 	public String getTopMaquinasLabelsJSON() {
-		return mapKeysToJSON(maquinasPorQuantidade);
+		return Json.rotulos(maquinasPorQuantidade);
 	}
 
 	public String getTopMaquinasDataJSON() {
-		return mapLongValuesToJSON(maquinasPorQuantidade);
+		return Json.valoresInteiros(maquinasPorQuantidade);
 	}
 
 	public String getTopLocaisLabelsJSON() {
-		return mapKeysToJSON(locaisPorQuantidade);
+		return Json.rotulos(locaisPorQuantidade);
 	}
 
 	public String getTopLocaisDataJSON() {
-		return mapLongValuesToJSON(locaisPorQuantidade);
+		return Json.valoresInteiros(locaisPorQuantidade);
 	}
 
 	public String getTopGastosLabelsJSON() {
-		return mapKeysToJSONDouble(manutencoesComMaisGastos);
+		return Json.rotulos(manutencoesComMaisGastos);
 	}
 
 	public String getTopGastosDataJSON() {
-		return mapDoubleValuesToJSON(manutencoesComMaisGastos);
+		return Json.valoresDecimais(manutencoesComMaisGastos);
 	}
 
 	public String getReparosPorMaquinaLabelsJSON() {
-		return mapKeysToJSON(reparosPorMaquina);
+		return Json.rotulos(reparosPorMaquina);
 	}
 
 	public String getReparosPorMaquinaDataJSON() {
-		return mapLongValuesToJSON(reparosPorMaquina);
+		return Json.valoresInteiros(reparosPorMaquina);
 	}
 
 	public String getAvariasPorCategoriaLabelsJSON() {
-		return mapKeysToJSON(avariasPorCategoria);
+		return Json.rotulos(avariasPorCategoria);
 	}
 
 	public String getAvariasPorCategoriaDataJSON() {
-		return mapLongValuesToJSON(avariasPorCategoria);
+		return Json.valoresInteiros(avariasPorCategoria);
 	}
 
 	public String getAvariasPorMaquinaPorMesJSON() {
@@ -1279,7 +1210,7 @@ public class EstatisticasManutencaoBean implements Serializable {
 				if (!first)
 					sb.append(",");
 				first = false;
-				sb.append("{\"label\":\"").append(escapeJSON(entry.getKey())).append("\",");
+				sb.append("{\"label\":\"").append(Json.escapar(entry.getKey())).append("\",");
 				sb.append("\"cor\":\"").append(cores[corIndex % cores.length]).append("\",");
 				sb.append("\"data\":[");
 				boolean firstData = true;
@@ -1301,27 +1232,27 @@ public class EstatisticasManutencaoBean implements Serializable {
 	}
 
 	public String getCustoPorTipoManutencaoLabelsJSON() {
-		return mapKeysToJSONDouble(custoPorTipoManutencao);
+		return Json.rotulos(custoPorTipoManutencao);
 	}
 
 	public String getCustoPorTipoManutencaoDataJSON() {
-		return mapDoubleValuesToJSON(custoPorTipoManutencao);
+		return Json.valoresDecimais(custoPorTipoManutencao);
 	}
 
 	public String getCustoMensalLabelsJSON() {
-		return mapKeysToJSONDouble(custoMensal);
+		return Json.rotulos(custoMensal);
 	}
 
 	public String getCustoMensalDataJSON() {
-		return mapDoubleValuesToJSON(custoMensal);
+		return Json.valoresDecimais(custoMensal);
 	}
 
 	public String getCustoTotalPorMaquinaLabelsJSON() {
-		return mapKeysToJSONDouble(custoTotalPorMaquina);
+		return Json.rotulos(custoTotalPorMaquina);
 	}
 
 	public String getCustoTotalPorMaquinaDataJSON() {
-		return mapDoubleValuesToJSON(custoTotalPorMaquina);
+		return Json.valoresDecimais(custoTotalPorMaquina);
 	}
 
 	public double getCustoTotalGeral() {
@@ -1349,18 +1280,18 @@ public class EstatisticasManutencaoBean implements Serializable {
 	}
 
 	public String getConfiabilidadeLabelsJSON() {
-		return mapKeysToJSONDouble(confiabilidadePorMaquina);
+		return Json.rotulos(confiabilidadePorMaquina);
 	}
 
 	public String getConfiabilidadeDataJSON() {
-		return mapDoubleValuesToJSON(confiabilidadePorMaquina);
+		return Json.valoresDecimais(confiabilidadePorMaquina);
 	}
 
 	/** Rótulos para o gráfico de confiabilidade por categoria */
 	public String getConfiabilidadePorCategoriaLabelsJSON() {
 		if (confiabilidadePorCategoriaLista == null || confiabilidadePorCategoriaLista.isEmpty())
 			return "[]";
-		return "[" + confiabilidadePorCategoriaLista.stream().map(i -> "\"" + escapeJSON(i.getCategoria()) + "\"")
+		return "[" + confiabilidadePorCategoriaLista.stream().map(i -> "\"" + Json.escapar(i.getCategoria()) + "\"")
 				.collect(Collectors.joining(",")) + "]";
 	}
 
@@ -1374,62 +1305,30 @@ public class EstatisticasManutencaoBean implements Serializable {
 	}
 
 	public String getPioresAtoresLabelsJSON() {
-		return mapKeysToJSON(pioresAtores);
+		return Json.rotulos(pioresAtores);
 	}
 
 	public String getPioresAtoresDataJSON() {
-		return mapLongValuesToJSON(pioresAtores);
+		return Json.valoresInteiros(pioresAtores);
 	}
 
 	public String getPioresAtoresPorcentagemDataJSON() {
-		return mapDoubleValuesToJSON(pioresAtoresPorcentagem);
+		return Json.valoresDecimais(pioresAtoresPorcentagem);
 	}
 
 	public String getPioresAtoresCategoriaLabelsJSON() {
-		return mapKeysToJSON(pioresAtoresPorCategoria);
+		return Json.rotulos(pioresAtoresPorCategoria);
 	}
 
 	public String getPioresAtoresCategoriaDataJSON() {
-		return mapLongValuesToJSON(pioresAtoresPorCategoria);
+		return Json.valoresInteiros(pioresAtoresPorCategoria);
 	}
 
 	public String getPioresAtoresCategoriaPorcentagemDataJSON() {
-		return mapDoubleValuesToJSON(pioresAtoresCategoriaPorcentagem);
+		return Json.valoresDecimais(pioresAtoresCategoriaPorcentagem);
 	}
 
 	// ==================== AUXILIARES JSON ====================
-
-	private String mapKeysToJSON(Map<String, Long> map) {
-		if (map == null || map.isEmpty())
-			return "[]";
-		return "[" + map.keySet().stream().map(s -> "\"" + escapeJSON(s) + "\"").collect(Collectors.joining(",")) + "]";
-	}
-
-	private String mapKeysToJSONDouble(Map<String, Double> map) {
-		if (map == null || map.isEmpty())
-			return "[]";
-		return "[" + map.keySet().stream().map(s -> "\"" + escapeJSON(s) + "\"").collect(Collectors.joining(",")) + "]";
-	}
-
-	private String mapLongValuesToJSON(Map<String, Long> map) {
-		if (map == null || map.isEmpty())
-			return "[]";
-		return "[" + map.values().stream().map(String::valueOf).collect(Collectors.joining(",")) + "]";
-	}
-
-	private String mapDoubleValuesToJSON(Map<String, Double> map) {
-		if (map == null || map.isEmpty())
-			return "[]";
-		return "["
-				+ map.values().stream().map(v -> String.format(Locale.US, "%.2f", v)).collect(Collectors.joining(","))
-				+ "]";
-	}
-
-	private String escapeJSON(String s) {
-		if (s == null)
-			return "";
-		return s.replace("\\", "\\\\").replace("\"", "\\\"");
-	}
 
 	// ==================== AUXILIARES ====================
 
@@ -1719,162 +1618,6 @@ public class EstatisticasManutencaoBean implements Serializable {
 	}
 
 	// ==================== CLASSE INTERNA: ItemEstatistica ====================
-	public static class ItemEstatistica implements Serializable {
-		private static final long serialVersionUID = 1L;
-
-		private Long id;
-		private String tipo;
-		private String falha;
-		private String problema;
-		private String local;
-		private String maquina;
-		private Date dataManutencao;
-		private boolean risco;
-		private boolean riscoSeguranca;
-		private boolean urgente;
-		private boolean cancelada;
-		private ControleStatusManutencao.StatusManutencao status;
-
-		public Long getId() {
-			return id;
-		}
-
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public String getTipo() {
-			return tipo;
-		}
-
-		public void setTipo(String tipo) {
-			this.tipo = tipo;
-		}
-
-		public String getFalha() {
-			return falha;
-		}
-
-		public void setFalha(String falha) {
-			this.falha = falha;
-		}
-
-		public String getProblema() {
-			return problema;
-		}
-
-		public void setProblema(String problema) {
-			this.problema = problema;
-		}
-
-		public String getLocal() {
-			return local;
-		}
-
-		public void setLocal(String local) {
-			this.local = local;
-		}
-
-		public String getMaquina() {
-			return maquina;
-		}
-
-		public void setMaquina(String maquina) {
-			this.maquina = maquina;
-		}
-
-		public Date getDataManutencao() {
-			return dataManutencao;
-		}
-
-		public void setDataManutencao(Date dataManutencao) {
-			this.dataManutencao = dataManutencao;
-		}
-
-		public boolean isRisco() {
-			return risco;
-		}
-
-		public void setRisco(boolean risco) {
-			this.risco = risco;
-		}
-
-		public boolean isRiscoSeguranca() {
-			return riscoSeguranca;
-		}
-
-		public void setRiscoSeguranca(boolean riscoSeguranca) {
-			this.riscoSeguranca = riscoSeguranca;
-		}
-
-		public boolean isUrgente() {
-			return urgente;
-		}
-
-		public void setUrgente(boolean urgente) {
-			this.urgente = urgente;
-		}
-
-		public boolean isCancelada() {
-			return cancelada;
-		}
-
-		public void setCancelada(boolean cancelada) {
-			this.cancelada = cancelada;
-		}
-
-		public ControleStatusManutencao.StatusManutencao getStatus() {
-			return status;
-		}
-
-		public void setStatus(ControleStatusManutencao.StatusManutencao status) {
-			this.status = status;
-		}
-	}
-
 	// ==================== CLASSE INTERNA: ConfiabilidadeCategoria
 	// ====================
-	public static class ConfiabilidadeCategoria implements Serializable {
-		private static final long serialVersionUID = 1L;
-
-		private String categoria;
-		private long quantidadeManutencoes;
-		private double confiabilidade;
-
-		public String getCategoria() {
-			return categoria;
-		}
-
-		public void setCategoria(String categoria) {
-			this.categoria = categoria;
-		}
-
-		public long getQuantidadeManutencoes() {
-			return quantidadeManutencoes;
-		}
-
-		public void setQuantidadeManutencoes(long quantidadeManutencoes) {
-			this.quantidadeManutencoes = quantidadeManutencoes;
-		}
-
-		public double getConfiabilidade() {
-			return confiabilidade;
-		}
-
-		public void setConfiabilidade(double confiabilidade) {
-			this.confiabilidade = confiabilidade;
-		}
-
-		public String getConfiabilidadeFormatada() {
-			return String.format("%.2f%%", confiabilidade);
-		}
-
-		public String getConfiabilidadeClass() {
-			if (confiabilidade >= 80)
-				return "confiabilidade-alta";
-			if (confiabilidade >= 50)
-				return "confiabilidade-media";
-			return "confiabilidade-baixa";
-		}
-	}
 }

@@ -6,11 +6,11 @@ body {
     justify-content: center;
     background: #f4f6f9;
     font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    color: #2c3e50;
+    color: var(--cor-marca);
 }
 
 .erro-card {
-    background: #ffffff;
+    background: var(--cor-branco);
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(44, 62, 80, 0.12);
     padding: 2.5rem 2rem;
@@ -27,7 +27,7 @@ body {
 .erro-codigo {
     font-size: 3.5rem;
     font-weight: 700;
-    color: #ed8936;
+    color: var(--cor-destaque);
     margin: 0.75rem 0 0;
 }
 
@@ -44,8 +44,8 @@ body {
 
 .erro-botao {
     display: inline-block;
-    background: #2c3e50;
-    color: #ffffff;
+    background: var(--cor-marca);
+    color: var(--cor-branco);
     text-decoration: none;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;

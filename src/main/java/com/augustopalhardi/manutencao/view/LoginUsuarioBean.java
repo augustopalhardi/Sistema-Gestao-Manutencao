@@ -13,9 +13,9 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.augustopalhardi.manutencao.dao.CadastroUsuarioDao;
 import com.augustopalhardi.manutencao.model.CadastroUsuario;
 import com.augustopalhardi.manutencao.model.TipoUsuario;
-import com.augustopalhardi.manutencao.dao.CadastroUsuarioDao;
 import com.augustopalhardi.manutencao.service.LoginService;
 
 @Named("loginUsuarioBean")

@@ -1,0 +1,63 @@
+/*
+ * Tema do sistema: paleta central de cores.
+ *
+ * Todas as folhas de estilo usam estas variáveis em vez de códigos hexadecimais
+ * soltos. Para mudar uma cor no sistema inteiro, altere-a aqui.
+ *
+ * As variáveis com sufixo -2 / -3 são tons muito próximos que vieram de telas
+ * diferentes; foram mantidos para não alterar o visual, e são candidatos a
+ * unificação numa próxima revisão de design.
+ */
+
+:root {
+	/* Marca */
+	--cor-marca: #2c3e50;  /* azul-petróleo do logo e cabeçalhos */
+	--cor-destaque: #ed8936;  /* laranja do logo */
+
+	/* Texto */
+	--cor-texto-forte: #1a202c;
+	--cor-texto-escuro: #212529;
+	--cor-texto: #2d3748;  /* texto padrão */
+	--cor-texto-medio: #4a5568;
+	--cor-texto-suave: #718096;  /* legendas e descrições */
+	--cor-texto-apagado: #a0aec0;  /* placeholders */
+	--cor-cinza: #6c757d;
+
+	/* Fundos e bordas */
+	--cor-branco: #ffffff;
+	--cor-fundo-suave: #f7fafc;
+	--cor-fundo-claro: #f8f9fa;
+	--cor-fundo-cinza: #e9ecef;
+	--cor-borda: #e2e8f0;  /* bordas de cards e tabelas */
+	--cor-borda-clara: #dee2e6;
+	--cor-borda-forte: #cbd5e0;
+
+	/* Primária (azul) */
+	--cor-primaria: #2563eb;  /* botões e links principais */
+	--cor-primaria-escura: #1d4ed8;  /* hover */
+	--cor-primaria-clara: #dbeafe;  /* fundos de destaque */
+	--cor-primaria-borda: #bfdbfe;
+	--cor-azul-2: #3182ce;
+	--cor-azul-3: #3498db;
+
+	/* Sucesso (verde) */
+	--cor-sucesso: #16a34a;
+	--cor-sucesso-escura: #15803d;
+	--cor-sucesso-clara: #bbf7d0;
+	--cor-sucesso-2: #28a745;
+	--cor-sucesso-3: #27ae60;
+
+	/* Perigo (vermelho) */
+	--cor-perigo: #dc2626;
+	--cor-perigo-clara: #fecaca;
+	--cor-perigo-2: #dc3545;
+	--cor-perigo-3: #e74c3c;
+	--cor-perigo-escura: #c0392b;
+
+	/* Alerta (amarelo/laranja) */
+	--cor-alerta: #ffc107;
+	--cor-alerta-laranja: #ea580c;
+	--cor-alerta-laranja-clara: #fed7aa;
+	--cor-alerta-2: #e67e22;
+	--cor-alerta-3: #f39c12;
+}

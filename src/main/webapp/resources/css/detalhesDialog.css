@@ -17,11 +17,11 @@
 	align-items: center;
 	margin-bottom: 20px;
 	padding-bottom: 15px;
-	border-bottom: 2px solid #dee2e6;
+	border-bottom: 2px solid var(--cor-borda-clara);
 }
 
 .dlg-det-titulo {
-	color: #2c3e50;
+	color: var(--cor-marca);
 	margin: 0 0 5px 0;
 }
 
@@ -32,7 +32,7 @@
 }
 
 .dlg-det-solicitante {
-	color: #3498db;
+	color: var(--cor-azul-3);
 	font-size: 0.9rem;
 }
 
@@ -68,7 +68,7 @@
 
 /* ===== CARDS DE INFORMAÇÃO ===== */
 .dlg-det-info-card {
-	background: #f8f9fa;
+	background: var(--cor-fundo-claro);
 	padding: 12px;
 	border-radius: 6px;
 }
@@ -101,19 +101,19 @@
 }
 
 .dlg-det-border-blue {
-	border-left: 4px solid #3498db;
+	border-left: 4px solid var(--cor-azul-3);
 }
 
 .dlg-det-border-green {
-	border-left: 4px solid #27ae60;
+	border-left: 4px solid var(--cor-sucesso-3);
 }
 
 .dlg-det-border-red {
-	border-left: 4px solid #e74c3c;
+	border-left: 4px solid var(--cor-perigo-3);
 }
 
 .dlg-det-border-orange {
-	border-left: 4px solid #f39c12;
+	border-left: 4px solid var(--cor-alerta-3);
 }
 
 .dlg-det-border-yellow {
@@ -139,7 +139,7 @@
 
 /* ===== TÍTULOS DE SEÇÃO ===== */
 .dlg-det-section-title {
-	color: #2c3e50;
+	color: var(--cor-marca);
 	margin: 20px 0 10px 0;
 	border-bottom: 2px solid;
 	padding-bottom: 8px;
@@ -195,7 +195,7 @@
 	background: #fef2f2;
 	padding: 20px;
 	border-radius: 8px;
-	border-left: 4px solid #e74c3c;
+	border-left: 4px solid var(--cor-perigo-3);
 	margin-bottom: 20px;
 }
 
@@ -216,7 +216,7 @@
 	background: white;
 	padding: 15px;
 	border-radius: 6px;
-	border-left: 4px solid #e74c3c;
+	border-left: 4px solid var(--cor-perigo-3);
 }
 
 /* ===== ESTADO VAZIO ===== */
@@ -231,7 +231,7 @@
 .dlg-det-footer {
 	text-align: right;
 	margin-top: 20px;
-	border-top: 1px solid #dee2e6;
+	border-top: 1px solid var(--cor-borda-clara);
 	padding-top: 15px;
 }
 
@@ -250,7 +250,7 @@
 	overflow-x: hidden !important;
 	padding-right: 10px !important;
 	scrollbar-width: thin;
-	scrollbar-color: #cbd5e0 #f1f5f9;
+	scrollbar-color: var(--cor-borda-forte) #f1f5f9;
 }
 
 .dlg-detalhes-rico .ui-panel .ui-panel-content::-webkit-scrollbar {
@@ -263,7 +263,7 @@
 }
 
 .dlg-detalhes-rico .ui-panel .ui-panel-content::-webkit-scrollbar-thumb {
-	background: #cbd5e0;
+	background: var(--cor-borda-forte);
 	border-radius: 4px;
 	transition: background 0.2s ease;
 }
@@ -303,13 +303,13 @@
 
 /* ===================================================================
    HEADER ESCURO DO DIALOG (padronizado)
-   Algumas páginas já pintavam o header via CSS próprio (cor #1a202c),
+   Algumas páginas já pintavam o header via CSS próprio (cor var(--cor-texto-forte)),
    outras não tinham nenhuma regra. Definindo aqui, no CSS compartilhado
    do dialog, garante o mesmo visual em TODAS as páginas.
    =================================================================== */
 .dlg-detalhes-rico.ui-dialog .ui-dialog-titlebar,
 .dlg-detalhes-rico .ui-dialog-titlebar {
-	background: #1a202c !important;
+	background: var(--cor-texto-forte) !important;
 	background-image: none !important;
 	color: white !important;
 	border: none !important;

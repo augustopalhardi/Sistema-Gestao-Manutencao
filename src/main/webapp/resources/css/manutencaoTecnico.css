@@ -26,7 +26,7 @@ Estilos dos Dialogs - Padronizados
 }
 
 .finalizacao-dialog .ui-dialog-titlebar {
-	background: #27ae60 !important;
+	background: var(--cor-sucesso-3) !important;
 	color: white !important;
 	border: none !important;
 	font-weight: 600 !important;
@@ -161,7 +161,7 @@ Estilos dos Dialogs - Padronizados
     margin: 0 0 10px 0 !important;
     font-size: 1.5rem !important;
     font-weight: 600 !important;
-    color: #2c3e50 !important;
+    color: var(--cor-marca) !important;
 }
 
 .detalhes-tipo {
@@ -177,7 +177,7 @@ Estilos dos Dialogs - Padronizados
 }
 
 .status-badge {
-    background: #e9ecef !important;
+    background: var(--cor-fundo-cinza) !important;
     color: #495057 !important;
     padding: 8px 16px !important;
     border-radius: 20px !important;
@@ -190,7 +190,7 @@ Estilos dos Dialogs - Padronizados
 /* Área de informações */
 .detalhes-info {
     padding: 24px !important;
-    background: #f8f9fa !important;
+    background: var(--cor-fundo-claro) !important;
 }
 
 /* Grid de informações */
@@ -220,13 +220,13 @@ Estilos dos Dialogs - Padronizados
     background: white;
     padding: 16px;
     border-radius: 6px;
-    border-left: 4px solid #dee2e6;
+    border-left: 4px solid var(--cor-borda-clara);
 }
 
 .info-card label {
     display: block;
     font-weight: 600;
-    color: #6c757d;
+    color: var(--cor-cinza);
     margin-bottom: 8px;
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -234,7 +234,7 @@ Estilos dos Dialogs - Padronizados
 }
 
 .info-text {
-    color: #212529;
+    color: var(--cor-texto-escuro);
     margin: 0;
     line-height: 1.5;
     font-size: 0.95rem;
@@ -242,7 +242,7 @@ Estilos dos Dialogs - Padronizados
 
 /* Cores das bordas */
 .info-problema {
-    border-left-color: #dc3545;
+    border-left-color: var(--cor-perigo-2);
 }
 
 .info-local {
@@ -250,7 +250,7 @@ Estilos dos Dialogs - Padronizados
 }
 
 .info-data {
-    border-left-color: #28a745;
+    border-left-color: var(--cor-sucesso-2);
 }
 
 .info-tecnicos {
@@ -267,13 +267,13 @@ Estilos dos Dialogs - Padronizados
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 16px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--cor-borda-clara);
 }
 
 .info-expandida-header {
-    background: #f8f9fa;
+    background: var(--cor-fundo-claro);
     padding: 12px 16px;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--cor-borda-clara);
 }
 
 .info-expandida-header label {
@@ -307,11 +307,11 @@ Estilos dos Dialogs - Padronizados
 /* Cancelamento */
 .info-cancelamento .info-expandida-header {
     background: #fee2e2;
-    border-bottom-color: #fecaca;
+    border-bottom-color: var(--cor-perigo-clara);
 }
 
 .info-cancelamento .info-expandida-header label {
-    color: #dc2626;
+    color: var(--cor-perigo);
 }
 
 .info-cancelamento {
@@ -331,7 +331,7 @@ Estilos dos Dialogs - Padronizados
 
 .priority-header label {
     font-weight: 600;
-    color: #6c757d;
+    color: var(--cor-cinza);
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -376,7 +376,7 @@ Estilos dos Dialogs - Padronizados
 .detalhes-actions {
     padding: 16px 24px;
     background: white;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid var(--cor-borda-clara);
     text-align: right;
 }
 
@@ -388,11 +388,11 @@ Estilos dos Dialogs - Padronizados
 	border-radius: 8px !important;
 	overflow: hidden !important;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-	border: 1px solid #dee2e6 !important;
+	border: 1px solid var(--cor-borda-clara) !important;
 }
 
 .dialog-compra-melhorado .ui-dialog-titlebar {
-	background: #f39c12 !important;
+	background: var(--cor-alerta-3) !important;
 	color: white !important;
 	border: none !important;
 	font-weight: 600 !important;
@@ -447,7 +447,7 @@ body {
 	line-height: 1.6;
 	margin: 0;
 	padding: 0;
-	background-color: #f8f9fa;
+	background-color: var(--cor-fundo-claro);
 	color: #333;
 	min-height: 100vh;
 }
@@ -473,7 +473,7 @@ body {
 }
 
 .info-section {
-	background-color: #f8f9fa;
+	background-color: var(--cor-fundo-claro);
 	padding: 15px;
 	border-radius: 5px;
 	margin-bottom: 15px;
@@ -501,7 +501,7 @@ body {
 .form-help {
 	display: block;
 	margin-top: 5px;
-	color: #6c757d;
+	color: var(--cor-cinza);
 	font-size: 0.875em;
 	line-height: 1.4;
 }
@@ -510,7 +510,7 @@ body {
 	background-color: #fff3cd;
 	padding: 10px;
 	border-radius: 4px;
-	border-left: 4px solid #ffc107;
+	border-left: 4px solid var(--cor-alerta);
 }
 
 .alert {
@@ -540,12 +540,12 @@ body {
 	align-items: center;
 	margin-bottom: 15px !important;
 	padding-bottom: 10px;
-	border-bottom: 1px solid #e9ecef;
+	border-bottom: 1px solid var(--cor-fundo-cinza);
 }
 
 .periodo-titulo {
 	font-weight: 600 !important;
-	color: #2c3e50;
+	color: var(--cor-marca);
 	font-size: 0.9rem;
 }
 
@@ -624,13 +624,13 @@ body {
 }
 
 .mensagem-validacao {
-	color: #e74c3c;
+	color: var(--cor-perigo-3);
 	font-size: 12px;
 	margin-top: 5px;
 	padding: 8px;
 	background: #fdf2f2;
 	border-radius: 4px;
-	border-left: 3px solid #e74c3c;
+	border-left: 3px solid var(--cor-perigo-3);
 }
 
 .mensagem-validacao i {
@@ -684,24 +684,24 @@ body {
 	margin-top: 8px;
 	font-size: 0.85rem;
 	color: #34495e;
-	background: #f8f9fa;
+	background: var(--cor-fundo-claro);
 	padding: 8px 10px;
 	border-radius: 6px;
-	border-left: 3px solid #3498db;
+	border-left: 3px solid var(--cor-azul-3);
 }
 
 .tecnicos-info strong {
-	color: #2c3e50;
+	color: var(--cor-marca);
 	font-weight: 600;
 }
 
 .tecnicos-responsaveis {
 	font-weight: 500 !important;
-	color: #3498db !important;
+	color: var(--cor-azul-3) !important;
 	background: #f0f8ff;
 	padding: 8px 12px;
 	border-radius: 6px;
-	border-left: 4px solid #3498db;
+	border-left: 4px solid var(--cor-azul-3);
 	margin-top: 5px;
 }
 
@@ -715,7 +715,7 @@ Header
 ========================================================================== */
 
 .header {
-    background: #1a202c;
+    background: var(--cor-texto-forte);
     color: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 2rem 0;
@@ -762,7 +762,7 @@ Componentes da Página
 /* --- Títulos e Badges --- */
 .page-subtitle {
 	text-align: center;
-	color: #1a202c;
+	color: var(--cor-texto-forte);
 	font-size: 1.6rem;
 	font-weight: 500;
 	margin-bottom: 2rem;
@@ -770,7 +770,7 @@ Componentes da Página
 
 .maintenance-type-badge {
 	display: inline-block;
-	background: #e74c3c;
+	background: var(--cor-perigo-3);
 	color: white;
 	padding: 0.4rem 1rem;
 	border-radius: 4px;
@@ -785,7 +785,7 @@ Componentes da Página
 .maintenance-header {
 	background: white;
 	border-radius: 8px;
-	border: 1px solid #e9ecef;
+	border: 1px solid var(--cor-fundo-cinza);
 	box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 	overflow: hidden;
 	margin-bottom: 2rem;
@@ -793,14 +793,14 @@ Componentes da Página
 
 .maintenance-tabs {
 	display: flex;
-	background: #f8f9fa;
+	background: var(--cor-fundo-claro);
 }
 
 .tab-button {
 	flex: 1;
 	padding: 1.2rem 1.5rem;
-	background: #f8f9fa;
-	color: #1a202c;
+	background: var(--cor-fundo-claro);
+	color: var(--cor-texto-forte);
 	text-decoration: none;
 	text-align: center;
 	font-weight: 500;
@@ -812,15 +812,15 @@ Componentes da Página
 }
 
 .tab-button:hover {
-	background: #e9ecef;
-	color: #1a202c;
+	background: var(--cor-fundo-cinza);
+	color: var(--cor-texto-forte);
 	text-decoration: none;
 }
 
 .tab-button.active {
-	background: #2c3e50;
+	background: var(--cor-marca);
 	color: white;
-	border-bottom-color: #e74c3c;
+	border-bottom-color: var(--cor-perigo-3);
 }
 
 /* --- Cards de Resumo --- */
@@ -836,7 +836,7 @@ Componentes da Página
 	padding: 1.2rem 1rem;
 	border-radius: 8px;
 	text-align: center;
-	border: 1px solid #e9ecef;
+	border: 1px solid var(--cor-fundo-cinza);
 	border-top: 4px solid transparent;
 	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 	transition: all 0.2s ease;
@@ -855,22 +855,22 @@ Componentes da Página
 
 .summary-label {
 	font-size: 0.75rem;
-	color: #6c757d;
+	color: var(--cor-cinza);
 	font-weight: 500;
 	text-transform: uppercase;
 	letter-spacing: 0.3px;
 }
 
-.count-fazer { color: #3498db; }
-.count-andamento { color: #f39c12; }
-.count-concluidas { color: #27ae60; }
-.count-canceladas { color: #dc3545; }
+.count-fazer { color: var(--cor-azul-3); }
+.count-andamento { color: var(--cor-alerta-3); }
+.count-concluidas { color: var(--cor-sucesso-3); }
+.count-canceladas { color: var(--cor-perigo-2); }
 
-.summary-card:nth-child(1) { border-top-color: #3498db; }
-.summary-card:nth-child(2) { border-top-color: #f39c12; }
+.summary-card:nth-child(1) { border-top-color: var(--cor-azul-3); }
+.summary-card:nth-child(2) { border-top-color: var(--cor-alerta-3); }
 .summary-card:nth-child(3) { border-top-color: #9b59b6; }
-.summary-card:nth-child(4) { border-top-color: #27ae60; }
-.summary-card:nth-child(5) { border-top-color: #dc3545; }
+.summary-card:nth-child(4) { border-top-color: var(--cor-sucesso-3); }
+.summary-card:nth-child(5) { border-top-color: var(--cor-perigo-2); }
 
 /* --- Grid de Status e Itens de Manutenção --- */
 .status-grid {
@@ -884,7 +884,7 @@ Componentes da Página
 	background: white;
 	border-radius: 8px;
 	padding: 1.5rem;
-	border: 1px solid #e9ecef;
+	border: 1px solid var(--cor-fundo-cinza);
 	border-left: 4px solid;
 	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 	min-height: 600px;
@@ -892,11 +892,11 @@ Componentes da Página
 	overflow-y: auto;
 }
 
-.status-fazer { border-left-color: #3498db; }
-.status-andamento { border-left-color: #f39c12; }
+.status-fazer { border-left-color: var(--cor-azul-3); }
+.status-andamento { border-left-color: var(--cor-alerta-3); }
 .status-aguardando-compra { border-left-color: #9b59b6; }
-.status-concluidas { border-left-color: #27ae60; }
-.status-canceladas { border-left-color: #dc3545; }
+.status-concluidas { border-left-color: var(--cor-sucesso-3); }
+.status-canceladas { border-left-color: var(--cor-perigo-2); }
 
 .status-title {
 	display: flex;
@@ -904,7 +904,7 @@ Componentes da Página
 	justify-content: space-between;
 	font-size: 1rem;
 	font-weight: 600;
-	color: #2c3e50;
+	color: var(--cor-marca);
 	padding-bottom: 0.8rem;
 	margin-bottom: 1.2rem;
 	border-bottom: 2px solid #f1f3f4;
@@ -913,7 +913,7 @@ Componentes da Página
 .status-count {
 	font-size: 0.8rem;
 	font-weight: 500;
-	color: #6c757d;
+	color: var(--cor-cinza);
 }
 
 .maintenance-item {
@@ -921,7 +921,7 @@ Componentes da Página
 	border-radius: 6px;
 	padding: 1.2rem;
 	margin-bottom: 1rem;
-	border: 1px solid #e9ecef;
+	border: 1px solid var(--cor-fundo-cinza);
 	transition: all 0.2s ease;
 	position: relative;
 	max-width: 100%;
@@ -930,7 +930,7 @@ Componentes da Página
 
 .maintenance-item:hover {
 	background: white;
-	border-color: #dee2e6;
+	border-color: var(--cor-borda-clara);
 	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
@@ -946,8 +946,8 @@ Componentes da Página
 .item-id {
 	font-weight: 700;
 	font-size: 0.85rem;
-	color: #2c3e50;
-	background: #e9ecef;
+	color: var(--cor-marca);
+	background: var(--cor-fundo-cinza);
 	padding: 0.2rem 0.6rem;
 	border-radius: 4px;
 }
@@ -960,7 +960,7 @@ Componentes da Página
 .item-description {
 	font-size: 0.9rem;
 	font-weight: 500;
-	color: #2c3e50;
+	color: var(--cor-marca);
 	line-height: 1.4;
 	margin-bottom: 0.7rem;
 	max-width: 100%;
@@ -969,14 +969,14 @@ Componentes da Página
 .item-location {
 	font-size: 0.8rem;
 	font-style: italic;
-	color: #6c757d;
+	color: var(--cor-cinza);
 	margin-bottom: 0.6rem;
 }
 
 .item-date {
 	font-size: 0.75rem;
 	font-weight: 500;
-	color: #6c757d;
+	color: var(--cor-cinza);
 	margin-bottom: 0.8rem;
 }
 
@@ -994,10 +994,10 @@ Componentes da Página
 	font-size: 0.8rem;
 	line-height: 1.4;
 	color: #495057;
-	background: #f8f9fa;
+	background: var(--cor-fundo-claro);
 	padding: 0.6rem;
 	border-radius: 4px;
-	border-left: 3px solid #6c757d;
+	border-left: 3px solid var(--cor-cinza);
 	margin-top: 0.6rem;
 }
 
@@ -1035,15 +1035,15 @@ Componentes da Página
 }
 
 .flag-risk {
-	background: linear-gradient(135deg, #e74c3c, #c0392b);
+	background: linear-gradient(135deg, var(--cor-perigo-3), var(--cor-perigo-escura));
 }
 
 .flag-urgent {
-	background: linear-gradient(135deg, #f39c12, #e67e22);
+	background: linear-gradient(135deg, var(--cor-alerta-3), var(--cor-alerta-2));
 }
 
 .flag-operating {
-	background: linear-gradient(135deg, #2ecc71, #27ae60);
+	background: linear-gradient(135deg, #2ecc71, var(--cor-sucesso-3));
 }
 
 .flag-normal {
@@ -1052,20 +1052,20 @@ Componentes da Página
 
 /* --- Utilitários e Mensagens --- */
 .read-more {
-	color: #3498db;
+	color: var(--cor-azul-3);
 	font-weight: 500;
 	cursor: pointer;
 	margin-left: 3px;
 }
 
 .empty-message {
-	color: #6c757d;
+	color: var(--cor-cinza);
 	font-style: italic;
 	text-align: center;
 	font-size: 0.85rem;
-	background: #f8f9fa;
+	background: var(--cor-fundo-claro);
 	padding: 2rem 1rem;
-	border: 2px dashed #dee2e6;
+	border: 2px dashed var(--cor-borda-clara);
 	border-radius: 6px;
 }
 
@@ -1095,15 +1095,15 @@ Sobrescrita de Estilos (Overrides) - PrimeFaces
 	padding: 0.35rem 0.6rem !important;
 }
 
-.ui-button-success { background-color: #27ae60 !important; border-color: #27ae60 !important; color: white !important; }
+.ui-button-success { background-color: var(--cor-sucesso-3) !important; border-color: var(--cor-sucesso-3) !important; color: white !important; }
 .ui-button-success:hover { background-color: #229954 !important; border-color: #229954 !important; }
 .ui-button-info { background-color: #17a2b8 !important; border-color: #17a2b8 !important; color: white !important; }
 .ui-button-info:hover { background-color: #138496 !important; border-color: #138496 !important; }
-.ui-button-secondary { background-color: #6c757d !important; border-color: #6c757d !important; color: white !important; }
+.ui-button-secondary { background-color: var(--cor-cinza) !important; border-color: var(--cor-cinza) !important; color: white !important; }
 .ui-button-secondary:hover { background-color: #545b62 !important; border-color: #545b62 !important; }
-.ui-button-warning { background-color: #f39c12 !important; border-color: #f39c12 !important; color: white !important; }
+.ui-button-warning { background-color: var(--cor-alerta-3) !important; border-color: var(--cor-alerta-3) !important; color: white !important; }
 .ui-button-warning:hover { background-color: #e08e0b !important; border-color: #e08e0b !important; }
-.ui-button-danger { background-color: #dc3545 !important; border-color: #dc3545 !important; color: white !important; }
+.ui-button-danger { background-color: var(--cor-perigo-2) !important; border-color: var(--cor-perigo-2) !important; color: white !important; }
 .ui-button-danger:hover { background-color: #c82333 !important; border-color: #c82333 !important; }
 
 /* ==========================================================================
@@ -1299,40 +1299,40 @@ Estilos Responsivos (Media Queries)
 .ui-growl-item-container.ui-growl-message-info .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-info .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-info .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Erro - Vermelho === */
 .ui-growl-item-container.ui-growl-message-error {
-    background: #c0392b !important;
+    background: var(--cor-perigo-escura) !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-title,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-error .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Aviso - Laranja/Âmbar === */
 .ui-growl-item-container.ui-growl-message-warn {
-    background: #e67e22 !important;
+    background: var(--cor-alerta-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-title,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-message p,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-image,
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-icon-close {
-    color: #ffffff !important;
+    color: var(--cor-branco) !important;
 }
 
 /* === Cores por tipo === */
 
 /* Sucesso - verde */
 .ui-growl-item-container.ui-growl-message-info {
-    border-left-color: #28a745 !important;
+    border-left-color: var(--cor-sucesso-2) !important;
     background: #f6fff8 !important;
 }
 .ui-growl-item-container.ui-growl-message-info .ui-growl-image {
-    color: #28a745 !important;
+    color: var(--cor-sucesso-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-info .ui-growl-title {
     color: #1a5c2a !important;
@@ -1340,11 +1340,11 @@ Estilos Responsivos (Media Queries)
 
 /* Erro - vermelho */
 .ui-growl-item-container.ui-growl-message-error {
-    border-left-color: #dc3545 !important;
+    border-left-color: var(--cor-perigo-2) !important;
     background: #fff8f8 !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-image {
-    color: #dc3545 !important;
+    color: var(--cor-perigo-2) !important;
 }
 .ui-growl-item-container.ui-growl-message-error .ui-growl-title {
     color: #7a1020 !important;
@@ -1352,7 +1352,7 @@ Estilos Responsivos (Media Queries)
 
 /* Aviso - amarelo */
 .ui-growl-item-container.ui-growl-message-warn {
-    border-left-color: #ffc107 !important;
+    border-left-color: var(--cor-alerta) !important;
     background: #fffdf0 !important;
 }
 .ui-growl-item-container.ui-growl-message-warn .ui-growl-image {
