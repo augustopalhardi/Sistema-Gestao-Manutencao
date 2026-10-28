@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}"
+		type="image/x-icon" />
+	<title>Todas as Solicitações de Manutenção</title>
+	<h:outputStylesheet name="css/todasSolicitacoes.css" />
+	<h:outputStylesheet name="css/detalhesDialog.css" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<style>
+/* ===================== FILTROS ===================== */
+.filtros-section {
+	background: white;
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	padding: 1.25rem 2rem;
+	margin-bottom: 1.5rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filtros-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+
+.filtros-header h3 {
+	margin: 0;
+	font-size: 1rem;
+	color: #2d3748;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.filtros-grid {
+	display: flex;
+	gap: 1.5rem;
+	align-items: flex-end;
+	flex-wrap: wrap;
+}
+
+.filtro-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 200px;
+}
+
+.filtro-group label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #718096;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.filtro-group .ui-selectonemenu {
+	width: 100% !important;
+	min-width: 200px !important;
+}
+
+.filtro-group .ui-selectonemenu .ui-selectonemenu-label {
+	padding: 8px 12px !important;
+	font-size: 0.9rem !important;
+}
+
+.filtros-actions {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	margin-left: auto;
+}
+
+.filtro-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: #ebf5ff;
+	color: #2563eb;
+	padding: 6px 12px;
+	border-radius: 20px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	border: 1px solid #bfdbfe;
+}
+
+.filtro-badge i {
+	font-size: 0.75rem;
+}
+
+@media ( max-width : 768px) {
+	.filtros-grid {
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.filtro-group {
+		min-width: 100%;
+	}
+	.filtros-actions {
+		margin-left: 0;
+		width: 100%;
+		justify-content: flex-end;
+	}
+	.filtros-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+}
+
+.action-buttons {
+	display: flex;
+	gap: 5px;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+
+.action-button {
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	padding: 0 !important;
+	border-radius: 6px !important;
+	transition: all 0.2s ease !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.action-button:hover:enabled {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.action-button .ui-button-text {
+	padding: 0 !important;
+	display: none !important;
+}
+
+.action-button .ui-button-icon-left {
+	margin: 0 !important;
+	position: static !important;
+	font-size: 14px !important;
+}
+
+.action-button:disabled {
+	opacity: 0.4 !important;
+	cursor: not-allowed !important;
+}
+
+.action-button.ui-button-info {
+	background: #3498db !important;
+	border-color: #3498db !important;
+}
+
+.action-button.ui-button-info:hover:enabled {
+	background: #2980b9 !important;
+	border-color: #2980b9 !important;
+}
+
+.action-button.ui-button-warning {
+	background: #f39c12 !important;
+	border-color: #f39c12 !important;
+}
+
+.action-button.ui-button-warning:hover:enabled {
+	background: #e67e22 !important;
+	border-color: #e67e22 !important;
+}
+
+.action-button.ui-button-danger {
+	background: #e74c3c !important;
+	border-color: #e74c3c !important;
+}
+
+.action-button.ui-button-danger:hover:enabled {
+	background: #c0392b !important;
+	border-color: #c0392b !important;
+}
+
+.historico-table .ui-datatable-header {
+	background: #6c757d;
+	color: white;
+	font-weight: bold;
+}
+
+.historico-table tbody tr:nth-child(odd) {
+	background-color: #ffffff;
+}
+
+.historico-table tbody tr:nth-child(even) {
+	background-color: #f8f9fa;
+}
+
+.historico-table tbody tr:hover {
+	background-color: #e9ecef !important;
+}
+
+.badge-reprogramacoes {
+	background-color: #ffc107;
+	color: #000;
+	padding: 2px 6px;
+	border-radius: 10px;
+	font-size: 0.75rem;
+	font-weight: bold;
+	margin-left: 5px;
+}
+
+.image-preview {
+	max-width: 100%;
+	max-height: 600px;
+	display: block;
+	margin: 0 auto;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.no-image-message {
+	text-align: center;
+	padding: 40px;
+	color: #95a5a6;
+	font-style: italic;
+	background: #f8f9fa;
+	border-radius: 8px;
+	border: 2px dashed #dee2e6;
+}
+
+.no-image-message i {
+	font-size: 48px;
+	margin-bottom: 15px;
+	display: block;
+	color: #bdc3c7;
+}
+
+.row-completed {
+	background-color: #d4edda !important;
+}
+
+.row-completed td {
+	color: #155724 !important;
+}
+
+.section-title-completed {
+	color: #155724 !important;
+	border-bottom-color: #28a745 !important;
+}
+
+.info-expandida {
+	background: #f8f9fa;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	overflow: hidden;
+	margin-bottom: 15px;
+	border-left: 3px solid #3498db;
+}
+
+.info-expandida-header {
+	background-color: #e9ecef;
+	padding: 12px 15px;
+	border-bottom: 1px solid #dee2e6;
+}
+
+.info-expandida-header label {
+	font-weight: 600;
+	color: #2c3e50;
+	margin: 0;
+	font-size: 0.95rem;
+}
+
+.info-expandida-content {
+	padding: 15px;
+}
+
+.info-text {
+	margin: 0;
+	line-height: 1.6;
+	color: #495057;
+	font-size: 0.9rem;
+	word-wrap: break-word;
+}
+</style>
+</h:head>
+
+<h:body>
+	<div class="header">
+		<h1>Todas as Solicitações de Manutenção</h1>
+	</div>
+
+	<div class="header-actions">
+		<button type="button" class="exit-button"
+			onclick="window.history.back();">Voltar</button>
+	</div>
+
+	<div class="container">
+		<p:growl id="messages" showDetail="true" life="4500" sticky="false"/>
+
+		<h:form id="filtrosForm">
+			<div class="filtros-section">
+				<div class="filtros-header">
+					<h3>
+						<i class="pi pi-filter"></i> Filtros
+					</h3>
+					<h:panelGroup rendered="#{todasSolicitacoesBean.filtroAtivo}">
+						<span class="filtro-badge"> <i class="pi pi-info-circle"></i>
+							<h:outputText
+								value="#{todasSolicitacoesBean.descricaoFiltrosAtivos}" />
+						</span>
+					</h:panelGroup>
+				</div>
+				<div class="filtros-grid">
+					<div class="filtro-group" style="min-width: 140px;">
+						<label>Buscar por ID</label>
+						<p:inputText id="filtroBuscaId"
+							value="#{todasSolicitacoesBean.filtroBuscaId}"
+							placeholder="Ex: 5, 12M, 3P"
+							style="width: 100%; padding: 8px 12px; font-size: 0.9rem;" />
+					</div>
+					<div class="filtro-group">
+						<label>Tipo de Manutenção</label>
+						<p:selectOneMenu id="filtroTipoManutencao"
+							value="#{todasSolicitacoesBean.filtroTipoManutencao}"
+							style="width: 100%;">
+							<f:selectItem itemLabel="Todas" itemValue="TODAS" />
+							<f:selectItem itemLabel="Corretiva" itemValue="CORRETIVA" />
+							<f:selectItem itemLabel="Preventiva" itemValue="PREVENTIVA" />
+							<f:selectItem itemLabel="Preditiva" itemValue="PREDITIVA" />
+							<p:ajax event="change" process="@this"
+								update=":activeTableForm:activeTable :completedTableForm:completedTable :cancelledTableForm:cancelledTable :filtrosForm"
+								listener="#{todasSolicitacoesBean.aplicarFiltros()}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="filtro-group">
+						<label>Categoria</label>
+						<p:selectOneMenu id="filtroCategoria"
+							value="#{todasSolicitacoesBean.filtroCategoria}"
+							style="width: 100%;">
+							<f:selectItem itemLabel="Todas" itemValue="TODAS" />
+							<f:selectItem itemLabel="Máquinas e Equipamentos"
+								itemValue="MAQUINA" />
+							<f:selectItem itemLabel="Predial" itemValue="PREDIAL" />
+							<p:ajax event="change" process="@this"
+								update=":activeTableForm:activeTable :completedTableForm:completedTable :cancelledTableForm:cancelledTable :filtrosForm"
+								listener="#{todasSolicitacoesBean.aplicarFiltros()}" />
+						</p:selectOneMenu>
+					</div>
+					
+					<div class="filtro-group">
+						<label>Data Início</label>
+						<p:calendar id="filtroDataInicio"
+							value="#{todasSolicitacoesBean.filtroDataInicio}"
+							pattern="dd/MM/yyyy" mask="true" showOn="button"
+							style="width: 100%;" locale="pt_BR"
+							placeholder="dd/mm/aaaa" />
+					</div>
+					<div class="filtro-group">
+						<label>Data Fim</label>
+						<p:calendar id="filtroDataFim"
+							value="#{todasSolicitacoesBean.filtroDataFim}"
+							pattern="dd/MM/yyyy" mask="true" showOn="button"
+							style="width: 100%;" locale="pt_BR"
+							placeholder="dd/mm/aaaa" />
+					</div>
+					
+					<div class="filtros-actions">
+						<p:commandButton 
+							value="#{todasSolicitacoesBean.ordenarPorIdCrescente ? 'ID ↑ Ativo' : 'Ordenar por ID'}"
+							action="#{todasSolicitacoesBean.toggleOrdenarPorId()}" process="@form"
+							update="@form :activeTableForm:activeTable :completedTableForm:completedTable :cancelledTableForm:cancelledTable messages"
+							icon="pi pi-sort-numeric-up"
+							styleClass="#{todasSolicitacoesBean.ordenarPorIdCrescente ? 'ui-button-success' : 'ui-button-outlined'}"
+							style="font-size: 0.85rem; padding: 8px 16px !important;" 
+							title="Ordenar todas as tabelas por ID crescente" />
+						<p:commandButton value="Aplicar Filtros"
+							action="#{todasSolicitacoesBean.aplicarFiltros()}" process="@form"
+							update="@form :activeTableForm:activeTable :completedTableForm:completedTable :cancelledTableForm:cancelledTable messages"
+							icon="pi pi-search" styleClass="ui-button-primary"
+							style="font-size: 0.85rem; padding: 8px 16px !important;" />
+						<p:commandButton value="Limpar Filtros"
+							action="#{todasSolicitacoesBean.limparFiltros()}" process="@form"
+							update="@form :activeTableForm:activeTable :completedTableForm:completedTable :cancelledTableForm:cancelledTable messages"
+							icon="pi pi-filter-slash" styleClass="ui-button-secondary"
+							style="font-size: 0.85rem; padding: 8px 16px !important;"
+							rendered="#{todasSolicitacoesBean.filtroAtivo}" />
+					</div>
+				</div>
+			</div>
+		</h:form>
+
+		<div class="list-section">
+			<h2 class="section-title">Solicitações Ativas</h2>
+			<h:form id="activeTableForm">
+				<p:dataTable id="activeTable"
+					value="#{todasSolicitacoesBean.solicitacoesAtivasUnificadas}"
+					var="item" paginator="true" rows="15" paginatorPosition="bottom"
+					emptyMessage="Nenhuma solicitação ativa encontrada."
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} solicitações">
+
+					<p:column headerText="ID" width="60" style="text-align: center;">
+						<h:outputText value="#{item.idFormatado}" />
+					</p:column>
+
+					<p:column headerText="Categoria" width="100"
+						style="text-align: center;">
+						<span class="tipo-solicitacao #{item.tipo.toLowerCase()}">
+							<h:outputText value="#{item.tipo}" />
+						</span>
+					</p:column>
+
+					<p:column headerText="Local/Máquina"
+						sortBy="#{item.descricaoLocal}">
+						<h:outputText value="#{item.descricaoLocal}" />
+					</p:column>
+
+					<p:column headerText="Problema/Falha">
+						<h:outputText value="#{item.problema}"
+							style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;" />
+					</p:column>
+
+					<p:column headerText="Tipo Manutenção" width="120"
+						style="text-align: center;">
+						<span
+							class="tipo-manutencao #{item.tipoManutencao.toString().toLowerCase()}">
+							<h:outputText value="#{item.tipoManutencao}" />
+						</span>
+					</p:column>
+
+					<p:column headerText="Data Manutenção" width="120"
+						style="text-align: center;">
+						<h:outputText value="#{item.dataManutencao}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Ações" width="130"
+						style="text-align: center; padding: 24px 12px !important;">
+						<div class="action-buttons">
+							<p:commandButton process="@this"
+								update=":rescheduleForm:reschedulePanel messages"
+								actionListener="#{todasSolicitacoesBean.prepararReprogramacao(item)}"
+								oncomplete="PF('dlgReprogramar').show();"
+								styleClass="ui-button-warning action-button"
+								icon="pi pi-calendar" title="Reprogramar manutenção"
+								rendered="#{todasSolicitacoesBean.podeSerReprogramada(item)}" />
+
+							<p:commandButton process="@this"
+								update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+								action="#{detalhesManutencaoBean.abrirDetalhes(item.id, item.tipo)}"
+								oncomplete="PF('dlgDetalhesGlobal').show();"
+								styleClass="ui-button-info action-button" icon="pi pi-eye"
+								title="Ver detalhes" />
+
+							<p:commandButton process="@this" update=":cancelForm:cancelPanel :messages"
+								actionListener="#{todasSolicitacoesBean.prepararCancelamento(item)}"
+								oncomplete="if(!args.validationFailed){PF('dlgCancelar').show();}"
+								styleClass="ui-button-danger action-button"
+								icon="pi pi-times-circle" title="Cancelar solicitação"
+								disabled="#{item.cancelada}" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</div>
+
+		<div class="list-section">
+			<h2 class="section-title section-title-completed">✓ Solicitações Concluídas</h2>
+			<h:form id="completedTableForm">
+				<p:dataTable id="completedTable"
+					value="#{todasSolicitacoesBean.solicitacoesConcluidasUnificadas}"
+					var="item" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="Nenhuma solicitação concluída encontrada."
+					rowStyleClass="row-completed"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} solicitações">
+
+					<p:column headerText="ID" width="60" style="text-align: center;">
+						<h:outputText value="#{item.idFormatado}" />
+					</p:column>
+
+					<p:column headerText="Categoria" width="100"
+						style="text-align: center;">
+						<span class="tipo-solicitacao #{item.tipo.toLowerCase()}">
+							<h:outputText value="#{item.tipo}" />
+						</span>
+					</p:column>
+
+					<p:column headerText="Local/Máquina"
+						sortBy="#{item.descricaoLocal}">
+						<h:outputText value="#{item.descricaoLocal}" />
+					</p:column>
+
+					<p:column headerText="Problema/Falha">
+						<h:outputText value="#{item.problema}"
+							style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;" />
+					</p:column>
+
+					<p:column headerText="Tipo Manutenção" width="120"
+						style="text-align: center;">
+						<span
+							class="tipo-manutencao #{item.tipoManutencao.toString().toLowerCase()}">
+							<h:outputText value="#{item.tipoManutencao}" />
+						</span>
+					</p:column>
+
+					<p:column headerText="Data Manutenção" width="120"
+						style="text-align: center;">
+						<h:outputText value="#{item.dataManutencao}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Ações" width="130"
+						style="text-align: center; padding: 24px 12px !important;">
+						<div class="action-buttons">
+							<p:commandButton process="@this"
+								update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+								action="#{detalhesManutencaoBean.abrirDetalhes(item.id, item.tipo)}"
+								oncomplete="PF('dlgDetalhesGlobal').show();"
+								styleClass="ui-button-info action-button" icon="pi pi-eye"
+								title="Ver detalhes" />
+
+							<p:commandButton process="@this"
+								update=":rescheduleForm:reschedulePanel messages"
+								actionListener="#{todasSolicitacoesBean.prepararReprogramacao(item)}"
+								oncomplete="PF('dlgReprogramar').show();"
+								styleClass="ui-button-warning action-button"
+								icon="pi pi-calendar" title="Reprogramar manutenção"
+								rendered="#{todasSolicitacoesBean.podeSerReprogramada(item)}" />
+
+							<p:commandButton process="@this" update=":cancelForm:cancelPanel :messages"
+								actionListener="#{todasSolicitacoesBean.prepararCancelamento(item)}"
+								oncomplete="if(!args.validationFailed){PF('dlgCancelar').show();}"
+								styleClass="ui-button-danger action-button"
+								icon="pi pi-times-circle" title="Cancelar solicitação"
+								disabled="#{item.cancelada}" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</div>
+
+		<div class="list-section">
+			<h2 class="section-title">Solicitações Canceladas</h2>
+			<h:form id="cancelledTableForm">
+				<p:dataTable id="cancelledTable"
+					value="#{todasSolicitacoesBean.solicitacoesCanceladasUnificadas}"
+					var="item" paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="Nenhuma solicitação cancelada encontrada."
+					rowStyleClass="row-cancelled"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} solicitações">
+
+					<p:column headerText="ID" width="60" style="text-align: center;">
+						<h:outputText value="#{item.id}" />
+					</p:column>
+
+					<p:column headerText="Categoria" width="100"
+						style="text-align: center;">
+						<span class="tipo-solicitacao #{item.tipo.toLowerCase()}">
+							<h:outputText value="#{item.tipo}" />
+						</span>
+					</p:column>
+
+					<p:column headerText="Local/Máquina"
+						sortBy="#{item.descricaoLocal}">
+						<h:outputText value="#{item.descricaoLocal}" />
+					</p:column>
+
+					<p:column headerText="Problema/Falha">
+						<h:outputText value="#{item.problema}"
+							style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;" />
+					</p:column>
+
+					<p:column headerText="Tipo Manutenção" width="120"
+						style="text-align: center;">
+						<span
+							class="tipo-manutencao #{item.tipoManutencao.toString().toLowerCase()}">
+							<h:outputText value="#{item.tipoManutencao}" />
+						</span>
+					</p:column>
+
+					<p:column headerText="Data Cancelamento" width="130"
+						style="text-align: center;">
+						<h:outputText value="#{item.dataCancelamento}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Motivo Cancelamento">
+						<h:outputText value="#{item.motivoCancelamento}"
+							style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;" />
+					</p:column>
+
+					<p:column headerText="Ações" width="130"
+						style="text-align: center; padding: 24px 12px !important;">
+						<div class="action-buttons">
+							<p:commandButton process="@this"
+								update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+								action="#{detalhesManutencaoBean.abrirDetalhes(item.id, item.tipo)}"
+								oncomplete="PF('dlgDetalhesGlobal').show();"
+								styleClass="ui-button-info action-button" icon="pi pi-eye"
+								title="Ver detalhes" />
+
+							<p:commandButton process="@this"
+								update=":rescheduleForm:reschedulePanel messages"
+								actionListener="#{todasSolicitacoesBean.prepararReprogramacao(item)}"
+								oncomplete="PF('dlgReprogramar').show();"
+								styleClass="ui-button-warning action-button"
+								icon="pi pi-calendar" title="Reprogramar manutenção"
+								rendered="#{todasSolicitacoesBean.podeSerReprogramada(item)}" />
+
+							<p:commandButton process="@this" update=":cancelForm:cancelPanel :messages"
+								actionListener="#{todasSolicitacoesBean.prepararCancelamento(item)}"
+								oncomplete="if(!args.validationFailed){PF('dlgCancelar').show();}"
+								styleClass="ui-button-danger action-button"
+								icon="pi pi-times-circle" title="Cancelar solicitação"
+								disabled="#{item.cancelada}" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</div>
+	</div>
+
+	<!-- ===== DIALOG DE DETALHES (componente reutilizável) ===== -->
+	<ui:include src="/includes/detalhesManutencaoDialog.xhtml"/>
+
+	<p:dialog header="Reprogramar Manutenção" widgetVar="dlgReprogramar"
+		modal="true" resizable="false" width="700" height="auto"
+		closable="true" showEffect="fade" hideEffect="fade">
+		<h:form id="rescheduleForm">
+			<p:panel id="reschedulePanel">
+				<h:panelGroup layout="block" style="padding: 10px;"
+					rendered="#{todasSolicitacoesBean.solicitacaoSelecionada != null}">
+
+					<p:growl id="msgDialogReprog" showDetail="true" life="4500" sticky="false"/>
+
+					<div
+						style="background: #e8f4f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+						<h4 style="margin-top: 0; color: #2c3e50;">&#x1F4CB; Informações da
+							Solicitação</h4>
+						<div
+							style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+							<div>
+								<strong>ID:</strong>
+								#{todasSolicitacoesBean.solicitacaoSelecionada.id}
+								#{todasSolicitacoesBean.tipoSolicitacaoSelecionada == 'MÁQUINA'
+								? 'M' : 'P'}
+							</div>
+							<div>
+								<strong>Tipo:</strong>
+								#{todasSolicitacoesBean.tipoSolicitacaoSelecionada}
+							</div>
+							<div>
+								<strong>Data Atual:</strong>
+								<h:outputText
+									value="#{todasSolicitacoesBean.solicitacaoSelecionada.dataManutencao}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</div>
+						</div>
+					</div>
+
+					<div style="margin-bottom: 15px;">
+						<h:outputLabel value="Nova Data da Manutenção:" for="novaData"
+							style="font-weight: bold; display: block; margin-bottom: 5px;" />
+						<p:calendar id="novaData"
+							value="#{todasSolicitacoesBean.novaDataManutencao}"
+							pattern="dd/MM/yyyy" mask="true" showOn="button" required="true"
+							style="width: 100%;" locale="pt_BR" />
+					</div>
+
+					<div style="margin-bottom: 15px;">
+						<h:outputLabel value="Motivo da Reprogramação:" for="motivoReprog"
+							style="font-weight: bold; display: block; margin-bottom: 5px;" />
+						<p:inputTextarea id="motivoReprog"
+							value="#{todasSolicitacoesBean.motivoReprogramacao}" rows="5"
+							style="width: 100%;" required="true"
+							placeholder="Digite o motivo..." />
+					</div>
+
+					<h:panelGroup
+						rendered="#{not empty todasSolicitacoesBean.historicoReprogramacoes}">
+						<div
+							style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #6c757d; margin-top: 15px;">
+							<h4 style="margin-top: 0; color: #2c3e50;">&#x1F4DC; Histórico</h4>
+							<p:dataTable
+								value="#{todasSolicitacoesBean.historicoReprogramacoes}"
+								var="hist" styleClass="historico-table">
+								<p:column headerText="De" style="text-align: center;">
+									<h:outputText value="#{hist.dataAnterior}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Para" style="text-align: center;">
+									<h:outputText value="#{hist.dataNova}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Motivo">
+									<h:outputText value="#{hist.motivoReprogramacao}" />
+								</p:column>
+							</p:dataTable>
+						</div>
+					</h:panelGroup>
+
+					<div
+						style="text-align: right; margin-top: 25px; border-top: 1px solid #dee2e6; padding-top: 15px;">
+						<p:commandButton value="Confirmar Reprogramação"
+							action="#{todasSolicitacoesBean.confirmarReprogramacao()}"
+							process="@form"
+							update="@form :activeTableForm:activeTable :completedTableForm:completedTable messages"
+							oncomplete="if (!args.validationFailed) { PF('dlgReprogramar').hide(); }"
+							styleClass="btn btn-warning" icon="pi pi-check"
+							style="margin-right: 10px;" />
+
+						<p:commandButton value="Fechar"
+							onclick="PF('dlgReprogramar').hide();" type="button"
+							immediate="true" styleClass="btn btn-secondary"
+							icon="pi pi-times" />
+					</div>
+				</h:panelGroup>
+
+				<h:panelGroup layout="block"
+					style="padding: 20px; text-align: center;"
+					rendered="#{todasSolicitacoesBean.solicitacaoSelecionada == null}">
+					<p style="color: #95a5a6; font-style: italic;">Nenhuma
+						solicitação selecionada.</p>
+				</h:panelGroup>
+			</p:panel>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog header="Cancelar Solicitação" widgetVar="dlgCancelar"
+		modal="true" resizable="false" width="500">
+		<h:form id="cancelForm">
+			<p:panel id="cancelPanel">
+				<h:panelGroup layout="block"
+					rendered="#{todasSolicitacoesBean.solicitacaoSelecionada != null}">
+					<p:growl id="msgDialog" showDetail="true" life="4500" sticky="false"/>
+					<div style="margin-bottom: 15px;">
+						<strong>Motivo do Cancelamento:</strong>
+						<p:inputTextarea id="motivoCancel"
+							value="#{todasSolicitacoesBean.motivoCancelamento}" rows="5"
+							style="width: 100%; margin-top: 10px;" required="true" />
+					</div>
+					<div style="text-align: right;">
+						<p:commandButton value="Confirmar"
+							action="#{todasSolicitacoesBean.confirmarCancelamento()}"
+							update="@form :activeTableForm:activeTable :completedTableForm:completedTable :cancelledTableForm:cancelledTable messages"
+							oncomplete="if (!args.validationFailed) { PF('dlgCancelar').hide(); }"
+							styleClass="btn btn-primary" icon="pi pi-check"
+							style="margin-right: 10px;" />
+						<p:commandButton value="Fechar"
+							onclick="PF('dlgCancelar').hide();" type="button"
+							styleClass="btn btn-secondary" />
+					</div>
+				</h:panelGroup>
+			</p:panel>
+		</h:form>
+	</p:dialog>
+</h:body>
+</html>

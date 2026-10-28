@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}"
+		type="image/x-icon" />
+	<title>Cadastro de Máquina/Equipamento</title>
+	<h:outputStylesheet name="css/maquinaEquipamento.css" />
+	<style>
+		/* ✅ Estilos para o status Ativo/Inativo */
+		.status-ativo {
+			color: #27ae60;
+			font-weight: bold;
+			background: #eafaf1;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+		.status-inativo {
+			color: #e74c3c;
+			font-weight: bold;
+			background: #fdedec;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+		/* Linha esmaecida para equipamentos inativos */
+		.linha-inativa {
+			opacity: 0.55;
+			background-color: #f5f5f5 !important;
+		}
+		/* ✅ Estilos dos botões de ação (mesmo estilo de todasSolicitacoes) */
+		.action-buttons {
+			display: flex;
+			gap: 5px;
+			justify-content: center;
+			align-items: center;
+			flex-wrap: nowrap;
+		}
+		.action-button {
+			width: 32px !important;
+			height: 32px !important;
+			min-width: 32px !important;
+			padding: 0 !important;
+			border-radius: 6px !important;
+			transition: all 0.2s ease !important;
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+		}
+		.action-button:hover:enabled {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+		}
+		.action-button .ui-button-text {
+			padding: 0 !important;
+			display: none !important;
+		}
+		.action-button .ui-button-icon-left {
+			margin: 0 !important;
+			position: static !important;
+			font-size: 14px !important;
+		}
+		.action-button.ui-button-info {
+			background: #3498db !important;
+			border-color: #3498db !important;
+		}
+		.action-button.ui-button-info:hover:enabled {
+			background: #2980b9 !important;
+			border-color: #2980b9 !important;
+		}
+		.action-button.ui-button-warning {
+			background: #f39c12 !important;
+			border-color: #f39c12 !important;
+		}
+		.action-button.ui-button-warning:hover:enabled {
+			background: #e67e22 !important;
+			border-color: #e67e22 !important;
+		}
+		.action-button.ui-button-success {
+			background: #27ae60 !important;
+			border-color: #27ae60 !important;
+		}
+		.action-button.ui-button-success:hover:enabled {
+			background: #219a52 !important;
+			border-color: #219a52 !important;
+		}
+		.action-button.ui-button-danger {
+			background: #e74c3c !important;
+			border-color: #e74c3c !important;
+		}
+		.action-button.ui-button-danger:hover:enabled {
+			background: #c0392b !important;
+			border-color: #c0392b !important;
+		}
+
+		/* ============================================================
+		   Autocomplete do campo "Tipo de Equipamento".
+
+		   O componente do PrimeFaces monta input + botão dentro de um
+		   span, e sem estas regras o input encolhe e o botão desalinha
+		   dentro do grid do formulário.
+		   ============================================================ */
+		.tipo-autocomplete {
+			width: 100%;
+			display: flex !important;
+		}
+		.tipo-autocomplete .ui-autocomplete-input {
+			flex: 1;
+			min-width: 0;
+			border-top-right-radius: 0 !important;
+			border-bottom-right-radius: 0 !important;
+		}
+		.tipo-autocomplete .ui-autocomplete-dropdown {
+			border-top-left-radius: 0 !important;
+			border-bottom-left-radius: 0 !important;
+			flex-shrink: 0;
+		}
+		.campo-ajuda {
+			display: block;
+			margin-top: 0.35rem;
+			color: #718096;
+			font-size: 0.8rem;
+			line-height: 1.4;
+		}
+	</style>
+</h:head>
+
+<h:body>
+		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+	<div class="header">
+		<h1>Cadastro de Máquinas e Equipamentos</h1>
+	</div>
+	<div class="header-actions">
+		<h:link outcome="/home/homeAdm.html" styleClass="exit-button"
+			value="Voltar" />
+	</div>
+
+	<div class="container">
+		<!-- Seção do Formulário -->
+		<div class="form-section">
+			<h2 class="section-title">Dados da Máquina/Equipamento</h2>
+
+			<h:form id="cadastroForm" enctype="multipart/form-data">
+
+				<div class="field">
+					<label for="numeroPatrimonio" class="required-field">Número
+						de Patrimônio:</label>
+					<p:inputText id="numeroPatrimonio"
+						value="#{cadastroMaquinaEquipamentoBean.numeroPatrimonio}"
+						required="true"
+						requiredMessage="Número de Patrimônio é obrigatório"
+						maxlength="50" placeholder="Ex: A0000"
+						style="text-transform: uppercase;" />
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="fabricante">Fabricante:</label>
+						<p:inputText id="fabricante"
+							value="#{cadastroMaquinaEquipamentoBean.fabricante}"
+							required="true" requiredMessage="Fabricante é obrigatório" />
+					</div>
+
+					<div class="field">
+						<label for="modelo">Modelo:</label>
+						<p:inputText id="modelo"
+							value="#{cadastroMaquinaEquipamentoBean.modelo}" required="true"
+							requiredMessage="Modelo é obrigatório" />
+					</div>
+
+					<!-- ============================================================
+					     O tipo virou autocomplete com os tipos já
+					     cadastrados.
+
+					     O botão ao lado abre a lista completa; digitar filtra.
+					     O campo continua ACEITANDO TEXTO LIVRE (forceSelection
+					     fica em false), então dá para cadastrar um tipo novo
+					     normalmente — a lista é só uma ajuda para reaproveitar
+					     um tipo existente em vez de criar uma variação de
+					     escrita.
+
+					     Isso importa porque a tela de solicitação de manutenção
+					     usa esse campo como CATEGORIA da máquina: cada grafia
+					     diferente vira uma categoria a mais naquela lista.
+					     ============================================================ -->
+					<div class="field">
+						<label for="tipo">Tipo de Equipamento:</label>
+						<p:autoComplete id="tipo"
+							value="#{cadastroMaquinaEquipamentoBean.tipo}"
+							completeMethod="#{cadastroMaquinaEquipamentoBean.completarTipo}"
+							dropdown="true" dropdownMode="blank" forceSelection="false"
+							minQueryLength="0" queryDelay="200" scrollHeight="240"
+							required="true" requiredMessage="Tipo é obrigatório"
+							maxlength="255" emptyMessage="Nenhum tipo cadastrado ainda"
+							placeholder="Escolha na lista ou digite um tipo novo"
+							styleClass="tipo-autocomplete" inputStyle="width: 100%;" />
+						<small class="campo-ajuda">Prefira reaproveitar um tipo da
+							lista: ele é usado como categoria na tela de solicitação de
+							manutenção.</small>
+					</div>
+
+					<div class="field">
+						<label for="anoFabricacao">Ano de Fabricação:</label>
+						<p:inputMask id="dialogAnoFabricacao"
+							value="#{cadastroMaquinaEquipamentoBean.anoFabricacao}"
+							mask="9999" placeholder="0000">
+
+							<f:convertDateTime pattern="yyyy" type="date" />
+
+						</p:inputMask>
+					</div>
+
+					<div class="field">
+						<label for="potencia">Potência:</label>
+						<p:inputText id="potencia"
+							value="#{cadastroMaquinaEquipamentoBean.potencia}"
+							placeholder="Ex: 100 HP, 75 kW" />
+					</div>
+
+					<div class="field">
+						<label for="lubrificacao">Sistema de Lubrificação:</label>
+						<p:inputText id="lubrificacao"
+							value="#{cadastroMaquinaEquipamentoBean.lubrificacao}"
+							placeholder="Tipo de lubrificação" />
+					</div>
+
+					<!-- ✅ Localização -->
+					<div class="field">
+						<label for="localizacao">Localização:</label>
+						<p:inputText id="localizacao"
+							value="#{cadastroMaquinaEquipamentoBean.localizacao}"
+							maxlength="255"
+							placeholder="Ex: Galpão B, próximo ao portão 3" />
+					</div>
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="observacoes">Observações:</label>
+						<p:inputTextarea id="observacoes"
+							value="#{cadastroMaquinaEquipamentoBean.observacoes}" rows="4"
+							placeholder="Informações adicionais sobre o equipamento" />
+					</div>
+
+					<div class="field">
+						<label for="foto">Foto do Equipamento:</label>
+						<div class="upload-section">
+							<p:fileUpload id="foto" mode="simple"
+								value="#{cadastroMaquinaEquipamentoBean.uploadedPhoto}"
+								skinSimple="true" accept=".jpg,.jpeg,.png,.gif"
+								chooseLabel="Selecionar Foto" />
+							<p>
+								<small>Formatos aceitos: JPG, JPEG, PNG, GIF (máx. 5MB)</small>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="buttons">
+					<p:commandButton value="Salvar Equipamento"
+						action="#{cadastroMaquinaEquipamentoBean.salvar()}"
+						update="cadastroForm listaForm growlMsgs" styleClass="btn btn-primary"
+						icon="pi pi-save" />
+
+					<p:commandButton value="Limpar Campos"
+						action="#{cadastroMaquinaEquipamentoBean.limpar()}"
+						update="cadastroForm growlMsgs" immediate="true"
+						styleClass="btn btn-secondary" icon="pi pi-refresh" type="button" />
+
+					<p:commandButton value="Cancelar Edição"
+						action="#{cadastroMaquinaEquipamentoBean.prepararNovo()}"
+						update="cadastroForm growlMsgs" immediate="true" styleClass="btn btn-info"
+						icon="pi pi-times"
+						rendered="#{cadastroMaquinaEquipamentoBean.equipamentoSelecionado != null}" />
+				</div>
+			</h:form>
+		</div>
+
+		<!-- Seção da Lista -->
+		<div class="list-section">
+			<h2 class="section-title">Equipamentos Cadastrados no Sistema</h2>
+
+			<h:form id="listaForm">
+				<p:dataTable id="tabelaEquipamentos"
+					value="#{cadastroMaquinaEquipamentoBean.cadastroMaquinasEquipamentos}"
+					var="equipamento" paginator="true" rows="10"
+					widgetVar="tabelaEquipamentosWV"
+					sortBy="#{equipamento.id}" sortOrder="ascending"
+					emptyMessage="Nenhum equipamento cadastrado no sistema"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} equipamentos"
+					rowStyleClass="#{equipamento.ativo eq false ? 'linha-inativa' : ''}"
+					filteredValue="#{cadastroMaquinaEquipamentoBean.cadastroMaquinasEquipamentosFiltrados}">>
+
+					<p:column headerText="ID" sortBy="#{equipamento.id}"
+						filterBy="#{equipamento.id}" filterMatchMode="contains"
+						style="width: 60px; text-align: center;">
+						<h:outputText value="#{equipamento.id}" />
+					</p:column>
+
+					<p:column headerText="Patrimônio"
+						sortBy="#{equipamento.numeroPatrimonio}"
+						filterBy="#{equipamento.numeroPatrimonio}"
+						filterMatchMode="contains"
+						style="width: 120px; text-align: center;">
+						<h:outputText value="#{equipamento.numeroPatrimonio}"
+							style="font-weight: bold; color: #2c3e50;" />
+					</p:column>
+
+					<p:column headerText="Fabricante"
+						sortBy="#{equipamento.fabricante}"
+						filterBy="#{equipamento.fabricante}" filterMatchMode="contains">
+						<h:outputText value="#{equipamento.fabricante}" />
+					</p:column>
+
+					<p:column headerText="Modelo" sortBy="#{equipamento.modelo}"
+						filterBy="#{equipamento.modelo}" filterMatchMode="contains">
+						<h:outputText value="#{equipamento.modelo}" />
+					</p:column>
+
+					<p:column headerText="Tipo" sortBy="#{equipamento.tipo}"
+						filterBy="#{equipamento.tipo}" filterMatchMode="contains">
+						<h:outputText value="#{equipamento.tipo}" />
+					</p:column>
+
+					<p:column headerText="Ano" style="width: 80px; text-align: center;">
+						<h:outputText value="#{equipamento.anoFabricacao}">
+							<f:convertDateTime pattern="yyyy" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Potência">
+						<h:outputText value="#{equipamento.potencia}" />
+					</p:column>
+
+					<!-- ✅ COLUNA STATUS COM FILTRO -->
+					<p:column headerText="Status" style="width: 110px; text-align: center;"
+						sortBy="#{equipamento.ativo}"
+						filterBy="#{equipamento.ativo}" filterMatchMode="exact">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="PF('tabelaEquipamentosWV').filter()"
+								style="width: 100%;">
+								<f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItem itemLabel="Ativo" itemValue="true" />
+								<f:selectItem itemLabel="Inativo" itemValue="false" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="✓ Ativo"
+							styleClass="status-ativo"
+							rendered="#{equipamento.ativo ne false}" />
+						<h:outputText value="✗ Inativo"
+							styleClass="status-inativo"
+							rendered="#{equipamento.ativo eq false}" />
+					</p:column>
+
+					<p:column headerText="Ações"
+						style="width: 160px; text-align: center;">
+						<div class="action-buttons">
+							<p:commandButton
+								action="#{cadastroMaquinaEquipamentoBean.prepararEdicao(equipamento)}"
+								update="dialogForm growlMsgs"
+								styleClass="ui-button-info action-button"
+								icon="pi pi-pencil" title="Editar equipamento"
+								oncomplete="PF('editarDialog').show();" />
+
+							<!-- Ver foto do equipamento (dialog global) -->
+							<p:commandButton
+								action="#{cadastroMaquinaEquipamentoBean.verImagem(equipamento)}"
+								process="@this"
+								update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+								oncomplete="PF('dlgVisualizarImagem').show();"
+								styleClass="ui-button-help action-button"
+								icon="pi pi-image"
+								title="Ver foto do equipamento"
+								rendered="#{not empty equipamento.urlFoto}" />
+
+							<p:commandButton
+								action="#{cadastroMaquinaEquipamentoBean.alternarStatus(equipamento)}"
+								update="listaForm cadastroForm growlMsgs"
+								icon="pi pi-power-off"
+								title="#{equipamento.ativo eq false ? 'Ativar equipamento' : 'Desativar equipamento'}"
+								styleClass="#{equipamento.ativo eq false ? 'ui-button-success' : 'ui-button-warning'} action-button">
+								<p:confirm header="Confirmação"
+									message="Deseja #{equipamento.ativo eq false ? 'ativar' : 'desativar'} o equipamento #{equipamento.numeroPatrimonio} - #{equipamento.modelo}?"
+									icon="pi pi-exclamation-triangle" />
+							</p:commandButton>
+
+							<p:commandButton
+								action="#{cadastroMaquinaEquipamentoBean.excluir(equipamento)}"
+								update="listaForm cadastroForm growlMsgs"
+								styleClass="ui-button-danger action-button"
+								icon="pi pi-trash" title="Excluir equipamento">
+								<p:confirm header="Excluir equipamento"
+									message="Tem certeza que deseja excluir o equipamento #{equipamento.fabricante} #{equipamento.modelo}? Esta ação não pode ser desfeita."
+									icon="pi pi-trash" />
+							</p:commandButton>
+						</div>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</div>
+	</div>
+
+	<!-- Dialog de Edição -->
+	<p:dialog header="Editar Equipamento" widgetVar="editarDialog"
+		modal="true" width="700" height="600" closable="true"
+		resizable="false" responsive="true" appendTo="@(body)" dynamic="true">
+
+		<h:form id="dialogForm" prependId="false"
+			enctype="multipart/form-data">
+
+			<div class="dialog-form-grid">
+				<div class="dialog-field" style="grid-column: 1 / -1;">
+					<label for="dialogNumeroPatrimonio" class="required-field">Número
+						de Patrimônio:</label>
+					<p:inputText id="dialogNumeroPatrimonio"
+						value="#{cadastroMaquinaEquipamentoBean.numeroPatrimonio}"
+						required="true"
+						requiredMessage="Número de Patrimônio é obrigatório"
+						maxlength="50" placeholder="Ex: A0000"
+						style="text-transform: uppercase; width: 100%;" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogFabricante">Fabricante:</label>
+					<p:inputText id="dialogFabricante"
+						value="#{cadastroMaquinaEquipamentoBean.fabricante}"
+						required="true" requiredMessage="Fabricante é obrigatório" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogModelo">Modelo:</label>
+					<p:inputText id="dialogModelo"
+						value="#{cadastroMaquinaEquipamentoBean.modelo}" required="true"
+						requiredMessage="Modelo é obrigatório" />
+				</div>
+
+				<!-- Mesmo autocomplete de tipos na edição -->
+				<div class="dialog-field">
+					<label for="dialogTipo">Tipo de Equipamento:</label>
+					<p:autoComplete id="dialogTipo"
+						value="#{cadastroMaquinaEquipamentoBean.tipo}"
+						completeMethod="#{cadastroMaquinaEquipamentoBean.completarTipo}"
+						dropdown="true" dropdownMode="blank" forceSelection="false"
+						minQueryLength="0" queryDelay="200" scrollHeight="240"
+						required="true" requiredMessage="Tipo é obrigatório"
+						maxlength="255" emptyMessage="Nenhum tipo cadastrado ainda"
+						placeholder="Escolha na lista ou digite um tipo novo"
+						styleClass="tipo-autocomplete" inputStyle="width: 100%;" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogAnoFabricacao">Ano de Fabricação:</label>
+					<p:calendar id="dialogAnoFabricacao"
+						value="#{cadastroMaquinaEquipamentoBean.anoFabricacao}"
+						pattern="yyyy" view="year" placeholder="Selecione o ano" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogPotencia">Potência:</label>
+					<p:inputText id="dialogPotencia"
+						value="#{cadastroMaquinaEquipamentoBean.potencia}"
+						placeholder="Ex: 100 HP, 75 kW" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogLubrificacao">Sistema de Lubrificação:</label>
+					<p:inputText id="dialogLubrificacao"
+						value="#{cadastroMaquinaEquipamentoBean.lubrificacao}"
+						placeholder="Tipo de lubrificação" />
+				</div>
+
+				<!-- ✅ Localização -->
+				<div class="dialog-field">
+					<label for="dialogLocalizacao">Localização:</label>
+					<p:inputText id="dialogLocalizacao"
+						value="#{cadastroMaquinaEquipamentoBean.localizacao}"
+						maxlength="255"
+						placeholder="Ex: Galpão B, próximo ao portão 3" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogObservacoes">Observações:</label>
+					<p:inputTextarea id="dialogObservacoes"
+						value="#{cadastroMaquinaEquipamentoBean.observacoes}" rows="4"
+						placeholder="Informações adicionais sobre o equipamento" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogFoto">Nova Foto:</label>
+					<p:fileUpload id="dialogFoto" mode="simple"
+						value="#{cadastroMaquinaEquipamentoBean.uploadedPhoto}"
+						skinSimple="true" accept=".jpg,.jpeg,.png,.gif"
+						chooseLabel="Selecionar Nova Foto" />
+					<small>Deixe vazio para manter a foto atual</small>
+				</div>
+			</div>
+
+
+			<div class="dialog-buttons">
+				<p:commandButton value="Salvar Alterações"
+					action="#{cadastroMaquinaEquipamentoBean.salvar()}"
+					update="dialogForm :listaForm :cadastroForm growlMsgs"
+					styleClass="btn btn-primary" icon="pi pi-save"
+					oncomplete="if (args &amp;&amp; !args.validationFailed) PF('editarDialog').hide();" />
+
+				<p:commandButton value="Cancelar"
+					onclick="PF('editarDialog').hide();"
+					action="#{cadastroMaquinaEquipamentoBean.limpar()}"
+					styleClass="btn btn-secondary" icon="pi pi-times" type="button"
+					immediate="true" />
+			</div>
+		</h:form>
+	</p:dialog>
+
+	<!-- ✅ Confirmação global (substitui os confirm() do navegador) -->
+	<h:form id="confirmForm">
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade"
+			responsive="true" width="420" appendTo="@(body)">
+			<p:commandButton value="Sim" type="button"
+				styleClass="ui-confirmdialog-yes ui-button-danger"
+				icon="pi pi-check" />
+			<p:commandButton value="Não" type="button"
+				styleClass="ui-confirmdialog-no ui-button-secondary"
+				icon="pi pi-times" />
+		</p:confirmDialog>
+	</h:form>
+
+	<!-- ✅ Dialog GLOBAL de imagem -->
+	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
+
+</h:body>
+</html>

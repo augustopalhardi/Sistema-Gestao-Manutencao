@@ -1,0 +1,600 @@
+/* Reset e configurações básicas */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    color: #212529;
+}
+
+/* Header */
+.header {
+    background: #1a202c;
+    color: white;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.header .exit-button {
+    position: absolute;
+    left: 2rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.95rem;
+}
+
+.header .exit-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Remove a seção header-actions (não é mais necessária) */
+.header-actions {
+    display: none;
+}
+
+/* Container Principal */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* Profile Header (Foto + Nome + Badge) */
+.profile-header {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.photo-container {
+    text-align: center;
+}
+
+.user-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e9ecef;
+}
+
+.no-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: #adb5bd;
+    border: 4px solid #dee2e6;
+}
+
+.user-info-header {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 1.75rem;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-admin {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.badge-tecnico {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.badge-funcionario {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+/* Form Section */
+.form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+.field label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Info Value (Modo Visualização) */
+.info-value {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    color: #2c3e50;
+    font-size: 0.95rem;
+}
+
+.info-value.empty {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+/* Input Fields (Modo Edição) */
+.ui-inputtext,
+.ui-password input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+
+.ui-inputtext:focus,
+.ui-password input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-disabled {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+}
+
+/* Password Section */
+.password-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e9ecef;
+}
+
+/* Alert Info */
+.alert-info {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #856404;
+}
+
+.alert-icon {
+    font-size: 1.25rem;
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 0.875rem 2rem !important;
+    background-color: #667eea !important;
+    color: white !important;
+    border: 1px solid #667eea !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover {
+    background-color: #5568d3 !important;
+    border-color: #5568d3 !important;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    padding: 0.875rem 2rem !important;
+    background-color: #28a745 !important;
+    color: white !important;
+    border: 1px solid #28a745 !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-success:hover {
+    background-color: #218838 !important;
+    border-color: #218838 !important;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    padding: 0.875rem 2rem !important;
+    background-color: #6c757d !important;
+    color: white !important;
+    border: 1px solid #6c757d !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268 !important;
+    border-color: #5a6268 !important;
+    transform: translateY(-1px);
+}
+
+.btn-remove-photo {
+    padding: 0.5rem 1rem !important;
+    background-color: #dc3545 !important;
+    color: white !important;
+    border: 1px solid #dc3545 !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    margin-top: 0.5rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-remove-photo:hover {
+    background-color: #c82333 !important;
+    border-color: #c82333 !important;
+}
+
+/* File Upload */
+.ui-fileupload-simple {
+    margin-top: 0.5rem;
+}
+
+/* Messages */
+.ui-messages {
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+}
+
+.ui-messages-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.ui-messages-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.ui-messages-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.ui-messages-warn {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-info-header {
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+    
+    .header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header .exit-button {
+        left: 1rem;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .profile-header {
+        padding: 1.5rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .user-name {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 1.5rem 0.5rem;
+    }
+    
+    .header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .header .exit-button {
+        left: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .profile-header {
+        padding: 1rem;
+    }
+    
+    .user-photo,
+    .no-photo {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .no-photo {
+        font-size: 3rem;
+    }
+}
+/* ===== Toast Notifications (p:growl) - Estilo Moderno ===== */
+.ui-growl {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+    width: 340px !important;
+}
+
+.ui-growl-item-container {
+    border-radius: 10px !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15) !important;
+    border: none !important;
+    margin-bottom: 12px !important;
+    animation: slideInRight 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+.ui-growl-item {
+    padding: 14px 16px !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    background: transparent !important;
+}
+
+/* Ícone */
+.ui-growl-image {
+    font-size: 1.4rem !important;
+    margin-top: 2px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Área de texto */
+.ui-growl-message {
+    flex: 1 !important;
+}
+
+/* Título em negrito */
+.ui-growl-title {
+    display: block !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 3px !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* Detalhe abaixo */
+.ui-growl-message p {
+    margin: 0 !important;
+    font-size: 0.84rem !important;
+    line-height: 1.4 !important;
+    opacity: 0.88 !important;
+}
+
+/* Botão fechar */
+.ui-growl-item-container .ui-growl-icon-close {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    font-size: 0.75rem !important;
+    cursor: pointer !important;
+    opacity: 0.6 !important;
+}
+.ui-growl-item-container .ui-growl-icon-close:hover {
+    opacity: 1 !important;
+}
+
+/* Animação slide-in da direita */
+@keyframes slideInRight {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* === Sucesso / Info - Verde === */
+.ui-growl-item-container.ui-growl-message-info {
+    background: #1a7a3a !important;
+}
+.ui-growl-item-container.ui-growl-message-info .ui-growl-title,
+.ui-growl-item-container.ui-growl-message-info .ui-growl-message p,
+.ui-growl-item-container.ui-growl-message-info .ui-growl-image,
+.ui-growl-item-container.ui-growl-message-info .ui-growl-icon-close {
+    color: #ffffff !important;
+}
+
+/* === Erro - Vermelho === */
+.ui-growl-item-container.ui-growl-message-error {
+    background: #c0392b !important;
+}
+.ui-growl-item-container.ui-growl-message-error .ui-growl-title,
+.ui-growl-item-container.ui-growl-message-error .ui-growl-message p,
+.ui-growl-item-container.ui-growl-message-error .ui-growl-image,
+.ui-growl-item-container.ui-growl-message-error .ui-growl-icon-close {
+    color: #ffffff !important;
+}
+
+/* === Aviso - Laranja/Âmbar === */
+.ui-growl-item-container.ui-growl-message-warn {
+    background: #e67e22 !important;
+}
+.ui-growl-item-container.ui-growl-message-warn .ui-growl-title,
+.ui-growl-item-container.ui-growl-message-warn .ui-growl-message p,
+.ui-growl-item-container.ui-growl-message-warn .ui-growl-image,
+.ui-growl-item-container.ui-growl-message-warn .ui-growl-icon-close {
+    color: #ffffff !important;
+}
+
+/* === Cores por tipo === */
+
+/* Sucesso - verde */
+.ui-growl-item-container.ui-growl-message-info {
+    border-left-color: #28a745 !important;
+    background: #f6fff8 !important;
+}
+.ui-growl-item-container.ui-growl-message-info .ui-growl-image {
+    color: #28a745 !important;
+}
+.ui-growl-item-container.ui-growl-message-info .ui-growl-title {
+    color: #1a5c2a !important;
+}
+
+/* Erro - vermelho */
+.ui-growl-item-container.ui-growl-message-error {
+    border-left-color: #dc3545 !important;
+    background: #fff8f8 !important;
+}
+.ui-growl-item-container.ui-growl-message-error .ui-growl-image {
+    color: #dc3545 !important;
+}
+.ui-growl-item-container.ui-growl-message-error .ui-growl-title {
+    color: #7a1020 !important;
+}
+
+/* Aviso - amarelo */
+.ui-growl-item-container.ui-growl-message-warn {
+    border-left-color: #ffc107 !important;
+    background: #fffdf0 !important;
+}
+.ui-growl-item-container.ui-growl-message-warn .ui-growl-image {
+    color: #e6a800 !important;
+}
+.ui-growl-item-container.ui-growl-message-warn .ui-growl-title {
+    color: #7a5800 !important;
+}
+
+
+
+/* === Mobile responsive additions ===*/
+
+@media (max-width: 640px) {
+    .profile-header { flex-direction: column; align-items: center; }
+    .photo-container { width: 100%; text-align: center; }
+    .profile-info { width: 100%; }
+    .ui-fileupload-choose { width: 100% !important; }
+}

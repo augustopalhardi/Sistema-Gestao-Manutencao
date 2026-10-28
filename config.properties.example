@@ -1,0 +1,35 @@
+# ============================================================
+# MODELO DE CONFIGURAÇÃO
+#
+# 1. Copie este arquivo para FORA do projeto e renomeie para
+#    config.properties.
+# 2. Preencha os valores.
+# 3. Aponte a aplicação para ele com o parâmetro da JVM:
+#      -Dconfig.file=C:/config/manutencao/config.properties
+#    (use barra normal: em .properties a barra invertida é escape)
+#
+# Sem o parâmetro, o caminho padrão é:
+#      /etc/manutencao/config.properties
+# ============================================================
+
+# ---- BANCO DE DADOS (obrigatório) ----
+db.url=jdbc:mysql://localhost:3306/gestao_manutencao?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo
+db.user=
+db.password=
+
+# ---- SERVIDOR DE E-MAIL / SMTP (obrigatório) ----
+smtp.host=
+smtp.port=587
+smtp.username=
+smtp.password=
+smtp.from=
+
+# ---- OPCIONAIS ----
+
+# Pasta onde as fotos enviadas são gravadas (fora do Tomcat,
+# para não serem apagadas a cada deploy). Padrão: /opt/uploads
+#uploads.dir=C:/manutencao/uploads
+
+# Domínios de e-mail corporativos, separados por vírgula. Evitam que a
+# validação sugira "correção" para o domínio da própria empresa.
+#email.dominios.empresa=suaempresa.com.br

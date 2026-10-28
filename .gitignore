@@ -1,0 +1,25 @@
+# Build
+target/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+
+# IntelliJ / VS Code
+.idea/
+*.iml
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Configuração local (credenciais NUNCA vão para o repositório)
+config.properties
+*.local.properties
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

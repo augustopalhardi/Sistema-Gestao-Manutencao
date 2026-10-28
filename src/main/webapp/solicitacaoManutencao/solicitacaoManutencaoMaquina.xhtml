@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<meta charset="UTF-8" />
+	<title>Solicitação de Manutenção de Máquina</title>
+	<h:outputStylesheet name="css/manutencaoMaquina.css" />
+
+	<!-- ============================================================
+	     Estilos da nova seleção de máquina (categoria -> máquina).
+	     Ficam aqui, no mesmo padrão já usado em maquinaEquipamento.xhtml,
+	     para não mexer no manutencaoMaquina.css, que é compartilhado.
+	     ============================================================ -->
+	<style>
+		/* Caixa que agrupa a identificação da máquina */
+		.selecao-maquina-box {
+			background: #f7fafc;
+			border: 1px solid #e2e8f0;
+			border-left: 4px solid #2563eb;
+			border-radius: 6px;
+			padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.selecao-maquina-titulo {
+			font-size: 1rem;
+			font-weight: 700;
+			color: #2d3748;
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.selecao-maquina-titulo .pi {
+			color: #2563eb;
+		}
+
+		/* Aviso embaixo do campo de e-mail */
+		.aviso-email {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex-wrap: wrap;
+			margin-top: 0.5rem;
+			padding: 0.6rem 0.8rem;
+			border-radius: 6px;
+			font-size: 0.83rem;
+			line-height: 1.4;
+		}
+
+		.aviso-email-texto {
+			flex: 1;
+			min-width: 0;
+		}
+
+		/* Impede o salvamento */
+		.aviso-email.erro {
+			background: #fef2f2;
+			border: 1px solid #fecaca;
+			border-left: 4px solid #dc2626;
+			color: #7f1d1d;
+		}
+
+		/* Apenas chama atenção */
+		.aviso-email.alerta {
+			background: #fffbeb;
+			border: 1px solid #fde68a;
+			border-left: 4px solid #f59e0b;
+			color: #78350f;
+		}
+
+		.btn-corrigir-email {
+			padding: 0.35rem 0.8rem !important;
+			font-size: 0.78rem !important;
+			flex-shrink: 0;
+		}
+
+		/* Asterisco de campo obrigatório */
+		.obrigatorio {
+			color: #dc2626;
+			font-weight: 700;
+		}
+
+		.campo-ajuda {
+			display: block;
+			margin-top: 0.35rem;
+			color: #718096;
+			font-size: 0.8rem;
+			line-height: 1.4;
+		}
+
+		/* Painel de confirmação da máquina escolhida */
+		.maquina-confirmacao {
+			display: flex;
+			gap: 1rem;
+			align-items: flex-start;
+			background: #ffffff;
+			border: 1px solid #16a34a;
+			border-radius: 6px;
+			padding: 1rem;
+			margin-bottom: 1.25rem;
+		}
+
+		.maquina-confirmacao-foto {
+			flex: 0 0 140px;
+			height: 110px;
+			border-radius: 6px;
+			overflow: hidden;
+			background: #edf2f7;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.maquina-confirmacao-foto img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.maquina-sem-foto {
+			text-align: center;
+			color: #a0aec0;
+			font-size: 0.75rem;
+		}
+
+		.maquina-sem-foto .pi {
+			display: block;
+			font-size: 1.75rem !important;
+			margin-bottom: 4px;
+		}
+
+		.maquina-confirmacao-dados {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.maquina-confirmacao-dados p {
+			margin: 0 0 4px 0;
+			font-size: 0.875rem;
+			color: #2d3748;
+			word-break: break-word;
+		}
+
+		.maquina-confirmacao-titulo {
+			font-size: 1.05rem !important;
+			font-weight: 700;
+			color: #15803d !important;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			margin-bottom: 8px !important;
+		}
+
+		/* Ficha completa dentro do painel de confirmação */
+		.maquina-info-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+			gap: 0.6rem 1.25rem;
+			margin-top: 0.5rem;
+		}
+
+		.maquina-info {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+		}
+
+		.maquina-info-rotulo {
+			font-size: 0.7rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: #718096;
+		}
+
+		.maquina-info-valor {
+			font-size: 0.9rem;
+			color: #2d3748;
+			word-break: break-word;
+		}
+
+		.maquina-info-obs {
+			margin-top: 0.75rem;
+			padding-top: 0.6rem;
+			border-top: 1px dashed #e2e8f0;
+			font-size: 0.85rem;
+			color: #2d3748;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+
+		.btn-detalhes-maquina {
+			margin-top: 0.6rem;
+			padding: 0.45rem 1rem !important;
+			font-size: 0.82rem !important;
+		}
+
+		/* Estado "nenhuma máquina escolhida ainda" */
+		.maquina-nao-selecionada {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			background: #ffffff;
+			border: 1px dashed #cbd5e0;
+			border-radius: 6px;
+			padding: 0.9rem 1rem;
+			margin-bottom: 1.25rem;
+			color: #718096;
+			font-size: 0.85rem;
+		}
+
+		.maquina-nao-selecionada .pi {
+			color: #2563eb;
+			flex-shrink: 0;
+		}
+
+		@media (max-width: 640px) {
+			.maquina-confirmacao {
+				flex-direction: column;
+			}
+
+			.maquina-confirmacao-foto {
+				flex: none;
+				width: 100%;
+				height: 160px;
+			}
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<f:metadata>
+		<f:viewParam name="maquinaId" value="#{solicitacaoManutencaoMaquinaBean.maquinaId}" />
+		<f:viewParam name="origemPreventivaId" value="#{solicitacaoManutencaoMaquinaBean.origemPreventivaId}" />
+		<f:event type="preRenderView" listener="#{solicitacaoManutencaoMaquinaBean.aplicarPreenchimentoAutomatico}" />
+	</f:metadata>
+
+	<div class="header">
+		<h1>Solicitação de Manutenção de Máquinas</h1>
+	</div>
+	<div class="header-actions">
+		<button type="button" class="exit-button"
+			onclick="window.history.back();">Voltar</button>
+	</div>
+
+	<div class="container">
+		<div class="form-section">
+			<h2 class="section-title">Nova Solicitação de Manutenção</h2>
+
+			<h:form id="cadastroForm" enctype="multipart/form-data">
+				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+
+				<!-- CAMPO SOLICITANTE SOZINHO NA PRIMEIRA LINHA -->
+				<div class="field">
+					<label for="solicitante">Solicitante:</label>
+					<p:inputText id="solicitante"
+						value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.solicitante}"
+						required="true"
+						requiredMessage="O nome do solicitante é obrigatório"
+						maxlength="100"
+						placeholder="Digite o nome de quem está solicitando a manutenção"
+						style="width: 100%;" />
+				</div>
+
+				<!-- ============================================================
+				     ✅ E-MAIL PARA CONFIRMAÇÃO
+
+				     Aparece SOMENTE para FUNCIONARIO. Esse perfil usa uma conta
+				     compartilhada para abrir manutenções, então a confirmação
+				     iria sempre para a caixa da conta e nunca para quem
+				     realmente registrou o chamado. Administrador e técnico têm
+				     conta individual — para eles o e-mail da própria conta já
+				     está correto e o campo nem é renderizado.
+				     ============================================================ -->
+				<h:panelGroup layout="block" styleClass="field"
+					rendered="#{solicitacaoManutencaoMaquinaBean.exibirCampoEmail}">
+					<label for="emailConfirmacao">E-mail para confirmação:</label>
+					<p:inputText id="emailConfirmacao"
+						value="#{solicitacaoManutencaoMaquinaBean.emailConfirmacao}"
+						maxlength="150" type="email"
+						placeholder="Digite o e-mail de quem deve receber a confirmação"
+						style="width: 100%;">
+						<!-- ✅ Confere assim que a pessoa sai do campo, em vez de
+						     só na hora de salvar. -->
+						<p:ajax event="blur" process="@this"
+							listener="#{solicitacaoManutencaoMaquinaBean.validarEmailInformado}"
+							update=":cadastroForm:painelAvisoEmail" />
+					</p:inputText>
+					<small class="campo-ajuda">Como esta conta é usada por várias
+						pessoas, informe aqui o e-mail de quem está abrindo a
+						solicitação.</small>
+
+					<!-- ============================================================
+					     ✅ AVISO DE E-MAIL SUSPEITO
+
+					     "joao@gmial.com" é um endereço válido na forma — nenhuma
+					     regex pega. O que pega é comparar o domínio com uma lista
+					     de conhecidos e oferecer a correção em um clique.
+					     ============================================================ -->
+					<p:outputPanel id="painelAvisoEmail" layout="block">
+						<h:panelGroup layout="block"
+							styleClass="aviso-email #{solicitacaoManutencaoMaquinaBean.classeAvisoEmail}"
+							rendered="#{solicitacaoManutencaoMaquinaBean.possuiAvisoEmail}">
+							<i class="pi pi-exclamation-circle"></i>
+							<span class="aviso-email-texto"> <h:outputText
+									value="#{solicitacaoManutencaoMaquinaBean.avisoEmail}" />
+							</span>
+							<p:commandButton value="Usar este"
+								action="#{solicitacaoManutencaoMaquinaBean.aplicarSugestaoEmail}"
+								process="@this"
+								update=":cadastroForm:emailConfirmacao :cadastroForm:painelAvisoEmail"
+								styleClass="btn btn-info btn-corrigir-email"
+								icon="pi pi-check"
+								rendered="#{solicitacaoManutencaoMaquinaBean.possuiSugestaoEmail}" />
+						</h:panelGroup>
+					</p:outputPanel>
+				</h:panelGroup>
+
+				<!-- ============================================================
+				     ✅ SELEÇÃO DA MÁQUINA EM DUAS ETAPAS
+
+				     A lista de equipamentos cresceu a ponto de ficar inviável
+				     achar a máquina certa em um único select. Agora o usuário
+				     escolhe primeiro a CATEGORIA (o campo "tipo" do cadastro
+				     do equipamento) e só então a máquina daquela categoria.
+
+				     Quem já sabe o patrimônio pode pular as duas etapas pela
+				     busca rápida abaixo, e o botão "Ver detalhes" abre a ficha
+				     com foto para conferência antes de registrar.
+				     ============================================================ -->
+				<div class="selecao-maquina-box">
+					<div class="selecao-maquina-titulo">
+						<i class="pi pi-cog"></i> Identificação da Máquina
+					</div>
+
+					<!-- ETAPA OPCIONAL: busca rápida por patrimônio -->
+					<div class="field">
+						<label for="buscaRapida">Busca rápida (opcional):</label>
+						<p:autoComplete id="buscaRapida"
+							value="#{solicitacaoManutencaoMaquinaBean.termoBuscaMaquina}"
+							completeMethod="#{solicitacaoManutencaoMaquinaBean.completarMaquina}"
+							minQueryLength="2" queryDelay="300" forceSelection="true"
+							scrollHeight="260" emptyMessage="Nenhuma máquina encontrada"
+							placeholder="Digite o patrimônio, fabricante ou modelo"
+							style="width: 100%;" inputStyle="width: 100%;">
+							<p:ajax event="itemSelect" process="@this"
+								listener="#{solicitacaoManutencaoMaquinaBean.selecionarMaquinaPorBusca}"
+								update=":cadastroForm:buscaRapida :cadastroForm:categoria :cadastroForm:maquina :cadastroForm:painelMaquinaSelecionada" />
+						</p:autoComplete>
+						<small class="campo-ajuda">Já sabe o número de patrimônio?
+							Digite aqui que a categoria e a máquina são preenchidas
+							automaticamente.</small>
+					</div>
+
+					<div class="form-grid">
+						<!-- ETAPA 1: CATEGORIA -->
+						<div class="field">
+							<label for="categoria">1. Categoria do Equipamento:</label>
+							<p:selectOneMenu id="categoria"
+								value="#{solicitacaoManutencaoMaquinaBean.categoriaSelecionada}"
+								filter="true" filterMatchMode="contains"
+								style="width: 100%;">
+								<f:selectItem itemLabel="Todas as categorias"
+									itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItems
+									value="#{solicitacaoManutencaoMaquinaBean.categoriasDisponiveis}" />
+								<p:ajax event="change" process="@this"
+									listener="#{solicitacaoManutencaoMaquinaBean.aoTrocarCategoria}"
+									update=":cadastroForm:maquina :cadastroForm:painelMaquinaSelecionada" />
+							</p:selectOneMenu>
+						</div>
+
+						<!-- ETAPA 2: MÁQUINA DA CATEGORIA -->
+						<div class="field">
+							<label for="maquina">2. Máquina/Equipamento:</label>
+							<p:selectOneMenu id="maquina"
+								value="#{solicitacaoManutencaoMaquinaBean.maquinaSelecionadaId}"
+								required="true" requiredMessage="Selecione uma máquina"
+								filter="true" filterMatchMode="contains"
+								style="width: 100%;">
+								<f:selectItem itemLabel="Selecione uma máquina..."
+									itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItems
+									value="#{solicitacaoManutencaoMaquinaBean.maquinasFiltradas}"
+									var="maquina"
+									itemLabel="#{solicitacaoManutencaoMaquinaBean.montarRotuloSelect(maquina)}"
+									itemValue="#{maquina.id}" />
+								<p:ajax event="change" process="@this"
+									listener="#{solicitacaoManutencaoMaquinaBean.aoTrocarMaquina}"
+									update=":cadastroForm:painelMaquinaSelecionada" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+
+					<!-- ============================================================
+					     ✅ PAINEL DE CONFIRMAÇÃO DA MÁQUINA ESCOLHIDA
+
+					     Usa p:outputPanel (e não h:panelGroup) porque o
+					     outputPanel SEMPRE renderiza o div marcador, mesmo
+					     quando o conteúdo interno está com rendered="false".
+					     Com h:panelGroup, se o alvo não existir no DOM no
+					     momento do update, o PrimeFaces não tem onde encaixar
+					     o novo trecho e o painel simplesmente não aparece.
+
+					     Mostra a ficha completa direto na tela: o botão "Ver
+					     detalhes e foto" fica só para ampliar a imagem.
+					     ============================================================ -->
+					<p:outputPanel id="painelMaquinaSelecionada" layout="block">
+
+						<h:panelGroup layout="block" styleClass="maquina-confirmacao"
+							rendered="#{solicitacaoManutencaoMaquinaBean.maquinaEscolhida}">
+
+							<div class="maquina-confirmacao-foto">
+								<h:graphicImage
+									value="#{solicitacaoManutencaoMaquinaBean.urlFotoMaquinaSelecionada}"
+									alt="Foto do equipamento"
+									rendered="#{not empty solicitacaoManutencaoMaquinaBean.urlFotoMaquinaSelecionada}" />
+								<h:panelGroup layout="block" styleClass="maquina-sem-foto"
+									rendered="#{empty solicitacaoManutencaoMaquinaBean.urlFotoMaquinaSelecionada}">
+									<i class="pi pi-image"></i>
+									<span>Sem foto</span>
+								</h:panelGroup>
+							</div>
+
+							<div class="maquina-confirmacao-dados">
+								<p class="maquina-confirmacao-titulo">
+									<i class="pi pi-check-circle"></i>
+									<h:outputText value="Máquina selecionada: " />
+									<h:outputText
+										value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.numeroPatrimonio ? 'Sem patrimônio' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.numeroPatrimonio}" />
+								</p>
+
+								<!-- Ficha completa, sem precisar abrir nada -->
+								<div class="maquina-info-grid">
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Fabricante</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.fabricante ? '—' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.fabricante}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Modelo</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.modelo ? '—' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.modelo}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Categoria</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.tipo ? 'Sem categoria' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.tipo}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Localização</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.localizacao ? 'Não informada' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.localizacao}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Ano de Fabricação</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{solicitacaoManutencaoMaquinaBean.anoFabricacaoMaquinaSelecionada}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Potência</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.potencia ? '—' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.potencia}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Lubrificação</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.lubrificacao ? '—' : solicitacaoManutencaoMaquinaBean.maquinaSelecionada.lubrificacao}" />
+										</span>
+									</div>
+
+									<div class="maquina-info">
+										<span class="maquina-info-rotulo">Código no sistema</span>
+										<span class="maquina-info-valor"> <h:outputText
+												value="#{solicitacaoManutencaoMaquinaBean.maquinaSelecionada.id}" />
+										</span>
+									</div>
+								</div>
+
+								<h:panelGroup layout="block" styleClass="maquina-info-obs"
+									rendered="#{not empty solicitacaoManutencaoMaquinaBean.maquinaSelecionada.observacoes}">
+									<span class="maquina-info-rotulo">Observações do
+										cadastro</span>
+									<h:outputText
+										value="#{solicitacaoManutencaoMaquinaBean.maquinaSelecionada.observacoes}" />
+								</h:panelGroup>
+
+								<p:commandButton value="Ver detalhes e foto"
+									action="#{solicitacaoManutencaoMaquinaBean.verDetalhesMaquinaSelecionada()}"
+									process="@this"
+									update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+									oncomplete="PF('dlgVisualizarImagem').show();"
+									styleClass="btn btn-info btn-detalhes-maquina"
+									icon="pi pi-search-plus" />
+							</div>
+						</h:panelGroup>
+
+						<h:panelGroup layout="block" styleClass="maquina-nao-selecionada"
+							rendered="#{solicitacaoManutencaoMaquinaBean.maquinaNaoEscolhida}">
+							<i class="pi pi-info-circle"></i>
+							<span>Escolha a categoria e a máquina acima. Os dados e a
+								foto do equipamento aparecem aqui para conferência.</span>
+						</h:panelGroup>
+					</p:outputPanel>
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="tipoManutencao">Tipo de Manutenção:</label>
+						<p:selectOneMenu id="tipoManutencao"
+							value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.tipoManutencao}"
+							required="true" requiredMessage="Selecione o tipo de manutenção">
+							<f:selectItem itemLabel="Selecione o tipo..." itemValue="#{null}" />
+							<f:selectItem itemLabel="Corretiva" itemValue="CORRETIVA" />
+							<c:if test="#{solicitacaoManutencaoMaquinaBean.usuarioLogado.tipoUsuario ne 'FUNCIONARIO'}">
+								<f:selectItem itemLabel="Preventiva" itemValue="PREVENTIVA" />
+								<f:selectItem itemLabel="Preditiva" itemValue="PREDITIVA" />
+							</c:if>
+						</p:selectOneMenu>
+					</div>
+
+					<div class="field">
+						<label for="dataManutencao">Data:</label>
+						<p:calendar id="dataManutencao"
+							value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.dataManutencao}"
+							pattern="dd/MM/yyyy" required="true"
+							requiredMessage="Data da manutenção é obrigatória"
+							placeholder="Selecione a data" />
+					</div>
+				</div>
+
+				<div class="field">
+					<label for="falha">Descrição da Falha:</label>
+					<p:inputTextarea id="falha"
+						value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.falha}"
+						rows="4" required="true"
+						requiredMessage="Descrição da falha é obrigatória"
+						placeholder="Descreva detalhadamente o problema identificado" />
+				</div>
+
+				<!-- ============================================================
+				     Risco de segurança
+
+				     Antes, o textarea tinha rendered amarrado ao checkbox mas o
+				     checkbox não disparava ajax nenhum: marcar a caixa não
+				     re-renderizava nada e o campo praticamente nunca aparecia —
+				     o risco era registrado sem descrição. Agora o checkbox
+				     atualiza o painel abaixo dele.
+				     ============================================================ -->
+				<div class="field">
+					<div class="checkbox-section">
+						<p:selectBooleanCheckbox id="risco"
+							value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.risco}">
+							<p:ajax event="change" process="@this"
+								update=":cadastroForm:painelDescrRisco" />
+						</p:selectBooleanCheckbox>
+						<label for="risco">Há risco de segurança?</label>
+					</div>
+
+					<p:outputPanel id="painelDescrRisco" layout="block">
+						<h:panelGroup layout="block"
+							rendered="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.risco}">
+							<label for="descrRisco">Descreva o risco: <span
+								class="obrigatorio">*</span></label>
+							<p:inputTextarea id="descrRisco"
+								value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.descrRisco}"
+								rows="3"
+								placeholder="Descreva os riscos de segurança identificados" />
+						</h:panelGroup>
+					</p:outputPanel>
+				</div>
+
+				<!-- ============================================================
+				     Condição de operação
+
+				     Este campo fica SEMPRE visível de propósito: ele serve nas
+				     duas situações. Com a caixa marcada, o usuário descreve as
+				     limitações com que a máquina segue operando; com a caixa
+				     desmarcada, descreve por que ela parou — que é justamente
+				     a informação mais importante para o técnico.
+				     ============================================================ -->
+				<div class="field">
+					<div class="checkbox-section">
+						<p:selectBooleanCheckbox id="operando"
+							value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.operando}" />
+						<label for="operando">Máquina ainda está operando?</label>
+					</div>
+
+					<label for="descrOperando">Condições de operação ou motivo
+						da parada:</label>
+					<p:inputTextarea id="descrOperando"
+						value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.descrOperando}"
+						rows="3"
+						placeholder="Se ainda opera, descreva as limitações. Se está parada, descreva o motivo." />
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="observacoes">Observações:</label>
+						<p:inputTextarea id="observacoes"
+							value="#{solicitacaoManutencaoMaquinaBean.solicitacaoManutencaoMaquina.observacoes}"
+							rows="3" placeholder="Informações adicionais sobre a solicitação" />
+					</div>
+
+					<div class="field">
+						<label for="foto">Foto do Problema:</label>
+						<div class="upload-section">
+							<p:fileUpload id="foto" mode="simple"
+								value="#{solicitacaoManutencaoMaquinaBean.uploadedPhoto}"
+								skinSimple="true" accept=".jpg,.jpeg,.png,.gif"
+								chooseLabel="Selecionar Foto" />
+							<p>
+								<small>Formatos aceitos: JPG, JPEG, PNG, GIF</small>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="buttons">
+					<p:commandButton value="Salvar Solicitação"
+						action="#{solicitacaoManutencaoMaquinaBean.salvar()}"
+						update="@form" styleClass="btn btn-primary" icon="pi pi-save" />
+
+					<p:commandButton value="Limpar Campos"
+						action="#{solicitacaoManutencaoMaquinaBean.limpar()}"
+						update="@form" immediate="true" styleClass="btn btn-secondary"
+						icon="pi pi-refresh" type="button" />
+				</div>
+			</h:form>
+		</div>
+
+		<div class="list-section">
+			<h2 class="section-title">Consultar Solicitações</h2>
+
+			<div style="text-align: center; padding: 2rem;">
+				<p style="margin-bottom: 1.5rem; color: #666; font-size: 1.1rem;">
+					Para visualizar, consultar e gerenciar todas as solicitações de
+					manutenção registradas no sistema, clique no botão abaixo.</p>
+
+				<h:form>
+					<p:button value="Ver Todas as Solicitações"
+						outcome="todasSolicitacoes" styleClass="btn btn-info"
+						icon="pi pi-list" style="font-size: 1.1rem; padding: 1rem 2rem;" />
+				</h:form>
+			</div>
+		</div>
+	</div>
+
+	<!-- ✅ Dialog GLOBAL de imagem: mostra a foto e a ficha do equipamento -->
+	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
+
+</h:body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Cadastro de Local</title>
+	<h:outputStylesheet name="css/local.css" />
+</h:head>
+
+<h:body>
+	<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false" />
+
+	<div class="header">
+		<h1>Cadastro de Locais</h1>
+	</div>
+
+	<div class="header-actions">
+		<h:link outcome="/home/homeAdm.html" styleClass="exit-button" value="Voltar" />
+	</div>
+
+	<div class="container">
+
+		<!-- ========== FORMULÁRIO ========== -->
+		<div class="form-section">
+			<h2 class="section-title">Dados do Local</h2>
+
+			<h:form id="cadastroForm" enctype="multipart/form-data">
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="nome">Nome do Local:</label>
+						<p:inputText id="nome"
+							value="#{cadastroLocalBean.nome}" required="true"
+							requiredMessage="Nome do local é obrigatório" />
+					</div>
+
+					<!-- Área é opcional: sem required, e minValue="0" porque com
+					     minValue="1" o próprio inputNumber recusaria o campo em
+					     branco. -->
+					<div class="field">
+						<label for="area">Área (m²) — opcional:</label>
+						<p:inputNumber id="area"
+							value="#{cadastroLocalBean.area}" decimalPlaces="0"
+							minValue="0" emptyValue="empty"
+							placeholder="Opcional — área em metros quadrados" />
+					</div>
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="observacoes">Observações:</label>
+						<p:inputTextarea id="observacoes"
+							value="#{cadastroLocalBean.observacoes}" rows="4"
+							placeholder="Informações adicionais sobre o local" />
+					</div>
+
+					<div class="field">
+						<label for="foto">Foto do Local:</label>
+						<div class="upload-section">
+							<p:fileUpload id="foto" mode="simple"
+								value="#{cadastroLocalBean.uploadedPhoto}" skinSimple="true"
+								accept=".jpg,.jpeg,.png,.gif" chooseLabel="Selecionar Foto" />
+							<p>
+								<small>Formatos aceitos: JPG, JPEG, PNG, GIF (máx. 5MB)</small>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="buttons">
+					<p:commandButton value="Salvar Local"
+						action="#{cadastroLocalBean.salvar()}"
+						update="cadastroForm listaForm growlMsgs" styleClass="btn btn-primary"
+						icon="pi pi-save" />
+
+					<p:commandButton value="Limpar Campos"
+						action="#{cadastroLocalBean.limpar()}" update="cadastroForm growlMsgs"
+						immediate="true" styleClass="btn btn-secondary"
+						icon="pi pi-refresh" type="button" />
+
+					<p:commandButton value="Cancelar Edição"
+						action="#{cadastroLocalBean.prepararNovo()}" update="cadastroForm growlMsgs"
+						immediate="true" styleClass="btn btn-info" icon="pi pi-times"
+						rendered="#{cadastroLocalBean.localSelecionado != null}" />
+				</div>
+			</h:form>
+		</div>
+
+		<!-- ========== LISTAGEM ========== -->
+		<div class="list-section">
+			<h2 class="section-title">Locais Cadastrados no Sistema</h2>
+
+			<h:form id="listaForm">
+				<p:dataTable id="tabelaLocais"
+					value="#{cadastroLocalBean.cadastroLocais}" var="local"
+					paginator="true" rows="10"
+					widgetVar="tabelaLocaisWV"
+					sortBy="#{local.id}" sortOrder="ascending"
+					emptyMessage="Nenhum local cadastrado no sistema"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} locais"
+					rowStyleClass="#{local.ativo eq false ? 'linha-inativa' : ''}"
+					filteredValue="#{cadastroLocalBean.cadastroLocaisFiltrados}">
+
+					<p:column headerText="ID" sortBy="#{local.id}"
+						filterBy="#{local.id}" filterMatchMode="contains"
+						style="width: 60px; text-align: center;">
+						<h:outputText value="#{local.id}" />
+					</p:column>
+
+					<p:column headerText="Nome do Local" sortBy="#{local.nome}"
+						filterBy="#{local.nome}" filterMatchMode="contains">
+						<h:outputText value="#{local.nome}" />
+					</p:column>
+
+					<!-- Local sem área cadastrada chega aqui como 0. Mostrar "0"
+					     daria a entender que o local tem área zero, então nesse
+					     caso exibimos um traço. -->
+					<p:column headerText="Área (m²)"
+						style="width: 120px; text-align: right;">
+						<h:outputText value="#{local.area}" rendered="#{local.area gt 0}">
+							<f:convertNumber type="number" groupingUsed="true" />
+						</h:outputText>
+						<h:outputText value="—" rendered="#{local.area le 0}" />
+					</p:column>
+
+					<p:column headerText="Observações">
+						<h:outputText value="#{local.observacoes}" />
+					</p:column>
+
+					<p:column headerText="Status" style="width: 110px; text-align: center;"
+						sortBy="#{local.ativo}"
+						filterBy="#{local.ativo}" filterMatchMode="exact">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="PF('tabelaLocaisWV').filter()"
+								style="width: 100%;">
+								<f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItem itemLabel="Ativo" itemValue="true" />
+								<f:selectItem itemLabel="Inativo" itemValue="false" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="✓ Ativo"
+							styleClass="status-ativo"
+							rendered="#{local.ativo ne false}" />
+						<h:outputText value="✗ Inativo"
+							styleClass="status-inativo"
+							rendered="#{local.ativo eq false}" />
+					</p:column>
+
+					<p:column headerText="Ações"
+						style="width: 160px; text-align: center;">
+						<div class="action-buttons">
+							<p:commandButton
+								action="#{cadastroLocalBean.prepararEdicao(local)}"
+								update="dialogForm growlMsgs"
+								styleClass="ui-button-info action-button"
+								icon="pi pi-pencil" title="Editar local"
+								oncomplete="PF('editarDialog').show();" />
+
+							<p:commandButton
+								action="#{cadastroLocalBean.verImagem(local)}"
+								process="@this"
+								update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+								oncomplete="PF('dlgVisualizarImagem').show();"
+								styleClass="ui-button-help action-button"
+								icon="pi pi-image"
+								title="Ver foto do local"
+								rendered="#{not empty local.urlFoto}" />
+
+							<p:commandButton
+								action="#{cadastroLocalBean.alternarStatus(local)}"
+								update="listaForm cadastroForm growlMsgs"
+								icon="pi pi-power-off"
+								title="#{local.ativo eq false ? 'Ativar local' : 'Desativar local'}"
+								styleClass="#{local.ativo eq false ? 'ui-button-success' : 'ui-button-warning'} action-button">
+								<p:confirm header="Confirmação"
+									message="Deseja #{local.ativo eq false ? 'ativar' : 'desativar'} o local #{local.nome}?"
+									icon="pi pi-exclamation-triangle" />
+							</p:commandButton>
+
+							<p:commandButton
+								action="#{cadastroLocalBean.excluir(local)}"
+								update="listaForm cadastroForm growlMsgs"
+								styleClass="ui-button-danger action-button"
+								icon="pi pi-trash" title="Excluir local">
+								<p:confirm header="Excluir local"
+									message="Tem certeza que deseja excluir o local #{local.nome}? Esta ação não pode ser desfeita."
+									icon="pi pi-trash" />
+							</p:commandButton>
+						</div>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</div>
+	</div>
+
+	<!-- ========== DIALOG DE EDIÇÃO ========== -->
+	<p:dialog header="Editar Local" widgetVar="editarDialog"
+		modal="true" width="600" height="auto"
+		closable="true" resizable="false"
+		responsive="true" appendTo="@(body)"
+		dynamic="true">
+
+		<h:form id="dialogForm" prependId="false"
+			enctype="multipart/form-data">
+
+			<div class="dialog-form-grid">
+				<div class="dialog-field">
+					<label for="dialogNome">Nome do Local:</label>
+					<p:inputText id="dialogNome" value="#{cadastroLocalBean.nome}"
+						required="true" requiredMessage="Nome do local é obrigatório" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogArea">Área (m²) — opcional:</label>
+					<p:inputNumber id="dialogArea"
+						value="#{cadastroLocalBean.area}" decimalPlaces="0"
+						minValue="0" emptyValue="empty"
+						placeholder="Opcional — área em metros quadrados" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogObservacoes">Observações:</label>
+					<p:inputTextarea id="dialogObservacoes"
+						value="#{cadastroLocalBean.observacoes}" rows="4"
+						placeholder="Informações adicionais sobre o local" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogFoto">Nova Foto:</label>
+					<p:fileUpload id="dialogFoto" mode="simple"
+						value="#{cadastroLocalBean.uploadedPhoto}" skinSimple="true"
+						accept=".jpg,.jpeg,.png,.gif" chooseLabel="Selecionar Nova Foto" />
+					<small>Deixe vazio para manter a foto atual</small>
+				</div>
+			</div>
+
+			<div class="dialog-buttons">
+				<p:commandButton value="Salvar Alterações"
+					action="#{cadastroLocalBean.salvar()}"
+					update="dialogForm :listaForm :cadastroForm growlMsgs"
+					styleClass="btn btn-primary"
+					icon="pi pi-save"
+					oncomplete="if (args &amp;&amp; !args.validationFailed) PF('editarDialog').hide();" />
+
+				<p:commandButton value="Cancelar"
+					onclick="PF('editarDialog').hide();"
+					action="#{cadastroLocalBean.limpar()}"
+					styleClass="btn btn-secondary"
+					icon="pi pi-times" type="button"
+					immediate="true" />
+			</div>
+		</h:form>
+	</p:dialog>
+
+	<!-- Confirmação global, no lugar do confirm() do navegador -->
+	<h:form id="confirmForm">
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade"
+			responsive="true" width="420" appendTo="@(body)">
+			<p:commandButton value="Sim" type="button"
+				styleClass="ui-confirmdialog-yes ui-button-danger"
+				icon="pi pi-check" />
+			<p:commandButton value="Não" type="button"
+				styleClass="ui-confirmdialog-no ui-button-secondary"
+				icon="pi pi-times" />
+		</p:confirmDialog>
+	</h:form>
+
+	<!-- Dialog global de imagem -->
+	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
+
+</h:body>
+</html>

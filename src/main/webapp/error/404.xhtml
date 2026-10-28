@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Página não encontrada - Gestão de Manutenção</title>
+	<h:outputStylesheet name="css/erro.css" />
+</h:head>
+<h:body>
+	<div class="erro-card">
+		<h:graphicImage library="imagens" name="logo.png" alt="Gestão de Manutenção" />
+		<p class="erro-codigo">404</p>
+		<h1 class="erro-titulo">Página não encontrada</h1>
+		<p class="erro-texto">O endereço acessado não existe ou foi movido.</p>
+		<a class="erro-botao" href="#{request.contextPath}/index.xhtml">Voltar ao início</a>
+	</div>
+</h:body>
+</html>

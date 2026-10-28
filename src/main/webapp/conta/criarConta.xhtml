@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-br"
+xmlns="http://www.w3.org/1999/xhtml"
+xmlns:h="http://xmlns.jcp.org/jsf/html"
+xmlns:f="http://xmlns.jcp.org/jsf/core"
+xmlns:p="http://primefaces.org/ui">
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+<title>Criar Conta - Sistema de Gestão de Manutenção</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+.criar-conta-box {
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn-criar {
+    width: 100%;
+    padding: 14px;
+    background-color: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-criar:hover {
+    background-color: #5568d3;
+}
+
+.btn-voltar {
+    width: 100%;
+    padding: 12px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+}
+
+.btn-voltar:hover {
+    background-color: #5a6268;
+}
+
+.ui-messages {
+    margin-bottom: 20px;
+}
+
+.info-text {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin-top: 20px;
+}
+</style>
+</h:head>
+<h:body>
+<div class="container">
+<div class="criar-conta-box">
+<h2 class="title">Criar Primeira Conta</h2>
+
+<p:growl id="messages" showDetail="true" life="4500" sticky="false"/>
+
+<h:form prependId="false">
+<div class="form-group">
+<h:outputLabel for="nome" value="Nome Completo" />
+<h:inputText id="nome"
+value="#{cadastroUsuarioBean.nome}"
+required="true"
+requiredMessage="Nome é obrigatório" />
+</div>
+
+<div class="form-group">
+<h:outputLabel for="nuRegistro" value="Número de Registro" />
+<h:inputText id="nuRegistro"
+value="#{cadastroUsuarioBean.nuRegistro}"
+required="true"
+requiredMessage="Número de Registro é obrigatório" />
+</div>
+
+<div class="form-group">
+<h:outputLabel for="email" value="E-mail" />
+<h:inputText id="email"
+value="#{cadastroUsuarioBean.email}"
+required="true"
+requiredMessage="E-mail é obrigatório" />
+</div>
+
+<div class="form-group">
+<h:outputLabel for="senha" value="Senha" />
+<h:inputSecret id="senha"
+value="#{cadastroUsuarioBean.senha}"
+required="true"
+requiredMessage="Senha é obrigatória" />
+</div>
+
+<div class="form-group">
+<h:outputLabel for="telefone" value="Telefone" />
+<h:inputText id="telefone"
+value="#{cadastroUsuarioBean.telefone}" />
+</div>
+
+<div class="form-group">
+<h:outputLabel for="funcao" value="Função" />
+<h:inputText id="funcao"
+value="#{cadastroUsuarioBean.funcao}" />
+</div>
+
+<p:commandButton value="CRIAR CONTA"
+action="#{cadastroUsuarioBean.salvarPrimeiraConta()}"
+update="messages"
+styleClass="btn-criar" />
+
+<p:button value="VOLTAR"
+outcome="/index.xhtml"
+styleClass="btn-voltar" />
+</h:form>
+
+<p class="info-text">Esta conta será criada como Administrador</p>
+</div>
+</div>
+</h:body>
+</html>

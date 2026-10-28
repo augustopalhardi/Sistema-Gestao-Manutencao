@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      lang="pt-BR">
+<h:head>
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dashboard - Estatísticas e Métricas de Manutenção</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <h:outputStylesheet name="css/dashboard.css" />
+</h:head>
+<h:body>
+    <f:view>
+        <!-- Header -->
+        <div class="header-top">
+            <h1>📊 Dashboard - Estatísticas e Relatórios</h1>
+        </div>
+        <div class="header-actions">
+            <h:form style="margin: 0;">
+                <h:button outcome="/home/homeAdm.xhtml" styleClass="back-button" value="Voltar"/> 
+            </h:form>
+        </div>
+        
+        <div class="container">
+            <h:form id="dashboardForm">
+            
+                <!-- ==================== FILTROS ==================== -->
+                <div class="filtros-container">
+                    <h2 class="filtros-titulo">🔍 Filtros</h2>
+                    <div class="filtros-grid">
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Período</label>
+                            <h:selectOneMenu id="filtroPeriodo" 
+                                             value="#{estatisticasManutencaoBean.filtroPeriodo}" 
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue="" itemLabel="Personalizado" />
+                                <f:selectItem itemValue="1" itemLabel="Último mês" />
+                                <f:selectItem itemValue="3" itemLabel="Últimos 3 meses" />
+                                <f:selectItem itemValue="6" itemLabel="Últimos 6 meses" />
+                                <f:selectItem itemValue="12" itemLabel="Últimos 12 meses" />
+                                <f:selectItem itemValue="24" itemLabel="Últimos 24 meses" />
+                            </h:selectOneMenu>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Data Início</label>
+                            <h:inputText id="dataInicio" 
+                                         value="#{estatisticasManutencaoBean.filtroDataInicio}" 
+                                         styleClass="filtro-input"
+                                         pt:type="date">
+                                <f:convertDateTime pattern="yyyy-MM-dd" />
+                            </h:inputText>
+                        </div>
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Data Fim</label>
+                            <h:inputText id="dataFim" 
+                                         value="#{estatisticasManutencaoBean.filtroDataFim}" 
+                                         styleClass="filtro-input"
+                                         pt:type="date">
+                                <f:convertDateTime pattern="yyyy-MM-dd" />
+                            </h:inputText>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Categoria Máquina</label>
+                            <h:selectOneMenu id="filtroTipoMaquina" 
+                                             value="#{estatisticasManutencaoBean.filtroTipoMaquina}" 
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue="" itemLabel="Todas" />
+                                <f:selectItems value="#{estatisticasManutencaoBean.listaTiposMaquina}" 
+                                               var="tipo" 
+                                               itemValue="#{tipo}" 
+                                               itemLabel="#{tipo}" />
+                            </h:selectOneMenu>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Tipo Manutenção</label>
+                            <h:selectOneMenu id="filtroTipoManutencao" 
+                                             value="#{estatisticasManutencaoBean.filtroTipoManutencao}" 
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue="" itemLabel="Todos" />
+                                <f:selectItem itemValue="CORRETIVA" itemLabel="Corretiva" />
+                                <f:selectItem itemValue="PREVENTIVA" itemLabel="Preventiva" />
+                                <f:selectItem itemValue="PREDITIVA" itemLabel="Preditiva" />
+                            </h:selectOneMenu>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Status</label>
+                            <h:selectOneMenu id="filtroStatus" 
+                                             value="#{estatisticasManutencaoBean.filtroStatus}" 
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue="" itemLabel="Todos" />
+                                <f:selectItem itemValue="PARA_FAZER" itemLabel="Para Fazer" />
+                                <f:selectItem itemValue="EM_ANDAMENTO" itemLabel="Em Andamento" />
+                                <f:selectItem itemValue="CONCLUIDA" itemLabel="Concluída" />
+                                <f:selectItem itemValue="AGUARDANDO_COMPRA" itemLabel="Aguardando Compra" />
+                                <f:selectItem itemValue="CANCELADA" itemLabel="Cancelada" />
+                            </h:selectOneMenu>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Tipo</label>
+                            <h:selectOneMenu id="filtroTipo" 
+                                             value="#{estatisticasManutencaoBean.filtroTipo}" 
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue="TODOS" itemLabel="Todos" />
+                                <f:selectItem itemValue="MAQUINA" itemLabel="Máquina" />
+                                <f:selectItem itemValue="PREDIAL" itemLabel="Predial" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                    
+                    <div class="filtros-acoes">
+                        <h:commandButton value="Aplicar Filtros" 
+                                         action="#{estatisticasManutencaoBean.aplicarPeriodoPreDefinido()}" 
+                                         styleClass="btn-filtrar"
+                                         update="@form"
+                                         onclick="setTimeout(function(){ renderizarTodosGraficos(); }, 500);" />
+                        <h:commandButton value="Limpar Filtros" 
+                                         action="#{estatisticasManutencaoBean.limparFiltros()}" 
+                                         styleClass="btn-limpar"
+                                         update="@form"
+                                         onclick="setTimeout(function(){ renderizarTodosGraficos(); }, 500);" />
+                    </div>
+                </div>
+                
+                <!-- ==================== CARDS INDICADORES PRINCIPAIS ==================== -->
+                <!-- Para Fazer exibe totalParaFazer + totalAtivas somados -->
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">📋 Indicadores Gerais</h2>
+                    <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total de Manutenções</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{estatisticasManutencaoBean.totalManutencoes}"/>
+                        </div>
+                        <div class="stat-label">Registradas no sistema</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Para Fazer</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{estatisticasManutencaoBean.totalParaFazer + estatisticasManutencaoBean.totalAtivas}"/>
+                        </div>
+                        <div class="stat-label">Aguardando início</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Em Andamento</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{estatisticasManutencaoBean.totalEmAndamento}"/>
+                        </div>
+                        <div class="stat-label">Sendo executadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Concluídas</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{estatisticasManutencaoBean.totalConcluidas}"/>
+                        </div>
+                        <div class="stat-label">Finalizadas com sucesso</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Aguardando Compra</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{estatisticasManutencaoBean.totalAguardandoCompra}"/>
+                        </div>
+                        <div class="stat-label">Pendentes de materiais</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Canceladas</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{estatisticasManutencaoBean.totalCanceladas}"/>
+                        </div>
+                        <div class="stat-label">Canceladas pelo sistema</div>
+                    </div>
+                </div>
+                
+                <!-- ==================== CARDS INDICADORES DE TEMPO ==================== -->
+                <div class="indicadores-tempo-grid">
+                    <div class="indicador-card indicador-tempo-total">
+                        <div class="indicador-icone">⏱️</div>
+                        <div class="indicador-info">
+                            <h3>Tempo Total em Manutenções</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{estatisticasManutencaoBean.tempoTotalFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Horas gastas com todas as manutenções</div>
+                        </div>
+                    </div>
+                    <div class="indicador-card indicador-tempo-medio">
+                        <div class="indicador-icone">🔧</div>
+                        <div class="indicador-info">
+                            <h3>Tempo Médio por Reparo</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{estatisticasManutencaoBean.tempoMedioPorReparoFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Média de horas por reparo</div>
+                        </div>
+                    </div>
+                    <div class="indicador-card indicador-mttr">
+                        <div class="indicador-icone">🛠️</div>
+                        <div class="indicador-info">
+                            <h3>MTTR</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{estatisticasManutencaoBean.mttrFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Mean Time To Repair (Tempo Médio de Reparo)</div>
+                        </div>
+                    </div>
+                    <div class="indicador-card indicador-mtbf">
+                        <div class="indicador-icone">📈</div>
+                        <div class="indicador-info">
+                            <h3>MTBF</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{estatisticasManutencaoBean.mtbfFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Mean Time Between Failures (em horas)</div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- ==================== GRÁFICOS ==================== -->
+                
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">🔧 Status e Tipos de Manutenção</h2>
+                    <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Status das Manutenções</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Tipo de Manutenção (Máquina vs Predial)</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="tipoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h2 class="chart-title">H/MAQ - Reparos por Máquina</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="reparosMaquinaChart"></canvas>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">⚠️ Avarias e Riscos</h2>
+                    <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Avarias por Categoria de Máquinas</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="avariasCategChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Manutenções com Risco</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="riscoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h2 class="chart-title">Avarias por Máquina por Mês</h2>
+                    <p class="chart-subtitle">Top 5 máquinas com mais manutenções (% do total)</p>
+                    <div class="chart-wrapper">
+                        <canvas id="avariasMesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Piores Atores - Top 5 Máquinas (%)</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="pioresAtoresChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Piores Atores - Por Categoria (%)</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="pioresAtoresCategoriaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">💰 Custos</h2>
+                    <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Custo por Tipo de Manutenção</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="custoTipoChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Custo Mensal de Manutenção</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="custoMensalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h2 class="chart-title">Custo Total por Máquina (R$)</h2>
+                    <p class="chart-subtitle">Top 10</p>
+                    <div class="chart-wrapper">
+                        <canvas id="custoMaquinaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h2 class="chart-title">Manutenções com Gastos em Materiais e Serviços</h2>
+                    <p class="chart-subtitle">Top 5 com mais gastos</p>
+                    <div class="chart-wrapper">
+                        <canvas id="gastosChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Valor Total Gasto em Materiais e Serviços</h2>
+                        <div class="indicador-card indicador-custo-total" style="box-shadow:none; border:none; padding: 0.5rem 0;">
+                            <div class="indicador-icone">💵</div>
+                            <div class="indicador-info">
+                                <div class="indicador-valor" style="font-size: 2.25rem; color: #2563eb;">
+                                    <h:outputText value="#{estatisticasManutencaoBean.custoTotalGeral}">
+                                        <f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                                <div class="indicador-descricao">Total gasto com materiais e serviços, conforme os filtros</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Valor Total Gasto em Mão de Obra</h2>
+                        <div class="indicador-card indicador-maoobra-total" style="box-shadow:none; border:none; padding: 0.5rem 0;">
+                            <div class="indicador-icone">🔧</div>
+                            <div class="indicador-info">
+                                <div class="indicador-valor" style="font-size: 2.25rem; color: #9333ea;">
+                                    <h:outputText value="#{estatisticasManutencaoBean.custoTotalMaoObra}">
+                                        <f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                                <div class="indicador-descricao">Total de mão de obra técnica, conforme os filtros</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Valor Gasto em Materiais e Serviços: Máquinas x Predial</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="custoMaquinaVsPredialChart"></canvas>
+                        </div>
+                        <div style="display:flex; justify-content:space-around; margin-top:12px; padding-top:12px; border-top:1px solid #e2e8f0;">
+                            <div style="text-align:center;">
+                                <div style="font-size:0.75rem; color:#718096; text-transform:uppercase; font-weight:600;">Máquinas e Equipamentos</div>
+                                <div style="font-size:1.4rem; font-weight:700; color:#ea580c;">
+                                    <h:outputText value="#{estatisticasManutencaoBean.custoTotalMaquinas}">
+                                        <f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:0.75rem; color:#718096; text-transform:uppercase; font-weight:600;">Predial</div>
+                                <div style="font-size:1.4rem; font-weight:700; color:#06b6d4;">
+                                    <h:outputText value="#{estatisticasManutencaoBean.custoTotalPredial}">
+                                        <f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Valor Gasto em Mão de Obra: Máquinas x Predial</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="maoObraMaquinaVsPredialChart"></canvas>
+                        </div>
+                        <div style="display:flex; justify-content:space-around; margin-top:12px; padding-top:12px; border-top:1px solid #e2e8f0;">
+                            <div style="text-align:center;">
+                                <div style="font-size:0.75rem; color:#718096; text-transform:uppercase; font-weight:600;">Máquinas e Equipamentos</div>
+                                <div style="font-size:1.4rem; font-weight:700; color:#ea580c;">
+                                    <h:outputText value="#{estatisticasManutencaoBean.custoMaoObraMaquina}">
+                                        <f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:0.75rem; color:#718096; text-transform:uppercase; font-weight:600;">Predial</div>
+                                <div style="font-size:1.4rem; font-weight:700; color:#06b6d4;">
+                                    <h:outputText value="#{estatisticasManutencaoBean.custoMaoObraPredial}">
+                                        <f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Quantidade de Solicitações de Compra por Tipo</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="quantidadeComprasPorTipoChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Valor Gasto por Tipo de Compra</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="valorComprasPorTipoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+
+                <!-- ==================== BBS / NEAR MISS ==================== -->
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">🛡️ BBS / Near Miss e Confiabilidade</h2>
+                    <div class="chart-container">
+                        <div style="display: flex; align-items: baseline; gap: 12px; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                        <h2 style="color: #2d3748; font-size: 1.25rem; font-weight: 600; margin: 0;">⚠️ BBS / Near Miss</h2>
+                        <span style="font-size: 0.78rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; padding: 2px 8px; white-space: nowrap;">
+                            * Contagem a partir de 27/05/2026 — Manutenções anteriores não possuem essa classificação e são contabilizadas como "Sem BBS/Near Miss".
+                        </span>
+                    </div>
+
+                    <div class="stats-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                            <h3>Total BBS / Near Miss</h3>
+                            <div class="stat-value" style="color: #d97706;">
+                                <h:outputText value="#{estatisticasManutencaoBean.totalBbsNearMiss}"/>
+                            </div>
+                            <div class="stat-label">ocorrências registradas*</div>
+                        </div>
+                        <div class="stat-card" style="border-left: 4px solid #22c55e;">
+                            <h3>Sem BBS / Near Miss</h3>
+                            <div class="stat-value" style="color: #16a34a;">
+                                <h:outputText value="#{estatisticasManutencaoBean.totalSemBbsNearMiss}"/>
+                            </div>
+                            <div class="stat-label">manutenções normais</div>
+                        </div>
+                        <div class="stat-card" style="border-left: 4px solid #ef4444;">
+                            <h3>Percentual BBS</h3>
+                            <div class="stat-value" style="color: #dc2626;">
+                                <h:outputText value="#{estatisticasManutencaoBean.percentualBbsNearMissFormatado}"/>%
+                            </div>
+                            <div class="stat-label">do total de manutenções*</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-wrapper" style="max-width: 380px; margin: 0 auto 1.5rem;">
+                        <canvas id="bbsNearMissChart"></canvas>
+                    </div>
+
+
+                </div>
+                
+                <!-- ==================== CONFIABILIDADE POR MÁQUINA ==================== -->
+                <div class="chart-container">
+                    <div class="conf-header">
+                        <h2 class="chart-title conf-chart-title">Confiabilidade por Máquina (%)</h2>
+                        <div class="toggle-view-btns">
+                            <button type="button" id="btnConfMaqGrafico"
+                                    class="toggle-btn toggle-btn-active"
+                                    onclick="mostrarVisualizacao('maquina', 'grafico')">
+                                📊 Gráfico
+                            </button>
+                            <button type="button" id="btnConfMaqLista"
+                                    class="toggle-btn"
+                                    onclick="mostrarVisualizacao('maquina', 'lista')">
+                                📋 Lista
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="confMaqGrafico">
+                        <div class="chart-wrapper">
+                            <canvas id="confiabilidadeChart"></canvas>
+                        </div>
+                        <div class="confiabilidade-media-bloco">
+                            <span class="confiabilidade-media-label">Média Geral de Confiabilidade por Máquina:</span>
+                            <span class="status-badge #{estatisticasManutencaoBean.mediaGeralConfiabilidadeMaquinaClass}">
+                                <h:outputText value="#{estatisticasManutencaoBean.mediaGeralConfiabilidadeMaquinaFormatada}"/>
+                            </span>
+                            <span class="confiabilidade-media-hint">
+                                (soma de todas as máquinas ÷ quantidade de máquinas)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="confMaqLista" style="display:none;">
+                        <div class="confiabilidade-lista-maquinas">
+                            <div class="conf-lista-header">
+                                <span class="conf-lista-col-nome">Máquina</span>
+                                <span class="conf-lista-col-qtd">Manutenções</span>
+                                <span class="conf-lista-col-valor">Confiabilidade</span>
+                            </div>
+                            <div id="confMaqListaCorpo"></div>
+                        </div>
+                        <div class="confiabilidade-media-bloco">
+                            <span class="confiabilidade-media-label">Média Geral de Confiabilidade por Máquina:</span>
+                            <span class="status-badge #{estatisticasManutencaoBean.mediaGeralConfiabilidadeMaquinaClass}">
+                                <h:outputText value="#{estatisticasManutencaoBean.mediaGeralConfiabilidadeMaquinaFormatada}"/>
+                            </span>
+                            <span class="confiabilidade-media-hint">
+                                (soma de todas as máquinas ÷ quantidade de máquinas)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ==================== CONFIABILIDADE POR CATEGORIA ==================== -->
+                    <div class="confiabilidade-resumo">
+                        <div class="conf-header conf-header-sub">
+                            <h3 class="confiabilidade-categorias-titulo">Confiabilidade por Categoria</h3>
+                            <div class="toggle-view-btns">
+                                <button type="button" id="btnConfCatGrafico"
+                                        class="toggle-btn toggle-btn-sm"
+                                        onclick="mostrarVisualizacao('categoria', 'grafico')">
+                                    📊 Gráfico
+                                </button>
+                                <button type="button" id="btnConfCatLista"
+                                        class="toggle-btn toggle-btn-sm toggle-btn-active"
+                                        onclick="mostrarVisualizacao('categoria', 'lista')">
+                                    📋 Lista
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="confCatGrafico" style="display:none;">
+                            <div class="chart-wrapper">
+                                <canvas id="confiabilidadeCategoriaChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div id="confCatLista">
+                            <div class="confiabilidade-categorias-grid">
+                                <ui:repeat value="#{estatisticasManutencaoBean.confiabilidadePorCategoriaLista}" var="item">
+                                    <div class="confiabilidade-categoria-item">
+                                        <span class="confiabilidade-categoria-nome">
+                                            <h:outputText value="#{item.categoria}"/>
+                                        </span>
+                                        <span class="confiabilidade-categoria-qtd">
+                                            (<h:outputText value="#{item.quantidadeManutencoes}"/> manutenções)
+                                        </span>
+                                        <span class="status-badge #{item.confiabilidadeClass}">
+                                            <h:outputText value="#{item.confiabilidadeFormatada}"/>
+                                        </span>
+                                    </div>
+                                </ui:repeat>
+                                <ui:fragment rendered="#{empty estatisticasManutencaoBean.confiabilidadePorCategoriaLista}">
+                                    <div style="color:#a0aec0; font-size:0.9rem; padding: 1rem 0;">
+                                        Nenhuma categoria encontrada com os filtros atuais
+                                    </div>
+                                </ui:fragment>
+                            </div>
+                        </div>
+
+                        <ui:fragment rendered="#{not empty estatisticasManutencaoBean.confiabilidadePorCategoriaLista}">
+                            <div class="confiabilidade-media-bloco confiabilidade-media-bloco-categoria">
+                                <span class="confiabilidade-media-label">Média Geral de Confiabilidade por Categoria:</span>
+                                <span class="status-badge #{estatisticasManutencaoBean.mediaGeralConfiabilidadeCategoriaClass}">
+                                    <h:outputText value="#{estatisticasManutencaoBean.mediaGeralConfiabilidadeCategoriaFormatada}"/>
+                                </span>
+                                <span class="confiabilidade-media-hint">
+                                    (soma de todas as categorias ÷ quantidade de categorias)
+                                </span>
+                            </div>
+                        </ui:fragment>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- ==================== DISTRIBUIÇÃO ==================== -->
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">📈 Distribuição</h2>
+                    <div class="two-columns">
+                    <div class="chart-container">
+                        <h2 class="chart-title">Máquinas com Mais Manutenções</h2>
+                        <p class="chart-subtitle">Top 5</p>
+                        <div class="chart-wrapper">
+                            <canvas id="maquinasChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h2 class="chart-title">Distribuição por Local</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="locaisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Tabela de Manutenções Recentes -->
+                <div class="data-table">
+                    <h2 class="chart-title">Manutenções Recentes</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Local/Máquina</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Prioridade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{estatisticasManutencaoBean.ultimasManutencoes}" var="item">
+                                <tr>
+                                    <td><strong>#<h:outputText value="#{item.id}"/></strong></td>
+                                    <td><h:outputText value="#{item.tipo}"/></td>
+                                    <td>
+                                        <h:outputText value="#{item.tipo eq 'MAQUINA' ? item.falha : item.problema}"/>
+                                    </td>
+                                    <td><h:outputText value="#{item.tipo eq 'MAQUINA' ? item.maquina : item.local}"/></td>
+                                    <td><h:outputText value="#{estatisticasManutencaoBean.getStatusLabel(item.status)}"/></td>
+                                    <td>
+                                        <h:outputText value="#{item.dataManutencao}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:panelGroup rendered="#{item.risco or item.riscoSeguranca}">
+                                            <span class="status-badge status-risco">RISCO</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{item.urgente}">
+                                            <span class="status-badge status-urgente">URGENTE</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{!item.risco and !item.riscoSeguranca and !item.urgente}">
+                                            <span class="status-badge status-normal">NORMAL</span>
+                                        </h:panelGroup>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </div>
+            </h:form>
+        </div>
+        
+        <h:outputScript>
+            function renderizarTodosGraficos() {
+                Chart.helpers.each(Chart.instances, function(instance) {
+                    instance.destroy();
+                });
+
+                // Para Fazer = Para Fazer + Ativas (sempre somados)
+                var totalParaFazer = #{estatisticasManutencaoBean.totalParaFazer} + #{estatisticasManutencaoBean.totalAtivas};
+
+                new Chart(document.getElementById('statusChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Para Fazer', 'Em Andamento', 'Concluída', 'Aguardando Compra', 'Cancelada'],
+                        datasets: [{
+                            data: [
+                                totalParaFazer,
+                                #{estatisticasManutencaoBean.totalEmAndamento},
+                                #{estatisticasManutencaoBean.totalConcluidas},
+                                #{estatisticasManutencaoBean.totalAguardandoCompra},
+                                #{estatisticasManutencaoBean.totalCanceladas}
+                            ],
+                            backgroundColor: [
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(0, 123, 255, 0.8)',
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(255, 152, 0, 0.8)',
+                                'rgba(220, 53, 69, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: {position: 'right'} }
+                    }
+                });
+                
+                new Chart(document.getElementById('tipoChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Máquina', 'Predial'],
+                        datasets: [{
+                            data: [
+                                #{estatisticasManutencaoBean.totalMaquinas},
+                                #{estatisticasManutencaoBean.totalPredial}
+                            ],
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.8)',
+                                'rgba(118, 75, 162, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: {position: 'bottom'} }
+                    }
+                });
+                
+                new Chart(document.getElementById('reparosMaquinaChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.reparosPorMaquinaLabelsJSON},
+                        datasets: [{
+                            label: 'Quantidade de Reparos',
+                            data: #{estatisticasManutencaoBean.reparosPorMaquinaDataJSON},
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: {display: false} },
+                        scales: { y: {beginAtZero: true, ticks: {stepSize: 1}} }
+                    }
+                });
+                
+                var avCategLabels = #{estatisticasManutencaoBean.avariasPorCategoriaLabelsJSON};
+                var avCategData = #{estatisticasManutencaoBean.avariasPorCategoriaDataJSON};
+                
+                if (avCategLabels.length > 0) {
+                    new Chart(document.getElementById('avariasCategChart'), {
+                        type: 'pie',
+                        data: {
+                            labels: avCategLabels,
+                            datasets: [{
+                                data: avCategData,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.8)',
+                                    'rgba(54, 162, 235, 0.8)',
+                                    'rgba(255, 205, 86, 0.8)',
+                                    'rgba(75, 192, 192, 0.8)',
+                                    'rgba(153, 102, 255, 0.8)',
+                                    'rgba(255, 159, 64, 0.8)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: {position: 'right'} }
+                        }
+                    });
+                }
+                
+                new Chart(document.getElementById('riscoChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Com Risco', 'Urgente', 'Normal'],
+                        datasets: [{
+                            label: 'Quantidade',
+                            data: [
+                                #{estatisticasManutencaoBean.totalComRisco},
+                                #{estatisticasManutencaoBean.totalUrgente},
+                                #{estatisticasManutencaoBean.totalNormal}
+                            ],
+                            backgroundColor: [
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(40, 167, 69, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: {display: false} },
+                        scales: { y: {beginAtZero: true} }
+                    }
+                });
+                
+                var avariasMesData = #{estatisticasManutencaoBean.avariasPorMaquinaPorMesJSON};
+                
+                if (avariasMesData &amp;&amp; avariasMesData.meses &amp;&amp; avariasMesData.meses.length > 0) {
+                    var avariasMesDatasets = [];
+                    for (var i = 0; i &lt; avariasMesData.datasets.length; i++) {
+                        var ds = avariasMesData.datasets[i];
+                        avariasMesDatasets.push({
+                            label: ds.label,
+                            data: ds.data,
+                            backgroundColor: ds.cor,
+                            borderColor: ds.cor.replace('0.8', '1'),
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.3
+                        });
+                    }
+                    new Chart(document.getElementById('avariasMesChart'), {
+                        type: 'line',
+                        data: {
+                            labels: avariasMesData.meses,
+                            datasets: avariasMesDatasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: {position: 'top'} },
+                            scales: { y: {beginAtZero: true, ticks: {stepSize: 1}} }
+                        }
+                    });
+                }
+                
+                var pioresLabels = #{estatisticasManutencaoBean.pioresAtoresLabelsJSON};
+                var pioresDataQtd = #{estatisticasManutencaoBean.pioresAtoresDataJSON};
+                var pioresDataPct = #{estatisticasManutencaoBean.pioresAtoresPorcentagemDataJSON};
+                
+                new Chart(document.getElementById('pioresAtoresChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: pioresLabels,
+                        datasets: [{
+                            label: 'Porcentagem (%)',
+                            data: pioresDataPct,
+                            backgroundColor: [
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(255, 99, 71, 0.8)',
+                                'rgba(255, 140, 0, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(255, 223, 0, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        var idx = context.dataIndex;
+                                        return context.parsed.x.toFixed(2) + '% (' + pioresDataQtd[idx] + ' manutenções)';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return value + '%'; } }
+                            }
+                        }
+                    }
+                });
+                
+                var pioresCategLabels = #{estatisticasManutencaoBean.pioresAtoresCategoriaLabelsJSON};
+                var pioresCategDataQtd = #{estatisticasManutencaoBean.pioresAtoresCategoriaDataJSON};
+                var pioresCategDataPct = #{estatisticasManutencaoBean.pioresAtoresCategoriaPorcentagemDataJSON};
+                
+                if (pioresCategLabels.length > 0) {
+                    new Chart(document.getElementById('pioresAtoresCategoriaChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: pioresCategLabels,
+                            datasets: [{
+                                label: 'Porcentagem (%)',
+                                data: pioresCategDataPct,
+                                backgroundColor: [
+                                    'rgba(153, 102, 255, 0.8)',
+                                    'rgba(255, 99, 132, 0.8)',
+                                    'rgba(54, 162, 235, 0.8)',
+                                    'rgba(255, 205, 86, 0.8)',
+                                    'rgba(75, 192, 192, 0.8)'
+                                ],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: {display: false},
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            var idx = context.dataIndex;
+                                            return context.parsed.x.toFixed(2) + '% (' + pioresCategDataQtd[idx] + ' manutenções)';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: { callback: function(value) { return value + '%'; } }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                new Chart(document.getElementById('custoTipoChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.custoPorTipoManutencaoLabelsJSON},
+                        datasets: [{
+                            data: #{estatisticasManutencaoBean.custoPorTipoManutencaoDataJSON},
+                            backgroundColor: [
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(54, 162, 235, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {position: 'bottom'},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': R$ ' + context.parsed.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                new Chart(document.getElementById('custoMensalChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.custoMensalLabelsJSON},
+                        datasets: [{
+                            label: 'Custo Mensal (R$)',
+                            data: #{estatisticasManutencaoBean.custoMensalDataJSON},
+                            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'R$ ' + context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } }
+                            }
+                        }
+                    }
+                });
+                
+                new Chart(document.getElementById('custoMaquinaChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.custoTotalPorMaquinaLabelsJSON},
+                        datasets: [{
+                            label: 'Custo Total (R$)',
+                            data: #{estatisticasManutencaoBean.custoTotalPorMaquinaDataJSON},
+                            backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'R$ ' + context.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } }
+                            }
+                        }
+                    }
+                });
+
+                new Chart(document.getElementById('custoMaquinaVsPredialChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Máquinas e Equipamentos', 'Predial'],
+                        datasets: [{
+                            label: 'Valor Gasto (R$)',
+                            data: [
+                                #{estatisticasManutencaoBean.custoTotalMaquinas},
+                                #{estatisticasManutencaoBean.custoTotalPredial}
+                            ],
+                            backgroundColor: [
+                                'rgba(255, 159, 64, 0.8)',
+                                'rgba(75, 192, 192, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'R$ ' + context.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } }
+                            }
+                        }
+                    }
+                });
+
+                new Chart(document.getElementById('maoObraMaquinaVsPredialChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Máquinas e Equipamentos', 'Predial'],
+                        datasets: [{
+                            label: 'Valor Mão de Obra (R$)',
+                            data: [
+                                #{estatisticasManutencaoBean.custoMaoObraMaquina},
+                                #{estatisticasManutencaoBean.custoMaoObraPredial}
+                            ],
+                            backgroundColor: [
+                                'rgba(234, 88, 12, 0.8)',
+                                'rgba(6, 182, 212, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(234, 88, 12, 1)',
+                                'rgba(6, 182, 212, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'R$ ' + context.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } }
+                            }
+                        }
+                    }
+                });
+
+                new Chart(document.getElementById('quantidadeComprasPorTipoChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Material', 'Serviço', 'Material e Serviço'],
+                        datasets: [{
+                            label: 'Quantidade de Solicitações',
+                            data: [
+                                #{estatisticasManutencaoBean.quantidadeComprasMaterial},
+                                #{estatisticasManutencaoBean.quantidadeComprasServico},
+                                #{estatisticasManutencaoBean.quantidadeComprasAmbos}
+                            ],
+                            backgroundColor: [
+                                'rgba(139, 92, 246, 0.8)',
+                                'rgba(236, 72, 153, 0.8)',
+                                'rgba(59, 130, 246, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(139, 92, 246, 1)',
+                                'rgba(236, 72, 153, 1)',
+                                'rgba(59, 130, 246, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.x + ' solicitação(ões)';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 }
+                            }
+                        }
+                    }
+                });
+
+                new Chart(document.getElementById('valorComprasPorTipoChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Material', 'Serviço', 'Ambos (Material)', 'Ambos (Serviço)'],
+                        datasets: [{
+                            label: 'Valor Gasto (R$)',
+                            data: [
+                                #{estatisticasManutencaoBean.custoComprasMaterial},
+                                #{estatisticasManutencaoBean.custoComprasServico},
+                                #{estatisticasManutencaoBean.custoComprasAmbosMaterial},
+                                #{estatisticasManutencaoBean.custoComprasAmbosServico}
+                            ],
+                            backgroundColor: [
+                                'rgba(139, 92, 246, 0.8)',
+                                'rgba(236, 72, 153, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(34, 197, 94, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(139, 92, 246, 1)',
+                                'rgba(236, 72, 153, 1)',
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(34, 197, 94, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'R$ ' + context.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } }
+                            }
+                        }
+                    }
+                });
+                
+                // ==================== BBS / NEAR MISS ====================
+                (function() {
+                    var ctx = document.getElementById('bbsNearMissChart');
+                    if (!ctx) return;
+                    if (ctx._bbsInst) { ctx._bbsInst.destroy(); }
+                    var totalBbs = #{estatisticasManutencaoBean.totalBbsNearMiss};
+                    var totalSem = #{estatisticasManutencaoBean.totalSemBbsNearMiss};
+                    ctx._bbsInst = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['BBS/Near Miss', 'Normal'],
+                            datasets: [{
+                                data: [totalBbs, totalSem],
+                                backgroundColor: ['rgba(239,68,68,0.85)', 'rgba(34,197,94,0.85)'],
+                                borderColor: ['#dc2626', '#16a34a'],
+                                borderWidth: 2,
+                                hoverOffset: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            cutout: '60%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { font: { size: 13 }, padding: 16 } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(ctx) {
+                                            var total = totalBbs + totalSem;
+                                            var pct = total > 0 ? (ctx.parsed * 100 / total).toFixed(1) : '0.0';
+                                            return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + pct + '%%)';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })();
+
+                // ==================== CONFIABILIDADE POR MÁQUINA ====================
+                var confLabels = #{estatisticasManutencaoBean.confiabilidadeLabelsJSON};
+                var confData   = #{estatisticasManutencaoBean.confiabilidadeDataJSON};
+
+                (function() {
+                    var corpo = document.getElementById('confMaqListaCorpo');
+                    if (!corpo) return;
+                    if (confLabels.length === 0) {
+                        var vazio = document.createElement('div');
+                        vazio.style.cssText = 'color:#a0aec0;font-size:0.9rem;padding:1rem 0;';
+                        vazio.textContent = 'Nenhuma m\u00e1quina encontrada com os filtros atuais';
+                        corpo.appendChild(vazio);
+                        return;
+                    }
+                    var rows = [];
+                    for (var i = 0; i &lt; confLabels.length; i++) {
+                        var v = confData[i];
+                        var cls = v >= 80 ? 'confiabilidade-alta' : (v >= 50 ? 'confiabilidade-media' : 'confiabilidade-baixa');
+                        var row = document.createElement('div');
+                        row.className = 'conf-lista-row';
+                        var spanNome = document.createElement('span');
+                        spanNome.className = 'conf-lista-col-nome';
+                        spanNome.textContent = confLabels[i];
+                        var spanQtd = document.createElement('span');
+                        spanQtd.className = 'conf-lista-col-qtd';
+                        spanQtd.textContent = '\u2014';
+                        var spanVal = document.createElement('span');
+                        spanVal.className = 'status-badge ' + cls;
+                        spanVal.textContent = v.toFixed(2) + '%';
+                        row.appendChild(spanNome);
+                        row.appendChild(spanQtd);
+                        row.appendChild(spanVal);
+                        rows.push(row);
+                    }
+                    corpo.innerHTML = '';
+                    for (var j = 0; j &lt; rows.length; j++) {
+                        corpo.appendChild(rows[j]);
+                    }
+                })();
+
+                if (confLabels.length > 0) {
+                    var confColors = confData.map(function(v) {
+                        if (v >= 80) return 'rgba(40, 167, 69, 0.8)';
+                        if (v >= 50) return 'rgba(255, 193, 7, 0.8)';
+                        return 'rgba(220, 53, 69, 0.8)';
+                    });
+                    new Chart(document.getElementById('confiabilidadeChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: confLabels,
+                            datasets: [{
+                                label: 'Confiabilidade (%)',
+                                data: confData,
+                                backgroundColor: confColors,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.parsed.x.toFixed(2) + '%';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: { callback: function(value) { return value + '%'; } }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // ==================== CONFIABILIDADE POR CATEGORIA ====================
+                var confCatLabels = #{estatisticasManutencaoBean.confiabilidadePorCategoriaLabelsJSON};
+                var confCatData   = #{estatisticasManutencaoBean.confiabilidadePorCategoriaDataJSON};
+
+                if (confCatLabels.length > 0) {
+                    var confCatColors = confCatData.map(function(v) {
+                        if (v >= 80) return 'rgba(40, 167, 69, 0.8)';
+                        if (v >= 50) return 'rgba(255, 193, 7, 0.8)';
+                        return 'rgba(220, 53, 69, 0.8)';
+                    });
+                    new Chart(document.getElementById('confiabilidadeCategoriaChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: confCatLabels,
+                            datasets: [{
+                                label: 'Confiabilidade (%)',
+                                data: confCatData,
+                                backgroundColor: confCatColors,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.parsed.x.toFixed(2) + '%';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: { callback: function(value) { return value + '%'; } }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                new Chart(document.getElementById('gastosChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.topGastosLabelsJSON},
+                        datasets: [{
+                            label: 'Valor Gasto (R$)',
+                            data: #{estatisticasManutencaoBean.topGastosDataJSON},
+                            backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'R$ ' + context.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } }
+                            }
+                        }
+                    }
+                });
+                
+                new Chart(document.getElementById('maquinasChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.topMaquinasLabelsJSON},
+                        datasets: [{
+                            label: 'Número de Manutenções',
+                            data: #{estatisticasManutencaoBean.topMaquinasDataJSON},
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: {display: false} },
+                        scales: { y: {beginAtZero: true} }
+                    }
+                });
+                
+                new Chart(document.getElementById('locaisChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: #{estatisticasManutencaoBean.topLocaisLabelsJSON},
+                        datasets: [{
+                            data: #{estatisticasManutencaoBean.topLocaisDataJSON},
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.8)',
+                                'rgba(118, 75, 162, 0.8)',
+                                'rgba(237, 100, 166, 0.8)',
+                                'rgba(255, 154, 158, 0.8)',
+                                'rgba(250, 208, 196, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: {position: 'right'} }
+                    }
+                });
+            }
+            
+            // ==================== TOGGLE GRÁFICO / LISTA ====================
+            function mostrarVisualizacao(secao, modo) {
+                if (secao === 'maquina') {
+                    var elGraf  = document.getElementById('confMaqGrafico');
+                    var elLista = document.getElementById('confMaqLista');
+                    var btnGraf = document.getElementById('btnConfMaqGrafico');
+                    var btnList = document.getElementById('btnConfMaqLista');
+                    if (modo === 'grafico') {
+                        elGraf.style.display  = '';
+                        elLista.style.display = 'none';
+                        btnGraf.classList.add('toggle-btn-active');
+                        btnList.classList.remove('toggle-btn-active');
+                    } else {
+                        elGraf.style.display  = 'none';
+                        elLista.style.display = '';
+                        btnList.classList.add('toggle-btn-active');
+                        btnGraf.classList.remove('toggle-btn-active');
+                    }
+                } else if (secao === 'categoria') {
+                    var elGrafC  = document.getElementById('confCatGrafico');
+                    var elListaC = document.getElementById('confCatLista');
+                    var btnGrafC = document.getElementById('btnConfCatGrafico');
+                    var btnListC = document.getElementById('btnConfCatLista');
+                    if (modo === 'grafico') {
+                        elGrafC.style.display  = '';
+                        elListaC.style.display = 'none';
+                        btnGrafC.classList.add('toggle-btn-active');
+                        btnListC.classList.remove('toggle-btn-active');
+                    } else {
+                        elGrafC.style.display  = 'none';
+                        elListaC.style.display = '';
+                        btnListC.classList.add('toggle-btn-active');
+                        btnGrafC.classList.remove('toggle-btn-active');
+                    }
+                }
+            }
+
+            window.addEventListener('load', function() {
+                renderizarTodosGraficos();
+            });
+        </h:outputScript>
+    </f:view>
+</h:body>
+</html>

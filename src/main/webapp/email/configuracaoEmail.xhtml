@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Configuração de Emails - Notificações</title>
+	<h:outputStylesheet name="css/configuracaoEmail.css" />
+</h:head>
+
+<h:body>
+	<f:metadata>
+		<f:viewAction action="#{configuracaoEmailBean.init}" />
+	</f:metadata>
+
+	<div class="header">
+		<h1>Configuração de Emails</h1>
+	</div>
+
+	<div class="header-actions">
+		<h:link outcome="/home/homeAdm.html" styleClass="exit-button" value="Voltar" />
+	</div>
+
+	<div class="container">
+
+		<!-- Formulário de Cadastro -->
+		<div class="form-section">
+			<h2 class="section-title">Cadastrar Novo Email</h2>
+			
+			<h:form id="formCadastro">
+				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+
+				<div class="p-fluid">
+					<div class="p-field">
+						<label for="email">Email Destinatário:</label>
+						<p:inputText id="email" 
+							value="#{configuracaoEmailBean.emailDestinatario}"
+							required="true"
+							requiredMessage="Email é obrigatório"
+							placeholder="exemplo@empresa.com.br" />
+					</div>
+
+					<div class="p-field">
+						<label for="tipo">Tipo de Notificação:</label>
+						<p:selectOneMenu id="tipo" 
+							value="#{configuracaoEmailBean.tipoNotificacao}"
+							required="true"
+							requiredMessage="Selecione o tipo de notificação">
+							<f:selectItem itemLabel="Selecione..." itemValue="#{null}" />
+							<f:selectItems value="#{configuracaoEmailBean.tiposNotificacao}" 
+								var="tipo"
+								itemLabel="#{tipo.descricao}" 
+								itemValue="#{tipo}" />
+						</p:selectOneMenu>
+					</div>
+
+					<div class="p-field">
+						<label for="descricao">Descrição (opcional):</label>
+						<p:inputTextarea id="descricao" 
+							value="#{configuracaoEmailBean.descricao}"
+							rows="3"
+							maxlength="500"
+							placeholder="Ex: Email do gerente de manutenção" />
+					</div>
+
+					<div style="text-align: right; margin-top: 1.5rem;">
+						<p:commandButton value="Cadastrar" 
+							action="#{configuracaoEmailBean.salvar}"
+							update="@form :formTabela:tabelaConfiguracoes growlMsgs"
+							icon="pi pi-check"
+							styleClass="ui-button-success" />
+					</div>
+				</div>
+			</h:form>
+		</div>
+
+		<!-- Tabela de Configurações -->
+		<div class="form-section">
+			<h2 class="section-title">Emails Cadastrados</h2>
+			
+			<h:form id="formTabela">
+				<p:dataTable id="tabelaConfiguracoes" 
+					value="#{configuracaoEmailBean.configuracoes}"
+					var="config"
+					emptyMessage="Nenhum email cadastrado"
+					styleClass="ui-table"
+					paginator="true"
+					rows="10"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} emails">
+
+					<p:column headerText="Email" sortBy="#{config.emailDestinatario}">
+						<h:outputText value="#{config.emailDestinatario}" />
+					</p:column>
+
+					<p:column headerText="Tipo de Notificação" sortBy="#{config.tipoNotificacao}">
+						<h:outputText value="#{config.tipoNotificacao.descricao}" />
+					</p:column>
+
+					<p:column headerText="Descrição">
+						<h:outputText value="#{config.descricao}" />
+					</p:column>
+
+					<p:column headerText="Status" style="text-align: center; width: 100px;">
+						<h:outputText value="✓ Ativo" 
+							styleClass="status-ativo"
+							rendered="#{config.ativo}" />
+						<h:outputText value="✗ Inativo" 
+							styleClass="status-inativo"
+							rendered="#{!config.ativo}" />
+					</p:column>
+
+					<p:column headerText="Ações" style="text-align: center; width: 200px;">
+						<p:commandButton icon="pi pi-power-off" 
+							action="#{configuracaoEmailBean.alternarStatus(config)}"
+							update="tabelaConfiguracoes :formCadastro:growlMsgs"
+							title="Ativar/Desativar"
+							styleClass="#{config.ativo ? 'ui-button-warning' : 'ui-button-success'}">
+							<p:confirm header="Confirmação" 
+								message="Deseja #{config.ativo ? 'desativar' : 'ativar'} este email?"
+								icon="pi pi-exclamation-triangle" />
+						</p:commandButton>
+
+						<p:commandButton icon="pi pi-trash" 
+							action="#{configuracaoEmailBean.excluir(config)}"
+							update="tabelaConfiguracoes :formCadastro:growlMsgs"
+							title="Excluir"
+							styleClass="ui-button-danger">
+							<p:confirm header="Confirmação" 
+								message="Deseja realmente excluir esta configuração?"
+								icon="pi pi-exclamation-triangle" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="Sim" type="button" 
+						styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+					<p:commandButton value="Não" type="button" 
+						styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+				</p:confirmDialog>
+			</h:form>
+		</div>
+	</div>
+</h:body>
+</html>

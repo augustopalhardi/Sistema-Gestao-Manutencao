@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Solicitação de Manutenção Predial</title>
+	<h:outputStylesheet name="css/manutencaoPredial.css" />
+
+	<!-- ============================================================
+	     Estilos da nova seleção de local. Ficam aqui, no mesmo padrão
+	     já usado em local.xhtml e maquinaEquipamento.xhtml, para não
+	     mexer no manutencaoPredial.css, que é compartilhado.
+	     ============================================================ -->
+	<style>
+		/* Caixa que agrupa a identificação do local */
+		.selecao-local-box {
+			background: #f7fafc;
+			border: 1px solid #e2e8f0;
+			border-left: 4px solid #2563eb;
+			border-radius: 6px;
+			padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.selecao-local-titulo {
+			font-size: 1rem;
+			font-weight: 700;
+			color: #2d3748;
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.selecao-local-titulo .pi {
+			color: #2563eb;
+		}
+
+		/* Aviso embaixo do campo de e-mail */
+		.aviso-email {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex-wrap: wrap;
+			margin-top: 0.5rem;
+			padding: 0.6rem 0.8rem;
+			border-radius: 6px;
+			font-size: 0.83rem;
+			line-height: 1.4;
+		}
+
+		.aviso-email-texto {
+			flex: 1;
+			min-width: 0;
+		}
+
+		/* Impede o salvamento */
+		.aviso-email.erro {
+			background: #fef2f2;
+			border: 1px solid #fecaca;
+			border-left: 4px solid #dc2626;
+			color: #7f1d1d;
+		}
+
+		/* Apenas chama atenção */
+		.aviso-email.alerta {
+			background: #fffbeb;
+			border: 1px solid #fde68a;
+			border-left: 4px solid #f59e0b;
+			color: #78350f;
+		}
+
+		.btn-corrigir-email {
+			padding: 0.35rem 0.8rem !important;
+			font-size: 0.78rem !important;
+			flex-shrink: 0;
+		}
+
+		/* Asterisco de campo obrigatório */
+		.obrigatorio {
+			color: #dc2626;
+			font-weight: 700;
+		}
+
+		.campo-ajuda {
+			display: block;
+			margin-top: 0.35rem;
+			color: #718096;
+			font-size: 0.8rem;
+			line-height: 1.4;
+		}
+
+		/* Painel de confirmação do local escolhido */
+		.local-confirmacao {
+			display: flex;
+			gap: 1rem;
+			align-items: flex-start;
+			background: #ffffff;
+			border: 1px solid #16a34a;
+			border-radius: 6px;
+			padding: 1rem;
+			margin-bottom: 1.25rem;
+		}
+
+		.local-confirmacao-foto {
+			flex: 0 0 140px;
+			height: 110px;
+			border-radius: 6px;
+			overflow: hidden;
+			background: #edf2f7;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.local-confirmacao-foto img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.local-sem-foto {
+			text-align: center;
+			color: #a0aec0;
+			font-size: 0.75rem;
+		}
+
+		.local-sem-foto .pi {
+			display: block;
+			font-size: 1.75rem !important;
+			margin-bottom: 4px;
+		}
+
+		.local-confirmacao-dados {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.local-confirmacao-dados p {
+			margin: 0 0 4px 0;
+			font-size: 0.875rem;
+			color: #2d3748;
+			word-break: break-word;
+		}
+
+		.local-confirmacao-titulo {
+			font-size: 1.05rem !important;
+			font-weight: 700;
+			color: #15803d !important;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			margin-bottom: 8px !important;
+		}
+
+		/* Ficha completa dentro do painel de confirmação */
+		.local-info-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+			gap: 0.6rem 1.25rem;
+			margin-top: 0.5rem;
+		}
+
+		.local-info {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+		}
+
+		.local-info-rotulo {
+			font-size: 0.7rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: #718096;
+		}
+
+		.local-info-valor {
+			font-size: 0.9rem;
+			color: #2d3748;
+			word-break: break-word;
+		}
+
+		.local-info-obs {
+			margin-top: 0.75rem;
+			padding-top: 0.6rem;
+			border-top: 1px dashed #e2e8f0;
+			font-size: 0.85rem;
+			color: #2d3748;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+
+		.btn-detalhes-local {
+			margin-top: 0.6rem;
+			padding: 0.45rem 1rem !important;
+			font-size: 0.82rem !important;
+		}
+
+		/* Estado "nenhum local escolhido ainda" */
+		.local-nao-selecionado {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			background: #ffffff;
+			border: 1px dashed #cbd5e0;
+			border-radius: 6px;
+			padding: 0.9rem 1rem;
+			margin-bottom: 1.25rem;
+			color: #718096;
+			font-size: 0.85rem;
+		}
+
+		.local-nao-selecionado .pi {
+			color: #2563eb;
+			flex-shrink: 0;
+		}
+
+		@media (max-width: 640px) {
+			.local-confirmacao {
+				flex-direction: column;
+			}
+
+			.local-confirmacao-foto {
+				flex: none;
+				width: 100%;
+				height: 160px;
+			}
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<f:metadata>
+		<f:viewParam name="localId" value="#{solicitacaoManutencaoPredialBean.localId}" />
+		<f:viewParam name="origemPreventivaId" value="#{solicitacaoManutencaoPredialBean.origemPreventivaId}" />
+		<f:event type="preRenderView" listener="#{solicitacaoManutencaoPredialBean.aplicarPreenchimentoAutomatico}" />
+	</f:metadata>
+
+	<div class="header">
+		<h1>Solicitação de Manutenção Predial</h1>
+	</div>
+	<div class="header-actions">
+		<button type="button" class="exit-button"
+			onclick="window.history.back();">Voltar</button>
+	</div>
+
+	<div class="container">
+		<div class="form-section">
+			<h2 class="section-title">Nova Solicitação de Manutenção Predial</h2>
+
+			<h:form id="cadastroForm" enctype="multipart/form-data">
+				<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+
+				<div class="field">
+					<label for="solicitante">Solicitante:</label>
+					<p:inputText id="solicitante"
+						value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.solicitante}"
+						required="true"
+						requiredMessage="O nome do solicitante é obrigatório"
+						maxlength="100"
+						placeholder="Digite o nome de quem está solicitando"
+						style="width: 100%;" />
+				</div>
+
+				<!-- ============================================================
+				     ✅ E-MAIL PARA CONFIRMAÇÃO
+
+				     Aparece SOMENTE para FUNCIONARIO. Esse perfil usa uma conta
+				     compartilhada para abrir manutenções, então a confirmação
+				     iria sempre para a caixa da conta e nunca para quem
+				     realmente registrou o chamado. Administrador e técnico têm
+				     conta individual — para eles o e-mail da própria conta já
+				     está correto e o campo nem é renderizado.
+				     ============================================================ -->
+				<h:panelGroup layout="block" styleClass="field"
+					rendered="#{solicitacaoManutencaoPredialBean.exibirCampoEmail}">
+					<label for="emailConfirmacao">E-mail para confirmação:</label>
+					<p:inputText id="emailConfirmacao"
+						value="#{solicitacaoManutencaoPredialBean.emailConfirmacao}"
+						maxlength="150" type="email"
+						placeholder="Digite o e-mail de quem deve receber a confirmação"
+						style="width: 100%;">
+						<!-- ✅ Confere assim que a pessoa sai do campo, em vez de
+						     só na hora de salvar. -->
+						<p:ajax event="blur" process="@this"
+							listener="#{solicitacaoManutencaoPredialBean.validarEmailInformado}"
+							update=":cadastroForm:painelAvisoEmail" />
+					</p:inputText>
+					<small class="campo-ajuda">Como esta conta é usada por várias
+						pessoas, informe aqui o e-mail de quem está abrindo a
+						solicitação.</small>
+
+					<!-- ============================================================
+					     ✅ AVISO DE E-MAIL SUSPEITO
+
+					     "joao@gmial.com" é um endereço válido na forma — nenhuma
+					     regex pega. O que pega é comparar o domínio com uma lista
+					     de conhecidos e oferecer a correção em um clique.
+					     ============================================================ -->
+					<p:outputPanel id="painelAvisoEmail" layout="block">
+						<h:panelGroup layout="block"
+							styleClass="aviso-email #{solicitacaoManutencaoPredialBean.classeAvisoEmail}"
+							rendered="#{solicitacaoManutencaoPredialBean.possuiAvisoEmail}">
+							<i class="pi pi-exclamation-circle"></i>
+							<span class="aviso-email-texto"> <h:outputText
+									value="#{solicitacaoManutencaoPredialBean.avisoEmail}" />
+							</span>
+							<p:commandButton value="Usar este"
+								action="#{solicitacaoManutencaoPredialBean.aplicarSugestaoEmail}"
+								process="@this"
+								update=":cadastroForm:emailConfirmacao :cadastroForm:painelAvisoEmail"
+								styleClass="btn btn-info btn-corrigir-email"
+								icon="pi pi-check"
+								rendered="#{solicitacaoManutencaoPredialBean.possuiSugestaoEmail}" />
+						</h:panelGroup>
+					</p:outputPanel>
+				</h:panelGroup>
+
+				<!-- ============================================================
+				     ✅ SELEÇÃO DO LOCAL
+
+				     Diferente da tela de máquinas, aqui não existe etapa de
+				     categoria: o cadastro de locais não tem um campo
+				     equivalente ao "tipo" do equipamento. A busca rápida é por
+				     nome do local, e a ficha com foto aparece logo abaixo para
+				     conferência.
+				     ============================================================ -->
+				<div class="selecao-local-box">
+					<div class="selecao-local-titulo">
+						<i class="pi pi-map-marker"></i> Identificação do Local
+					</div>
+
+					<!-- Busca rápida por nome do local -->
+					<div class="field">
+						<label for="buscaRapida">Busca rápida (opcional):</label>
+						<p:autoComplete id="buscaRapida"
+							value="#{solicitacaoManutencaoPredialBean.termoBuscaLocal}"
+							completeMethod="#{solicitacaoManutencaoPredialBean.completarLocal}"
+							minQueryLength="2" queryDelay="300" forceSelection="true"
+							scrollHeight="260" emptyMessage="Nenhum local encontrado"
+							placeholder="Digite o nome do local"
+							style="width: 100%;" inputStyle="width: 100%;">
+							<p:ajax event="itemSelect" process="@this"
+								listener="#{solicitacaoManutencaoPredialBean.selecionarLocalPorBusca}"
+								update=":cadastroForm:buscaRapida :cadastroForm:local :cadastroForm:painelLocalSelecionado" />
+						</p:autoComplete>
+						<small class="campo-ajuda">Já sabe o nome do local? Digite
+							aqui que ele é selecionado automaticamente.</small>
+					</div>
+
+					<div class="field">
+						<label for="local">Local da Manutenção:</label>
+						<p:selectOneMenu id="local"
+							value="#{solicitacaoManutencaoPredialBean.localSelecionadoId}"
+							required="true" requiredMessage="Selecione um local"
+							filter="true" filterMatchMode="contains" style="width: 100%;">
+							<f:selectItem itemLabel="Selecione um local..."
+								itemValue="#{null}" noSelectionOption="true" />
+							<f:selectItems
+								value="#{solicitacaoManutencaoPredialBean.locaisDisponiveis}"
+								var="local"
+								itemLabel="#{solicitacaoManutencaoPredialBean.montarRotuloLocal(local)}"
+								itemValue="#{local.id}" />
+							<p:ajax event="change" process="@this"
+								listener="#{solicitacaoManutencaoPredialBean.aoTrocarLocal}"
+								update=":cadastroForm:painelLocalSelecionado" />
+						</p:selectOneMenu>
+					</div>
+
+					<!-- ============================================================
+					     ✅ PAINEL DE CONFIRMAÇÃO DO LOCAL ESCOLHIDO
+
+					     Usa p:outputPanel (e não h:panelGroup) porque o
+					     outputPanel SEMPRE renderiza o div marcador, mesmo
+					     quando o conteúdo interno está com rendered="false".
+					     Com h:panelGroup, se o alvo não existir no DOM no
+					     momento do update, o PrimeFaces não tem onde encaixar
+					     o novo trecho e o painel simplesmente não aparece.
+					     ============================================================ -->
+					<p:outputPanel id="painelLocalSelecionado" layout="block">
+
+						<h:panelGroup layout="block" styleClass="local-confirmacao"
+							rendered="#{solicitacaoManutencaoPredialBean.localEscolhido}">
+
+							<div class="local-confirmacao-foto">
+								<h:graphicImage
+									value="#{solicitacaoManutencaoPredialBean.urlFotoLocalSelecionado}"
+									alt="Foto do local"
+									rendered="#{not empty solicitacaoManutencaoPredialBean.urlFotoLocalSelecionado}" />
+								<h:panelGroup layout="block" styleClass="local-sem-foto"
+									rendered="#{empty solicitacaoManutencaoPredialBean.urlFotoLocalSelecionado}">
+									<i class="pi pi-image"></i>
+									<span>Sem foto</span>
+								</h:panelGroup>
+							</div>
+
+							<div class="local-confirmacao-dados">
+								<p class="local-confirmacao-titulo">
+									<i class="pi pi-check-circle"></i>
+									<h:outputText value="Local selecionado: " />
+									<h:outputText
+										value="#{solicitacaoManutencaoPredialBean.localSelecionado.nome}" />
+								</p>
+
+								<!-- Ficha completa, sem precisar abrir nada -->
+								<div class="local-info-grid">
+									<div class="local-info">
+										<span class="local-info-rotulo">Área</span>
+										<span class="local-info-valor"> <h:outputText
+												value="#{solicitacaoManutencaoPredialBean.areaLocalSelecionado}" />
+										</span>
+									</div>
+
+									<div class="local-info">
+										<span class="local-info-rotulo">Código no sistema</span>
+										<span class="local-info-valor"> <h:outputText
+												value="#{solicitacaoManutencaoPredialBean.localSelecionado.id}" />
+										</span>
+									</div>
+								</div>
+
+								<h:panelGroup layout="block" styleClass="local-info-obs"
+									rendered="#{not empty solicitacaoManutencaoPredialBean.localSelecionado.observacoes}">
+									<span class="local-info-rotulo">Observações do
+										cadastro</span>
+									<h:outputText
+										value="#{solicitacaoManutencaoPredialBean.localSelecionado.observacoes}" />
+								</h:panelGroup>
+
+								<p:commandButton value="Ver detalhes e foto"
+									action="#{solicitacaoManutencaoPredialBean.verDetalhesLocalSelecionado()}"
+									process="@this"
+									update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+									oncomplete="PF('dlgVisualizarImagem').show();"
+									styleClass="btn btn-info btn-detalhes-local"
+									icon="pi pi-search-plus" />
+							</div>
+						</h:panelGroup>
+
+						<h:panelGroup layout="block" styleClass="local-nao-selecionado"
+							rendered="#{solicitacaoManutencaoPredialBean.localNaoEscolhido}">
+							<i class="pi pi-info-circle"></i>
+							<span>Escolha o local acima. Os dados e a foto aparecem
+								aqui para conferência.</span>
+						</h:panelGroup>
+					</p:outputPanel>
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="tipoManutencao">Tipo de Manutenção:</label>
+						<p:selectOneMenu id="tipoManutencao"
+							value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.tipoManutencao}"
+							required="true" requiredMessage="Selecione o tipo de manutenção">
+							<f:selectItem itemLabel="Selecione o tipo..." itemValue="#{null}" />
+							<f:selectItem itemLabel="Corretiva" itemValue="CORRETIVA" />
+							<c:if test="#{solicitacaoManutencaoPredialBean.usuarioLogado.tipoUsuario ne 'FUNCIONARIO'}">
+								<f:selectItem itemLabel="Preventiva" itemValue="PREVENTIVA" />
+								<f:selectItem itemLabel="Preditiva" itemValue="PREDITIVA" />
+							</c:if>
+						</p:selectOneMenu>
+					</div>
+
+					<div class="field">
+						<label for="dataManutencao">Data:</label>
+						<p:calendar id="dataManutencao"
+							value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.dataManutencao}"
+							pattern="dd/MM/yyyy" required="true"
+							requiredMessage="Data da manutenção é obrigatória"
+							placeholder="Selecione a data" />
+					</div>
+				</div>
+
+				<div class="field">
+					<label for="problema">Descrição do Problema:</label>
+					<p:inputTextarea id="problema"
+						value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.problema}"
+						rows="4" required="true"
+						requiredMessage="Descrição do problema é obrigatória"
+						placeholder="Descreva detalhadamente o problema identificado no local" />
+				</div>
+
+				<!-- ============================================================
+				     Risco de segurança
+
+				     Antes, o textarea tinha rendered amarrado ao checkbox mas o
+				     checkbox não disparava ajax nenhum: marcar a caixa não
+				     re-renderizava nada e o campo praticamente nunca aparecia —
+				     o risco era registrado sem descrição. Agora o checkbox
+				     atualiza o painel abaixo dele, e a descrição é obrigatória.
+				     ============================================================ -->
+				<div class="field">
+					<div class="checkbox-section">
+						<p:selectBooleanCheckbox id="riscoSeguranca"
+							value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.riscoSeguranca}">
+							<p:ajax event="change" process="@this"
+								update=":cadastroForm:painelDescrRisco" />
+						</p:selectBooleanCheckbox>
+						<label for="riscoSeguranca">Há risco de segurança?</label>
+					</div>
+
+					<p:outputPanel id="painelDescrRisco" layout="block">
+						<h:panelGroup layout="block"
+							rendered="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.riscoSeguranca}">
+							<label for="descrRisco">Descreva o risco: <span
+								class="obrigatorio">*</span></label>
+							<p:inputTextarea id="descrRisco"
+								value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.descrRisco}"
+								rows="3"
+								placeholder="Descreva os riscos de segurança identificados" />
+						</h:panelGroup>
+					</p:outputPanel>
+				</div>
+
+				<!-- ============================================================
+				     Urgência
+
+				     Mesmo problema do bloco de risco: o campo de justificativa
+				     dependia do checkbox mas nada era re-renderizado ao marcar.
+				     ============================================================ -->
+				<div class="field">
+					<div class="checkbox-section">
+						<p:selectBooleanCheckbox id="urgente"
+							value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.urgente}">
+							<p:ajax event="change" process="@this"
+								update=":cadastroForm:painelDescrUrgente" />
+						</p:selectBooleanCheckbox>
+						<label for="urgente">É urgente?</label>
+					</div>
+
+					<p:outputPanel id="painelDescrUrgente" layout="block">
+						<h:panelGroup layout="block"
+							rendered="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.urgente}">
+							<label for="descrUrgente">Justifique a urgência:</label>
+							<p:inputTextarea id="descrUrgente"
+								value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.descrUrgente}"
+								rows="3"
+								placeholder="Explique por que é urgente e qual o prazo necessário" />
+						</h:panelGroup>
+					</p:outputPanel>
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="observacoes">Observações:</label>
+						<p:inputTextarea id="observacoes"
+							value="#{solicitacaoManutencaoPredialBean.solicitacaoManutencaoPredial.observacoes}"
+							rows="3" placeholder="Informações adicionais sobre a solicitação" />
+					</div>
+
+					<div class="field">
+						<label for="foto">Foto do Problema:</label>
+						<div class="upload-section">
+							<p:fileUpload id="foto" mode="simple"
+								value="#{solicitacaoManutencaoPredialBean.uploadedPhoto}"
+								skinSimple="true" accept=".jpg,.jpeg,.png,.gif"
+								chooseLabel="Selecionar Foto" />
+							<p>
+								<small>Formatos aceitos: JPG, JPEG, PNG, GIF</small>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="buttons">
+					<p:commandButton value="Salvar Solicitação"
+						action="#{solicitacaoManutencaoPredialBean.salvar()}"
+						update="@form" styleClass="btn btn-primary" icon="pi pi-save" />
+
+					<p:commandButton value="Limpar Campos"
+						action="#{solicitacaoManutencaoPredialBean.limpar()}"
+						update="@form" immediate="true" styleClass="btn btn-secondary"
+						icon="pi pi-refresh" type="button" />
+				</div>
+			</h:form>
+		</div>
+
+		<!-- Seção de navegação para ver todas as solicitações -->
+		<div class="list-section">
+			<h2 class="section-title">Consultar Solicitações</h2>
+
+			<div style="text-align: center; padding: 2rem;">
+				<p style="margin-bottom: 1.5rem; color: #666; font-size: 1.1rem;">
+					Para visualizar, consultar e gerenciar todas as solicitações de
+					manutenção registradas no sistema, clique no botão abaixo.</p>
+
+				<h:form>
+					<p:button value="Ver Todas as Solicitações"
+						outcome="todasSolicitacoes" styleClass="btn btn-info"
+						icon="pi pi-list" style="font-size: 1.1rem; padding: 1rem 2rem;" />
+				</h:form>
+			</div>
+		</div>
+	</div>
+
+	<!-- ✅ Dialog GLOBAL de imagem: mostra a foto e a ficha do local -->
+	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
+
+</h:body>
+</html>

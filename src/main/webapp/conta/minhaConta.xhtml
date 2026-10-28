@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Minha Conta</title>
+	<h:outputStylesheet name="css/minhaConta.css" />
+</h:head>
+
+<h:body>
+	<div class="header">
+		<h:link outcome="/home/#{meuPerfilBean.usuarioLogado.tipoUsuario == 'ADMINISTRADOR' ? 'homeAdm' : (meuPerfilBean.usuarioLogado.tipoUsuario == 'TECNICO' ? 'homeTecnico' : 'homeUser')}.xhtml" 
+			styleClass="exit-button" value="Voltar" />
+		<h1>Minha Conta</h1>
+	</div>
+
+	<div class="container">
+		<p:growl id="messages" showDetail="true" life="4500" sticky="false"/>
+
+		<h:form id="formPerfil" enctype="multipart/form-data">
+			<!-- Seção de Foto e Informações Básicas -->
+			<div class="profile-header">
+				<div class="photo-container">
+					<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.urlFoto != null and meuPerfilBean.usuarioLogado.urlFoto != ''}">
+						<h:graphicImage value="#{meuPerfilBean.usuarioLogado.urlFoto}" 
+							styleClass="user-photo" alt="Foto do usuário" />
+					</h:panelGroup>
+
+					<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.urlFoto == null or meuPerfilBean.usuarioLogado.urlFoto == ''}">
+						<div class="no-photo">
+							<span>👤</span>
+						</div>
+					</h:panelGroup>
+
+					<h:panelGroup rendered="#{meuPerfilBean.modoEdicao}">
+						<div style="margin-top: 1rem;">
+							<p:fileUpload id="uploadFoto" value="#{meuPerfilBean.uploadedPhoto}" 
+								mode="simple" auto="false" skinSimple="true" 
+								label="Escolher Foto" accept="image/*" />
+							
+							<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.urlFoto != null and meuPerfilBean.usuarioLogado.urlFoto != ''}">
+								<p:commandButton value="Remover Foto"
+									action="#{meuPerfilBean.removerFoto()}"
+									update="formPerfil,:messages" 
+									styleClass="btn-remove-photo"
+									onclick="return confirm('Deseja remover sua foto?');" />
+							</h:panelGroup>
+						</div>
+					</h:panelGroup>
+				</div>
+
+				<div class="user-info-header">
+					<h2 class="user-name">
+						<h:outputText value="#{meuPerfilBean.usuarioLogado.nome}" />
+					</h2>
+					
+					<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.tipoUsuario == 'ADMINISTRADOR'}">
+						<span class="badge badge-admin">Administrador</span>
+					</h:panelGroup>
+					<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.tipoUsuario == 'TECNICO'}">
+						<span class="badge badge-tecnico">Técnico</span>
+					</h:panelGroup>
+					<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.tipoUsuario == 'FUNCIONARIO'}">
+						<span class="badge badge-funcionario">Funcionário</span>
+					</h:panelGroup>
+				</div>
+			</div>
+
+			<!-- Modo Visualização -->
+			<h:panelGroup rendered="#{!meuPerfilBean.modoEdicao}">
+				<div class="form-section">
+					<h2 class="section-title">Informações Pessoais</h2>
+
+					<div class="form-grid">
+						<div class="field">
+							<label>Nome Completo:</label>
+							<div class="info-value">
+								<h:outputText value="#{meuPerfilBean.usuarioLogado.nome}" />
+							</div>
+						</div>
+
+						<div class="field">
+							<label>Número de Registro:</label>
+							<div class="info-value">
+								<h:outputText value="#{meuPerfilBean.usuarioLogado.nuRegistro}" />
+							</div>
+						</div>
+
+						<div class="field">
+							<label>E-mail:</label>
+							<div class="info-value">
+								<h:outputText value="#{meuPerfilBean.usuarioLogado.email}" />
+							</div>
+						</div>
+
+						<div class="field">
+							<label>Telefone:</label>
+							<div class="info-value">
+								<h:outputText value="#{meuPerfilBean.usuarioLogado.telefone != null ? meuPerfilBean.usuarioLogado.telefone : 'Não informado'}" 
+									styleClass="#{meuPerfilBean.usuarioLogado.telefone == null ? 'empty' : ''}" />
+							</div>
+						</div>
+
+						<div class="field">
+							<label>Função:</label>
+							<div class="info-value">
+								<h:outputText value="#{meuPerfilBean.usuarioLogado.funcao != null ? meuPerfilBean.usuarioLogado.funcao : 'Não informada'}" 
+									styleClass="#{meuPerfilBean.usuarioLogado.funcao == null ? 'empty' : ''}" />
+							</div>
+						</div>
+
+						<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.tipoUsuario == 'TECNICO'}">
+							<div class="field">
+								<label>Valor Hora - Máquina:</label>
+								<div class="info-value">
+									<h:outputText value="#{meuPerfilBean.usuarioLogado.valorHoraMaquina != null ? meuPerfilBean.usuarioLogado.valorHoraMaquina : 'Não informado'}" 
+										styleClass="#{meuPerfilBean.usuarioLogado.valorHoraMaquina == null ? 'empty' : ''}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</div>
+							</div>
+							<div class="field">
+								<label>Valor Hora - Predial:</label>
+								<div class="info-value">
+									<h:outputText value="#{meuPerfilBean.usuarioLogado.valorHoraPredial != null ? meuPerfilBean.usuarioLogado.valorHoraPredial : 'Não informado'}" 
+										styleClass="#{meuPerfilBean.usuarioLogado.valorHoraPredial == null ? 'empty' : ''}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</div>
+							</div>
+						</h:panelGroup>
+					</div>
+
+					<div class="button-group">
+						<p:commandButton value="Editar Perfil" 
+							action="#{meuPerfilBean.ativarEdicao()}"
+							update="formPerfil messages" 
+							styleClass="btn-primary" 
+							icon="pi pi-pencil" />
+					</div>
+				</div>
+			</h:panelGroup>
+
+			<!-- Modo Edição -->
+			<h:panelGroup rendered="#{meuPerfilBean.modoEdicao}">
+				<div class="form-section">
+					<h2 class="section-title">Editar Informações Pessoais</h2>
+
+					<div class="form-grid">
+						<div class="field">
+							<label for="nome">Nome Completo:</label>
+							<p:inputText id="nome" value="#{meuPerfilBean.nome}" 
+								required="true" requiredMessage="Nome é obrigatório" />
+						</div>
+
+						<div class="field">
+							<label for="nuRegistro">Número de Registro:</label>
+							<p:inputText id="nuRegistro" value="#{meuPerfilBean.usuarioLogado.nuRegistro}" 
+								disabled="true" styleClass="input-disabled" />
+						</div>
+
+						<div class="field">
+							<label for="email">E-mail:</label>
+							<p:inputText id="email" value="#{meuPerfilBean.email}" 
+								required="true" requiredMessage="E-mail é obrigatório" />
+						</div>
+
+						<div class="field">
+							<label for="telefone">Telefone:</label>
+							<p:inputText id="telefone" value="#{meuPerfilBean.telefone}" />
+						</div>
+
+						<div class="field">
+							<label for="funcao">Função:</label>
+							<p:inputText id="funcao" value="#{meuPerfilBean.funcao}" />
+						</div>
+
+						<h:panelGroup rendered="#{meuPerfilBean.usuarioLogado.tipoUsuario == 'TECNICO'}">
+							<div class="field">
+								<label for="valorHoraMaquina">Valor Hora - Máquina:</label>
+								<p:inputText id="valorHoraMaquina" value="#{meuPerfilBean.usuarioLogado.valorHoraMaquina}" 
+									disabled="true" styleClass="input-disabled">
+									<f:convertNumber type="currency" currencySymbol="R$ " />
+								</p:inputText>
+							</div>
+							<div class="field">
+								<label for="valorHoraPredial">Valor Hora - Predial:</label>
+								<p:inputText id="valorHoraPredial" value="#{meuPerfilBean.usuarioLogado.valorHoraPredial}" 
+									disabled="true" styleClass="input-disabled">
+									<f:convertNumber type="currency" currencySymbol="R$ " />
+								</p:inputText>
+							</div>
+						</h:panelGroup>
+					</div>
+
+					<!-- Seção de Alteração de Senha -->
+					<div class="password-section">
+						<h2 class="section-title">Alterar Senha (Opcional)</h2>
+						
+						<div class="alert-info">
+							<span class="alert-icon">💡</span>
+							<span>Deixe os campos vazios se não desejar alterar sua senha.</span>
+						</div>
+
+						<div class="form-grid">
+							<div class="field">
+								<label for="senhaAtual">Senha Atual:</label>
+								<p:password id="senhaAtual" value="#{meuPerfilBean.senhaAtual}"
+									feedback="false" toggleMask="true" />
+							</div>
+
+							<div class="field">
+								<label for="novaSenha">Nova Senha:</label>
+								<p:password id="novaSenha" value="#{meuPerfilBean.novaSenha}"
+									feedback="true" toggleMask="true" />
+							</div>
+
+							<div class="field">
+								<label for="confirmarSenha">Confirmar Nova Senha:</label>
+								<p:password id="confirmarSenha" value="#{meuPerfilBean.confirmarSenha}"
+									feedback="false" toggleMask="true" />
+							</div>
+						</div>
+					</div>
+
+					<div class="button-group">
+						<p:commandButton value="Salvar Alterações" 
+							action="#{meuPerfilBean.salvarPerfil()}"
+							update="formPerfil,:messages" 
+							styleClass="btn-success" 
+							icon="pi pi-check" />
+						
+						<p:commandButton value="Cancelar" 
+							action="#{meuPerfilBean.cancelarEdicao()}"
+							update="formPerfil,:messages" 
+							styleClass="btn-secondary" 
+							icon="pi pi-times"
+							immediate="true" />
+					</div>
+				</div>
+			</h:panelGroup>
+		</h:form>
+	</div>
+</h:body>
+</html>

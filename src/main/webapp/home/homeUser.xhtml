@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Sistema de Gestão de Manutenção - Usuário</title>
+	<h:outputStylesheet name="css/homeUser.css" />
+</h:head>
+
+<h:body>
+	<div class="header">
+		<div class="header-content">
+			<div class="header-left">
+				<h:graphicImage library="imagens" name="logo.png" alt="Gestão de Manutenção" styleClass="header-logo" />
+				<div class="header-info">
+					<h1>Sistema de Gestão de Manutenção</h1>
+					<p>Painel do Usuário</p>
+				</div>
+			</div>
+			<div class="header-actions">
+				<div class="user-info">
+					<span class="user-label">Bem-vindo(a),</span>
+					<h:outputText value="#{usuarioLogado.nome}" styleClass="username" />
+				</div>
+				
+				<h:form prependId="false" style="display: inline;">
+					<h:commandLink action="#{loginUsuarioBean.logout()}" styleClass="exit-button" value="Sair" />
+				</h:form>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="hero-section">
+			<h2 class="hero-title">Solicitações de Manutenção</h2>
+			
+			<div class="hero-grid">
+				<div class="hero-card card-maquinas">
+					<h3>Máquinas e Equipamentos</h3>
+					<p>Solicite manutenção preventiva, preditiva e corretiva de máquinas e equipamentos</p>
+					
+					<div class="hero-buttons">
+						<h:link outcome="/solicitacaoManutencao/solicitacaoManutencaoMaquina"
+							styleClass="hero-btn btn-maquinas"
+							value="Acessar Sistema" />
+					</div>
+				</div>
+
+				<div class="hero-card card-predial">
+					<h3>Predial</h3>
+					<p>Solicite manutenção de infraestrutura predial e instalações da empresa</p>
+					
+					<div class="hero-buttons">
+						<h:link outcome="/solicitacaoManutencao/solicitacaoManutencaoPredial"
+							styleClass="hero-btn btn-predial"
+							value="Acessar Sistema" />
+					</div>
+				</div>
+
+				<div class="hero-card card-todas">
+					<h3>Todas as Solicitações</h3>
+					<p>Acompanhe e gerencie todas as suas solicitações de manutenção</p>
+					
+					<div class="hero-buttons">
+						<h:link outcome="/solicitacaoManutencao/todasSolicitacoes.xhtml"
+							styleClass="hero-btn btn-todas"
+							value="Acessar Sistema" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="footer">
+		<p>Sistema de Gestão de Manutenção - Versão 2.0 - 2026</p>
+	</div>
+</h:body>
+</html>

@@ -1,0 +1,334 @@
+/* ============================================================
+   detalhesDialog.css
+   Estilos do dialog reutilizável de detalhes de manutenção.
+   Incluir em todas as páginas que usam o dialog:
+     <h:outputStylesheet name="css/detalhesDialog.css" />
+   ============================================================ */
+
+/* ===== CONTAINER ===== */
+.dlg-det-container {
+	padding: 10px;
+}
+
+/* ===== CABEÇALHO ===== */
+.dlg-det-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid #dee2e6;
+}
+
+.dlg-det-titulo {
+	color: #2c3e50;
+	margin: 0 0 5px 0;
+}
+
+.dlg-det-tipo-label {
+	font-size: 0.8rem;
+	color: #7f8c8d;
+	margin-left: 8px;
+}
+
+.dlg-det-solicitante {
+	color: #3498db;
+	font-size: 0.9rem;
+}
+
+.dlg-det-status-badge {
+	font-weight: bold;
+	padding: 6px 14px;
+	border-radius: 12px;
+	font-size: 11px;
+	text-transform: uppercase;
+	color: white;
+	white-space: nowrap;
+}
+
+/* ===== CONTEÚDO DAS ABAS ===== */
+.dlg-det-tab-content {
+	padding: 15px 5px;
+}
+
+/* ===== GRIDS ===== */
+.dlg-det-grid-2 {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+	margin-bottom: 15px;
+}
+
+.dlg-det-grid-3 {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 12px;
+	margin-bottom: 15px;
+}
+
+/* ===== CARDS DE INFORMAÇÃO ===== */
+.dlg-det-info-card {
+	background: #f8f9fa;
+	padding: 12px;
+	border-radius: 6px;
+}
+
+.dlg-det-label {
+	color: #7f8c8d;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	display: block;
+	margin-bottom: 4px;
+}
+
+.dlg-det-label-sm {
+	color: #7f8c8d;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	display: block;
+	margin-bottom: 4px;
+}
+
+.dlg-det-mono {
+	font-family: 'Courier New', monospace;
+	font-weight: 600;
+}
+
+/* ===== BORDAS COLORIDAS ===== */
+.dlg-det-border-purple {
+	border-left: 4px solid #6366f1;
+	margin-bottom: 15px;
+}
+
+.dlg-det-border-blue {
+	border-left: 4px solid #3498db;
+}
+
+.dlg-det-border-green {
+	border-left: 4px solid #27ae60;
+}
+
+.dlg-det-border-red {
+	border-left: 4px solid #e74c3c;
+}
+
+.dlg-det-border-orange {
+	border-left: 4px solid #f39c12;
+}
+
+.dlg-det-border-yellow {
+	border-left: 4px solid #f59e0b;
+}
+
+.dlg-det-border-gray {
+	border-left: 4px solid #95a5a6;
+}
+
+/* ===== BACKGROUNDS COLORIDOS ===== */
+.dlg-det-bg-red {
+	background: #fef2f2;
+}
+
+.dlg-det-bg-green {
+	background: #e8f5e9;
+}
+
+.dlg-det-bg-yellow {
+	background: #fffbeb;
+}
+
+/* ===== TÍTULOS DE SEÇÃO ===== */
+.dlg-det-section-title {
+	color: #2c3e50;
+	margin: 20px 0 10px 0;
+	border-bottom: 2px solid;
+	padding-bottom: 8px;
+}
+
+/* ===== BLOCOS DE TEXTO ===== */
+.dlg-det-text-block {
+	margin-top: 15px;
+}
+
+.dlg-det-text-block .dlg-det-info-card {
+	padding: 14px;
+	margin-top: 6px;
+}
+
+/* ===== BBS / NEAR MISS ===== */
+.dlg-det-bbs-banner {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	background-color: #fff8e1;
+	border: 1px solid #ffe082;
+	border-radius: 8px;
+	margin-bottom: 15px;
+}
+
+/* ===== REPROGRAMAÇÕES ===== */
+.dlg-det-reprog-card {
+	background: #fffbeb;
+	border: 1px solid #fde68a;
+	border-radius: 8px;
+	padding: 15px;
+	margin-bottom: 12px;
+}
+
+.dlg-det-reprog-field {
+	background: white;
+	padding: 10px 12px;
+	border-radius: 6px;
+}
+
+.dlg-det-reprog-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.8rem;
+	color: #92400e;
+}
+
+/* ===== CANCELAMENTO ===== */
+.dlg-det-cancel-container {
+	background: #fef2f2;
+	padding: 20px;
+	border-radius: 8px;
+	border-left: 4px solid #e74c3c;
+	margin-bottom: 20px;
+}
+
+.dlg-det-cancel-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 15px;
+}
+
+.dlg-det-cancel-field {
+	background: white;
+	padding: 12px;
+	border-radius: 6px;
+}
+
+.dlg-det-cancel-motivo {
+	background: white;
+	padding: 15px;
+	border-radius: 6px;
+	border-left: 4px solid #e74c3c;
+}
+
+/* ===== ESTADO VAZIO ===== */
+.dlg-det-empty-state {
+	text-align: center;
+	padding: 30px;
+	color: #95a5a6;
+	font-style: italic;
+}
+
+/* ===== RODAPÉ ===== */
+.dlg-det-footer {
+	text-align: right;
+	margin-top: 20px;
+	border-top: 1px solid #dee2e6;
+	padding-top: 15px;
+}
+
+/* ===================================================================
+   ROLAGEM DO DIALOG (evita que o conteúdo ultrapasse a tela quando a
+   solicitação tem muitos dados: períodos, compras, reprogramações etc.)
+   Aplicada via styleClass="dlg-detalhes-rico" no próprio p:dialog.
+   =================================================================== */
+.dlg-detalhes-rico .ui-dialog-content {
+	max-height: 550px !important;
+}
+
+.dlg-detalhes-rico .ui-panel .ui-panel-content {
+	max-height: 500px !important;
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+	padding-right: 10px !important;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e0 #f1f5f9;
+}
+
+.dlg-detalhes-rico .ui-panel .ui-panel-content::-webkit-scrollbar {
+	width: 8px;
+}
+
+.dlg-detalhes-rico .ui-panel .ui-panel-content::-webkit-scrollbar-track {
+	background: #f1f5f9;
+	border-radius: 4px;
+}
+
+.dlg-detalhes-rico .ui-panel .ui-panel-content::-webkit-scrollbar-thumb {
+	background: #cbd5e0;
+	border-radius: 4px;
+	transition: background 0.2s ease;
+}
+
+.dlg-detalhes-rico .ui-panel .ui-panel-content::-webkit-scrollbar-thumb:hover {
+	background: #94a3b8;
+}
+
+@media (max-width: 768px) {
+	.dlg-detalhes-rico .ui-dialog-content {
+		max-height: 65vh !important;
+	}
+	.dlg-detalhes-rico .ui-panel .ui-panel-content {
+		max-height: 55vh !important;
+	}
+}
+
+/* ===================================================================
+   TAMANHO E BORDA DO DIALOG (padronizado, igual à referência)
+   =================================================================== */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.dlg-detalhes-rico.ui-dialog {
+	border-radius: 4px !important;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+	animation: fadeIn 0.3s ease-out;
+}
+
+/* ===================================================================
+   HEADER ESCURO DO DIALOG (padronizado)
+   Algumas páginas já pintavam o header via CSS próprio (cor #1a202c),
+   outras não tinham nenhuma regra. Definindo aqui, no CSS compartilhado
+   do dialog, garante o mesmo visual em TODAS as páginas.
+   =================================================================== */
+.dlg-detalhes-rico.ui-dialog .ui-dialog-titlebar,
+.dlg-detalhes-rico .ui-dialog-titlebar {
+	background: #1a202c !important;
+	background-image: none !important;
+	color: white !important;
+	border: none !important;
+	border-radius: 4px 4px 0 0 !important;
+	padding: 1.25rem !important;
+}
+
+.dlg-detalhes-rico .ui-dialog-titlebar .ui-dialog-title {
+	color: white !important;
+	font-size: 1.125rem !important;
+	font-weight: 600 !important;
+}
+
+.dlg-detalhes-rico .ui-dialog-titlebar .ui-dialog-titlebar-icon {
+	color: white !important;
+	background: transparent !important;
+	border-radius: 4px !important;
+}
+
+.dlg-detalhes-rico .ui-dialog-titlebar .ui-dialog-titlebar-icon:hover {
+	background: rgba(255, 255, 255, 0.15) !important;
+}

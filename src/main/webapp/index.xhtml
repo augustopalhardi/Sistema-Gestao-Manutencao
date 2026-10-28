@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Sistema de Gestão de Manutenção - Login</title>
+	<h:outputStylesheet name="css/index.css" />
+	
+	<!-- Script para recarregar a página uma vez automaticamente -->
+	<script type="text/javascript">
+		// Verifica se a página já foi recarregada nesta sessão
+		if (!sessionStorage.getItem('loginPageLoaded')) {
+			// Marca que a página foi carregada
+			sessionStorage.setItem('loginPageLoaded', 'true');
+			// Recarrega a página
+			window.location.reload();
+		}
+	</script>
+</h:head>
+<h:body> 
+	<div class="container">
+		<div class="header">
+			<h:graphicImage library="imagens" name="logo.png" alt="Gestão de Manutenção"
+				styleClass="logo" />
+			<h1 class="title">SISTEMA DE GESTÃO DE MANUTENÇÃO</h1>
+		</div>
+
+		<div class="login-box">
+			<h2 class="login-title">LOGIN</h2>
+
+			<h:form id="loginForm" prependId="false">
+				<p:growl id="messages" showDetail="true" life="4500" sticky="false"/>
+
+				<div class="form-group">
+					<h:outputLabel for="nuRegistro" value="NÚMERO REGISTRO" />
+					<h:inputText id="nuRegistro"
+						value="#{loginUsuarioBean.nuRegistroInput}" 
+						required="true"
+						requiredMessage="Número de Registro é obrigatório" />
+				</div>
+
+				<div class="form-group">
+					<h:outputLabel for="senha" value="SENHA" />
+					<h:inputSecret id="senha" 
+						value="#{loginUsuarioBean.senhaInput}"
+						required="true" 
+						requiredMessage="Senha é obrigatória" />
+				</div>
+
+				<p:commandButton value="ENTRAR"
+					action="#{loginUsuarioBean.autenticar}" 
+					update="messages"
+					ajax="false"
+					styleClass="btn-entrar" />
+			</h:form>
+
+			<h:panelGroup rendered="#{loginUsuarioBean.naoExistemUsuarios()}">
+				<h:form prependId="false">
+					<p:commandButton value="CRIAR CONTA"
+						onclick="PF('criarContaDialog').show();" type="button"
+						styleClass="btn-criar-conta" />
+				</h:form>
+			</h:panelGroup>
+		</div>
+
+		<p:dialog header="Criar Primeira Conta" widgetVar="criarContaDialog"
+			modal="true" responsive="true" width="500" closable="true">
+			<h:form id="formCriarConta">
+				<p:growl id="dialogMessages" showDetail="true" life="4500" sticky="false"/>
+
+				<p:panelGrid columns="2" layout="grid" styleClass="ui-fluid">
+					<p:outputLabel for="nomeDialog" value="Nome Completo:" />
+					<p:inputText id="nomeDialog" value="#{cadastroUsuarioBean.nome}"
+						required="true" requiredMessage="Nome é obrigatório" />
+
+					<p:outputLabel for="nuRegistroDialog" value="Número de Registro:" />
+					<p:inputText id="nuRegistroDialog"
+						value="#{cadastroUsuarioBean.nuRegistro}" required="true"
+						requiredMessage="Número de Registro é obrigatório" />
+
+					<p:outputLabel for="emailDialog" value="E-mail:" />
+					<p:inputText id="emailDialog" value="#{cadastroUsuarioBean.email}"
+						required="true" requiredMessage="E-mail é obrigatório" />
+
+					<p:outputLabel for="senhaDialog" value="Senha:" />
+					<p:password id="senhaDialog" value="#{cadastroUsuarioBean.senha}"
+						required="true" feedback="false"
+						requiredMessage="Senha é obrigatória" />
+
+					<p:outputLabel for="telefoneDialog" value="Telefone:" />
+					<p:inputText id="telefoneDialog"
+						value="#{cadastroUsuarioBean.telefone}" />
+
+					<p:outputLabel for="funcaoDialog" value="Função:" />
+					<p:inputText id="funcaoDialog"
+						value="#{cadastroUsuarioBean.funcao}" />
+				</p:panelGrid>
+
+				<p style="text-align: center; color: #666; font-size: 13px; margin-top: 15px;">
+					Esta conta será criada como Administrador
+				</p>
+
+				<div style="text-align: center; margin-top: 20px;">
+					<p:commandButton value="CRIAR CONTA"
+						action="#{cadastroUsuarioBean.salvarPrimeiraConta()}"
+						update="dialogMessages :messages"
+						oncomplete="if(!args.validationFailed) { PF('criarContaDialog').hide(); location.reload(); }"
+						styleClass="ui-button-success" style="margin-right: 10px;" />
+
+					<p:commandButton value="CANCELAR"
+						onclick="PF('criarContaDialog').hide();" type="button"
+						styleClass="ui-button-secondary" />
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<div class="footer">
+			<h:outputText value="© 2026 Gestão de Manutenção · Augusto de Barros Palhardi" />
+		</div>
+	</div>
+	
+	<!-- Limpa o flag quando o usuário faz logout (detecta se veio de outra página) -->
+	<script type="text/javascript">
+		// Se o usuário veio de outra página (não é reload), limpa o flag para garantir reload na próxima visita
+		if (performance.navigation.type !== 1) {
+			// Não é um reload, então veio de navegação normal
+			// Mantém o comportamento atual
+		}
+	</script>
+</h:body>
+</html>

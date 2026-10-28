@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      lang="pt-BR">
+<h:head>
+    <link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Relatório de Indicadores - Manutenção de Máquinas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <h:outputStylesheet name="css/relatorioIndicadores.css" />
+</h:head>
+<h:body>
+    <f:view>
+
+        <!-- ===== HEADER ===== -->
+        <div class="header-top">
+            <h1>🏭 Relatório de Indicadores — Manutenção de Máquinas</h1>
+        </div>
+        <div class="header-actions">
+            <h:form style="margin:0;">
+                <h:button outcome="/home/homeAdm.xhtml" styleClass="back-button" value="Voltar"/>
+            </h:form>
+        </div>
+
+        <div class="container">
+            <h:form id="relatorioForm">
+
+                <!-- ===== FILTROS ===== -->
+                <div class="filtros-container">
+                    <h2 class="filtros-titulo">🔍 Filtros</h2>
+                    <div class="filtros-grid">
+
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Período</label>
+                            <h:selectOneMenu id="filtroPeriodo"
+                                             value="#{relatorioIndicadoresBean.filtroPeriodo}"
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue=""   itemLabel="Personalizado" />
+                                <f:selectItem itemValue="1"  itemLabel="Último 1 mês" />
+                                <f:selectItem itemValue="3"  itemLabel="Últimos 3 meses" />
+                                <f:selectItem itemValue="6"  itemLabel="Últimos 6 meses" />
+                                <f:selectItem itemValue="12" itemLabel="Últimos 12 meses" />
+                                <f:selectItem itemValue="24" itemLabel="Últimos 24 meses" />
+                                <f:ajax event="change"
+                                        listener="#{relatorioIndicadoresBean.aplicarPeriodoPreDefinido()}"
+                                        render="@form"
+                                        onevent="function(data){ if(data.status==='success'){ renderizarGraficos(); } }" />
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Data Início</label>
+                            <h:inputText id="dataInicio"
+                                         value="#{relatorioIndicadoresBean.filtroDataInicio}"
+                                         styleClass="filtro-input"
+                                         pt:type="date">
+                                <f:convertDateTime pattern="yyyy-MM-dd" />
+                            </h:inputText>
+                        </div>
+
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Data Fim</label>
+                            <h:inputText id="dataFim"
+                                         value="#{relatorioIndicadoresBean.filtroDataFim}"
+                                         styleClass="filtro-input"
+                                         pt:type="date">
+                                <f:convertDateTime pattern="yyyy-MM-dd" />
+                            </h:inputText>
+                        </div>
+
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Categoria Máquina</label>
+                            <h:selectOneMenu id="filtroCategoria"
+                                             value="#{relatorioIndicadoresBean.filtroTipoMaquina}"
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue="" itemLabel="Todas" />
+                                <f:selectItems value="#{relatorioIndicadoresBean.listaTiposMaquina}"
+                                               var="tipo" itemValue="#{tipo}" itemLabel="#{tipo}" />
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="filtro-grupo">
+                            <label class="filtro-label">Tipo Manutenção</label>
+                            <h:selectOneMenu id="filtroTipo"
+                                             value="#{relatorioIndicadoresBean.filtroTipoManutencao}"
+                                             styleClass="filtro-select">
+                                <f:selectItem itemValue=""           itemLabel="Todos" />
+                                <f:selectItem itemValue="CORRETIVA"  itemLabel="Corretiva" />
+                                <f:selectItem itemValue="PREVENTIVA" itemLabel="Preventiva" />
+                                <f:selectItem itemValue="PREDITIVA"  itemLabel="Preditiva" />
+                            </h:selectOneMenu>
+                        </div>
+
+                    </div>
+                    <div class="filtros-acoes">
+                        <h:commandButton value="Aplicar Filtros"
+                                         styleClass="btn-filtrar">
+                            <f:ajax execute="@form"
+                                    listener="#{relatorioIndicadoresBean.aplicarFiltros()}"
+                                    render="@form"
+                                    onevent="function(data){ if(data.status==='success'){ renderizarGraficos(); } }" />
+                        </h:commandButton>
+                        <h:commandButton value="Limpar Filtros"
+                                         styleClass="btn-limpar">
+                            <f:ajax execute="@form"
+                                    listener="#{relatorioIndicadoresBean.limparFiltros()}"
+                                    render="@form"
+                                    onevent="function(data){ if(data.status==='success'){ renderizarGraficos(); } }" />
+                        </h:commandButton>
+                    </div>
+                </div>
+
+                <!-- ===== CARDS PRINCIPAIS (stat-card igual ao dashboard) ===== -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total de Manutenções</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{relatorioIndicadoresBean.totalManutencoesCategoria}"/>
+                        </div>
+                        <div class="stat-label">por categoria de máquinas</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Concluídas</h3>
+                        <div class="stat-value">
+                            <h:outputText value="#{relatorioIndicadoresBean.totalConcluidas}"/>
+                        </div>
+                        <div class="stat-label">manutenções finalizadas</div>
+                    </div>
+                </div>
+
+                <!-- ===== CARDS DE TEMPO (indicador-card igual ao dashboard) ===== -->
+                <div class="indicadores-tempo-grid">
+                    <div class="indicador-card indicador-tempo-total">
+                        <div class="indicador-icone">⏱️</div>
+                        <div class="indicador-info">
+                            <h3>Tempo Total em Manutenções</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{relatorioIndicadoresBean.tempoTotalFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Horas gastas com todas as manutenções</div>
+                        </div>
+                    </div>
+                    <div class="indicador-card indicador-tempo-medio">
+                        <div class="indicador-icone">🔧</div>
+                        <div class="indicador-info">
+                            <h3>Tempo Médio por Reparo</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{relatorioIndicadoresBean.tempoMedioPorReparoFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Média de horas por reparo</div>
+                        </div>
+                    </div>
+                    <div class="indicador-card indicador-mttr">
+                        <div class="indicador-icone">🛠️</div>
+                        <div class="indicador-info">
+                            <h3>MTTR</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{relatorioIndicadoresBean.mttrFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Mean Time To Repair (Tempo Médio de Reparo)</div>
+                        </div>
+                    </div>
+                    <div class="indicador-card indicador-mtbf">
+                        <div class="indicador-icone">📈</div>
+                        <div class="indicador-info">
+                            <h3>MTBF</h3>
+                            <div class="indicador-valor">
+                                <h:outputText value="#{relatorioIndicadoresBean.mtbfFormatado}"/>
+                            </div>
+                            <div class="indicador-descricao">Mean Time Between Failures (em horas)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== MANUTENÇÕES POR CATEGORIA (toggle) ===== -->
+                <div class="chart-container">
+                    <div class="conf-header">
+                        <h2 class="chart-title conf-chart-title">Total de Manutenções por Categoria de Máquinas</h2>
+                        <div class="toggle-view-btns">
+                            <button type="button" id="btnCatGraf" class="toggle-btn toggle-btn-active"
+                                    onclick="toggleView('cat','grafico')">📊 Gráfico</button>
+                            <button type="button" id="btnCatList" class="toggle-btn"
+                                    onclick="toggleView('cat','lista')">📋 Lista</button>
+                        </div>
+                    </div>
+                    <div id="catGrafico">
+                        <div class="chart-wrapper"><canvas id="catChart"></canvas></div>
+                    </div>
+                    <div id="catLista" style="display:none;">
+                        <div class="rel-lista" id="catListaCorpo"></div>
+                    </div>
+                </div>
+
+                <!-- ===== PIORES ATORES ===== -->
+                <div class="chart-container">
+                    <div class="conf-header">
+                        <h2 class="chart-title conf-chart-title">Piores Atores — Top 5 Máquinas (%)</h2>
+                        <div class="toggle-view-btns">
+                            <button type="button" id="btnPiorMaqGraf" class="toggle-btn toggle-btn-active"
+                                    onclick="toggleView('piorMaq','grafico')">📊 Gráfico</button>
+                            <button type="button" id="btnPiorMaqList" class="toggle-btn"
+                                    onclick="toggleView('piorMaq','lista')">📋 Lista</button>
+                        </div>
+                    </div>
+                    <div id="piorMaqGrafico">
+                        <div class="chart-wrapper"><canvas id="pioresAtoresChart"></canvas></div>
+                    </div>
+                    <div id="piorMaqLista" style="display:none;">
+                        <div class="rel-lista" id="piorMaqListaCorpo"></div>
+                    </div>
+                </div>
+
+                <!-- ===== CUSTO POR CATEGORIA + CUSTO POR MÁQUINA ===== -->
+                <div class="two-columns">
+                    <div class="chart-container">
+                        <div class="conf-header">
+                            <h2 class="chart-title conf-chart-title">Custo por Categoria (R$)</h2>
+                            <div class="toggle-view-btns">
+                                <button type="button" id="btnCustoCatGraf" class="toggle-btn toggle-btn-active"
+                                        onclick="toggleView('custoCat','grafico')">📊 Gráfico</button>
+                                <button type="button" id="btnCustoCatList" class="toggle-btn"
+                                        onclick="toggleView('custoCat','lista')">📋 Lista</button>
+                            </div>
+                        </div>
+                        <div id="custoCatGrafico">
+                            <div class="chart-wrapper"><canvas id="custoCatChart"></canvas></div>
+                        </div>
+                        <div id="custoCatLista" style="display:none;">
+                            <div class="rel-lista" id="custoCatListaCorpo"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="conf-header">
+                            <h2 class="chart-title conf-chart-title">Custo por Máquina (R$)</h2>
+                            <div class="toggle-view-btns">
+                                <button type="button" id="btnCustoMaqGraf" class="toggle-btn toggle-btn-active"
+                                        onclick="toggleView('custoMaq','grafico')">📊 Gráfico</button>
+                                <button type="button" id="btnCustoMaqList" class="toggle-btn"
+                                        onclick="toggleView('custoMaq','lista')">📋 Lista</button>
+                            </div>
+                        </div>
+                        <div id="custoMaqGrafico">
+                            <div class="chart-wrapper"><canvas id="custoMaqChart"></canvas></div>
+                        </div>
+                        <div id="custoMaqLista" style="display:none;">
+                            <div class="rel-lista" id="custoMaqListaCorpo"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== CUSTO TOTAL ===== -->
+                <div class="chart-container custo-total-container">
+                    <h2 class="chart-title">Custo Total Geral</h2>
+                    <div class="custo-total-bloco">
+                        <span class="custo-total-icone">💰</span>
+                        <span class="custo-total-valor">
+                            <h:outputText value="#{relatorioIndicadoresBean.custoTotalFormatado}"/>
+                        </span>
+                    </div>
+                    <div class="custo-total-sub">Soma de todos os gastos com materiais e serviços no período</div>
+                </div>
+
+                <!-- ===== CONFIABILIDADE POR MÁQUINA ===== -->
+                <div class="chart-container">
+                    <div class="conf-header">
+                        <h2 class="chart-title conf-chart-title">Confiabilidade por Máquina (%)</h2>
+                        <div class="toggle-view-btns">
+                            <button type="button" id="btnConfMaqGraf" class="toggle-btn toggle-btn-active"
+                                    onclick="toggleView('confMaq','grafico')">📊 Gráfico</button>
+                            <button type="button" id="btnConfMaqList" class="toggle-btn"
+                                    onclick="toggleView('confMaq','lista')">📋 Lista</button>
+                        </div>
+                    </div>
+                    <div id="confMaqGrafico">
+                        <div class="chart-wrapper"><canvas id="confMaqChart"></canvas></div>
+                    </div>
+                    <div id="confMaqLista" style="display:none;">
+                        <div class="rel-lista-conf">
+                            <div class="rel-lista-conf-header">
+                                <span class="conf-lista-col-nome">Máquina</span>
+                                <span>Confiabilidade</span>
+                            </div>
+                            <div id="confMaqListaCorpo"></div>
+                        </div>
+                    </div>
+
+                    <div class="confiabilidade-media-bloco">
+                        <span class="confiabilidade-media-label">Média Geral de Confiabilidade por Máquina:</span>
+                        <span class="status-badge #{relatorioIndicadoresBean.mediaGeralConfMaquinaClass}">
+                            <h:outputText value="#{relatorioIndicadoresBean.mediaGeralConfMaquinaFormatada}"/>
+                        </span>
+                        <span class="confiabilidade-media-hint">(soma ÷ quantidade de máquinas)</span>
+                    </div>
+
+                    <!-- Confiabilidade por Categoria -->
+                    <div class="confiabilidade-resumo">
+                        <div class="conf-header conf-header-sub">
+                            <h3 class="confiabilidade-categorias-titulo">Confiabilidade por Categoria</h3>
+                            <div class="toggle-view-btns">
+                                <button type="button" id="btnConfCatGraf" class="toggle-btn toggle-btn-sm"
+                                        onclick="toggleView('confCat','grafico')">📊 Gráfico</button>
+                                <button type="button" id="btnConfCatList" class="toggle-btn toggle-btn-sm toggle-btn-active"
+                                        onclick="toggleView('confCat','lista')">📋 Lista</button>
+                            </div>
+                        </div>
+                        <div id="confCatGrafico" style="display:none;">
+                            <div class="chart-wrapper"><canvas id="confCatChart"></canvas></div>
+                        </div>
+                        <div id="confCatLista">
+                            <div class="confiabilidade-categorias-grid">
+                                <ui:repeat value="#{relatorioIndicadoresBean.confiabilidadePorCategoriaLista}" var="item">
+                                    <div class="confiabilidade-categoria-item">
+                                        <span class="confiabilidade-categoria-nome">
+                                            <h:outputText value="#{item.categoria}"/>
+                                        </span>
+                                        <span class="confiabilidade-categoria-qtd">
+                                            (<h:outputText value="#{item.quantidadeManutencoes}"/> manutenções)
+                                        </span>
+                                        <span class="status-badge #{item.confiabilidadeClass}">
+                                            <h:outputText value="#{item.confiabilidadeFormatada}"/>
+                                        </span>
+                                    </div>
+                                </ui:repeat>
+                                <ui:fragment rendered="#{empty relatorioIndicadoresBean.confiabilidadePorCategoriaLista}">
+                                    <div style="color:#a0aec0;font-size:0.9rem;padding:1rem 0;">
+                                        Nenhuma categoria encontrada com os filtros atuais
+                                    </div>
+                                </ui:fragment>
+                            </div>
+                        </div>
+                        <ui:fragment rendered="#{not empty relatorioIndicadoresBean.confiabilidadePorCategoriaLista}">
+                            <div class="confiabilidade-media-bloco confiabilidade-media-bloco-categoria">
+                                <span class="confiabilidade-media-label">Média Geral de Confiabilidade por Categoria:</span>
+                                <span class="status-badge #{relatorioIndicadoresBean.mediaGeralConfCategoriaClass}">
+                                    <h:outputText value="#{relatorioIndicadoresBean.mediaGeralConfCategoriaFormatada}"/>
+                                </span>
+                                <span class="confiabilidade-media-hint">(soma ÷ quantidade de categorias)</span>
+                            </div>
+                        </ui:fragment>
+                    </div>
+                </div>
+
+            </h:form>
+        </div>
+
+        <h:outputScript>
+            var catLabels    = #{relatorioIndicadoresBean.manutencoesTotaisPorCategoriaLabelsJSON};
+            var catData      = #{relatorioIndicadoresBean.manutencoesTotaisPorCategoriaDataJSON};
+            var piorMaqLab   = #{relatorioIndicadoresBean.pioresAtoresLabelsJSON};
+            var piorMaqQtd   = #{relatorioIndicadoresBean.pioresAtoresDataJSON};
+            var piorMaqPct   = #{relatorioIndicadoresBean.pioresAtoresPctDataJSON};
+            var custoCatLab  = #{relatorioIndicadoresBean.custoPorCategoriaLabelsJSON};
+            var custoCatData = #{relatorioIndicadoresBean.custoPorCategoriaDataJSON};
+            var custoMaqLab  = #{relatorioIndicadoresBean.custoPorMaquinaLabelsJSON};
+            var custoMaqData = #{relatorioIndicadoresBean.custoPorMaquinaDataJSON};
+            var confMaqLab   = #{relatorioIndicadoresBean.confMaquinaLabelsJSON};
+            var confMaqData  = #{relatorioIndicadoresBean.confMaquinaDataJSON};
+            var confCatLab   = #{relatorioIndicadoresBean.confCatLabelsJSON};
+            var confCatData  = #{relatorioIndicadoresBean.confCatDataJSON};
+
+            var CORES = ['rgba(102,126,234,0.8)','rgba(118,75,162,0.8)',
+                'rgba(16,185,129,0.8)','rgba(245,158,11,0.8)',
+                'rgba(239,68,68,0.8)','rgba(6,182,212,0.8)',
+                'rgba(251,146,60,0.8)','rgba(167,139,250,0.8)'];
+            var CORES_PIORES = ['rgba(220,53,69,0.8)','rgba(255,99,71,0.8)',
+                'rgba(255,140,0,0.8)','rgba(255,193,7,0.8)','rgba(255,223,0,0.8)'];
+            function confColor(v) {
+                if (v >= 80) return 'rgba(40,167,69,0.8)';
+                if (v >= 50) return 'rgba(255,193,7,0.8)';
+                return 'rgba(220,53,69,0.8)';
+            }
+            function confClass(v) {
+                if (v >= 80) return 'confiabilidade-alta';
+                if (v >= 50) return 'confiabilidade-media';
+                return 'confiabilidade-baixa';
+            }
+
+            function renderizarGraficos() {
+                Chart.helpers.each(Chart.instances, function(i){ i.destroy(); });
+
+                if (catLabels.length > 0) {
+                    new Chart(document.getElementById('catChart'), {
+                        type: 'bar',
+                        data: { labels: catLabels, datasets: [{ label: 'Manutenções',
+                            data: catData, backgroundColor: CORES, borderWidth: 2 }] },
+                        options: { responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                    });
+                }
+                preencherListaQtd('catListaCorpo', catLabels, catData, 'Categoria', 'manutenções');
+
+                if (piorMaqLab.length > 0) {
+                    new Chart(document.getElementById('pioresAtoresChart'), {
+                        type: 'bar',
+                        data: { labels: piorMaqLab, datasets: [{ label: '%',
+                            data: piorMaqPct, backgroundColor: CORES_PIORES, borderWidth: 2 }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){
+                                return ctx.parsed.x.toFixed(2) + '% (' + piorMaqQtd[ctx.dataIndex] + ' manutenções)'; }}}},
+                            scales: { x: { beginAtZero: true, ticks: { callback: function(v){ return v + '%'; } } } } }
+                    });
+                }
+                preencherListaPct('piorMaqListaCorpo', piorMaqLab, piorMaqPct, piorMaqQtd);
+
+                if (custoCatLab.length > 0) {
+                    new Chart(document.getElementById('custoCatChart'), {
+                        type: 'bar',
+                        data: { labels: custoCatLab, datasets: [{ label: 'R$',
+                            data: custoCatData, backgroundColor: CORES, borderWidth: 2 }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){
+                                return 'R$ ' + ctx.parsed.x.toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }}}},
+                            scales: { x: { beginAtZero: true, ticks: { callback: function(v){ return 'R$ ' + v.toLocaleString('pt-BR'); } } } } }
+                    });
+                }
+                preencherListaCusto('custoCatListaCorpo', custoCatLab, custoCatData, 'Categoria');
+
+                if (custoMaqLab.length > 0) {
+                    new Chart(document.getElementById('custoMaqChart'), {
+                        type: 'bar',
+                        data: { labels: custoMaqLab, datasets: [{ label: 'R$',
+                            data: custoMaqData,
+                            backgroundColor: 'rgba(255,99,132,0.8)',
+                            borderColor: 'rgba(255,99,132,1)', borderWidth: 2 }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){
+                                return 'R$ ' + ctx.parsed.x.toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }}}},
+                            scales: { x: { beginAtZero: true, ticks: { callback: function(v){ return 'R$ ' + v.toLocaleString('pt-BR'); } } } } }
+                    });
+                }
+                preencherListaCusto('custoMaqListaCorpo', custoMaqLab, custoMaqData, 'Máquina');
+
+                if (confMaqLab.length > 0) {
+                    new Chart(document.getElementById('confMaqChart'), {
+                        type: 'bar',
+                        data: { labels: confMaqLab, datasets: [{ label: 'Confiabilidade (%)',
+                            data: confMaqData, backgroundColor: confMaqData.map(confColor), borderWidth: 2 }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){
+                                return ctx.parsed.x.toFixed(2) + '%'; }}}},
+                            scales: { x: { beginAtZero: true, max: 100, ticks: { callback: function(v){ return v + '%'; } } } } }
+                    });
+                }
+                preencherListaConf('confMaqListaCorpo', confMaqLab, confMaqData);
+
+                if (confCatLab.length > 0) {
+                    new Chart(document.getElementById('confCatChart'), {
+                        type: 'bar',
+                        data: { labels: confCatLab, datasets: [{ label: 'Confiabilidade (%)',
+                            data: confCatData, backgroundColor: confCatData.map(confColor), borderWidth: 2 }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){
+                                return ctx.parsed.x.toFixed(2) + '%'; }}}},
+                            scales: { x: { beginAtZero: true, max: 100, ticks: { callback: function(v){ return v + '%'; } } } } }
+                    });
+                }
+            }
+
+            function preencherListaQtd(idCorpo, labels, valores, colLabel, unidade) {
+                var el = document.getElementById(idCorpo); if (!el) return;
+                el.innerHTML = '';
+                if (labels.length === 0) { var d = document.createElement('div');
+                    d.style.cssText = 'color:#a0aec0;font-size:0.9rem;padding:1rem 0.875rem;';
+                    d.textContent = 'Nenhum dado encontrado'; el.appendChild(d); return; }
+                var h = document.createElement('div'); h.className = 'rel-lista-header';
+                var hn = document.createElement('span'); hn.className = 'col-nome'; hn.textContent = colLabel;
+                var hv = document.createElement('span'); hv.className = 'col-pct'; hv.textContent = 'Quantidade';
+                h.appendChild(hn); h.appendChild(hv); el.appendChild(h);
+                for (var i = 0; i &lt; labels.length; i++) {
+                    var row = document.createElement('div'); row.className = 'rel-lista-row';
+                    var sn = document.createElement('span'); sn.className = 'col-nome'; sn.textContent = labels[i];
+                    var sv = document.createElement('span'); sv.className = 'col-pct'; sv.textContent = valores[i] + ' ' + unidade;
+                    row.appendChild(sn); row.appendChild(sv); el.appendChild(row);
+                }
+            }
+
+            function preencherListaPct(idCorpo, labels, pcts, qtds) {
+                var el = document.getElementById(idCorpo); if (!el) return;
+                el.innerHTML = '';
+                if (labels.length === 0) { var d = document.createElement('div');
+                    d.style.cssText = 'color:#a0aec0;font-size:0.9rem;padding:1rem 0.875rem;';
+                    d.textContent = 'Nenhum dado encontrado'; el.appendChild(d); return; }
+                var h = document.createElement('div'); h.className = 'rel-lista-header';
+                var hn = document.createElement('span'); hn.className = 'col-nome'; hn.textContent = 'Nome';
+                var hq = document.createElement('span'); hq.className = 'col-qtd'; hq.textContent = 'Qtd';
+                var hp = document.createElement('span'); hp.className = 'col-pct'; hp.textContent = '%';
+                h.appendChild(hn); h.appendChild(hq); h.appendChild(hp); el.appendChild(h);
+                for (var i = 0; i &lt; labels.length; i++) {
+                    var row = document.createElement('div'); row.className = 'rel-lista-row';
+                    var sn = document.createElement('span'); sn.className = 'col-nome'; sn.textContent = labels[i];
+                    var sq = document.createElement('span'); sq.className = 'col-qtd'; sq.textContent = qtds[i] + ' manutenções';
+                    var sp = document.createElement('span'); sp.className = 'col-pct'; sp.textContent = pcts[i].toFixed(2) + '%';
+                    row.appendChild(sn); row.appendChild(sq); row.appendChild(sp); el.appendChild(row);
+                }
+            }
+
+            function preencherListaCusto(idCorpo, labels, valores, colLabel) {
+                var el = document.getElementById(idCorpo); if (!el) return;
+                el.innerHTML = '';
+                if (labels.length === 0) { var d = document.createElement('div');
+                    d.style.cssText = 'color:#a0aec0;font-size:0.9rem;padding:1rem 0.875rem;';
+                    d.textContent = 'Nenhum dado encontrado'; el.appendChild(d); return; }
+                var h = document.createElement('div'); h.className = 'rel-lista-header';
+                var hn = document.createElement('span'); hn.className = 'col-nome'; hn.textContent = colLabel;
+                var hv = document.createElement('span'); hv.className = 'col-pct'; hv.textContent = 'Custo (R$)';
+                h.appendChild(hn); h.appendChild(hv); el.appendChild(h);
+                for (var i = 0; i &lt; labels.length; i++) {
+                    var row = document.createElement('div'); row.className = 'rel-lista-row';
+                    var sn = document.createElement('span'); sn.className = 'col-nome'; sn.textContent = labels[i];
+                    var sv = document.createElement('span'); sv.className = 'col-pct';
+                    sv.textContent = 'R$ ' + valores[i].toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    row.appendChild(sn); row.appendChild(sv); el.appendChild(row);
+                }
+            }
+
+            function preencherListaConf(idCorpo, labels, valores) {
+                var el = document.getElementById(idCorpo); if (!el) return;
+                el.innerHTML = '';
+                if (labels.length === 0) { var d = document.createElement('div');
+                    d.style.cssText = 'color:#a0aec0;font-size:0.9rem;padding:1rem 0.875rem;';
+                    d.textContent = 'Nenhuma m\u00e1quina encontrada'; el.appendChild(d); return; }
+                for (var i = 0; i &lt; labels.length; i++) {
+                    var row = document.createElement('div'); row.className = 'conf-lista-row';
+                    var sn = document.createElement('span'); sn.className = 'conf-lista-col-nome'; sn.textContent = labels[i];
+                    var sv = document.createElement('span');
+                    sv.className = 'status-badge ' + confClass(valores[i]);
+                    sv.textContent = valores[i].toFixed(2) + '%';
+                    row.appendChild(sn); row.appendChild(sv); el.appendChild(row);
+                }
+            }
+
+            function toggleView(secao, modo) {
+                var mapa = {
+                    'cat':      { graf: 'catGrafico',      lista: 'catLista',      bg: 'btnCatGraf',      bl: 'btnCatList' },
+                    'piorMaq':  { graf: 'piorMaqGrafico',  lista: 'piorMaqLista',  bg: 'btnPiorMaqGraf',  bl: 'btnPiorMaqList' },
+                    'custoCat': { graf: 'custoCatGrafico', lista: 'custoCatLista', bg: 'btnCustoCatGraf', bl: 'btnCustoCatList' },
+                    'custoMaq': { graf: 'custoMaqGrafico', lista: 'custoMaqLista', bg: 'btnCustoMaqGraf', bl: 'btnCustoMaqList' },
+                    'confMaq':  { graf: 'confMaqGrafico',  lista: 'confMaqLista',  bg: 'btnConfMaqGraf',  bl: 'btnConfMaqList' },
+                    'confCat':  { graf: 'confCatGrafico',  lista: 'confCatLista',  bg: 'btnConfCatGraf',  bl: 'btnConfCatList' }
+                };
+                var m = mapa[secao]; if (!m) return;
+                var eG = document.getElementById(m.graf); var eL = document.getElementById(m.lista);
+                var bG = document.getElementById(m.bg);   var bL = document.getElementById(m.bl);
+                if (modo === 'grafico') {
+                    eG.style.display = ''; eL.style.display = 'none';
+                    bG.classList.add('toggle-btn-active'); bL.classList.remove('toggle-btn-active');
+                } else {
+                    eG.style.display = 'none'; eL.style.display = '';
+                    bL.classList.add('toggle-btn-active'); bG.classList.remove('toggle-btn-active');
+                }
+            }
+
+            window.addEventListener('load', function() { renderizarGraficos(); });
+        </h:outputScript>
+
+    </f:view>
+</h:body>
+</html>

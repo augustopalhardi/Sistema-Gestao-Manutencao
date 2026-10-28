@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+xmlns:h="http://xmlns.jcp.org/jsf/html"
+xmlns:f="http://xmlns.jcp.org/jsf/core"
+xmlns:p="http://primefaces.org/ui"
+xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+<title>Consulta de Máquina/Equipamento</title>
+<h:outputStylesheet name="css/maquinaEquipamento.css" />
+<h:outputStylesheet name="css/detalhesDialog.css" />
+<style>
+    /* GARANTE A BARRA DE ROLAGEM DENTRO DOS DIALOGS */
+    .ui-dialog-content {
+        overflow-y: auto !important;
+    }
+
+    /* ✅ Estilos para o status Ativo/Inativo do equipamento */
+    .status-ativo {
+        color: #27ae60;
+        font-weight: bold;
+        background: #eafaf1;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+    }
+
+    .status-inativo {
+        color: #e74c3c;
+        font-weight: bold;
+        background: #fdedec;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Linha esmaecida para equipamentos inativos */
+    .linha-inativa {
+        opacity: 0.55;
+        background-color: #f5f5f5 !important;
+    }
+
+    /* ✅ Cabeçalho da coluna Status com o seletor de filtro */
+    .coluna-status-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .coluna-status-titulo {
+        font-weight: 700;
+    }
+
+    .coluna-status-header .coluna-status-select {
+        width: 100% !important;
+        min-width: 110px;
+        font-weight: normal;
+    }
+
+    .patrimonio-cell {
+        font-family: 'Courier New', Consolas, monospace !important;
+        font-weight: 600 !important;
+        color: #2c3e50 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .patrimonio-vazio {
+        color: #95a5a6 !important;
+        font-style: italic !important;
+        font-weight: 400 !important;
+    }
+    
+    .ui-datatable tbody tr:hover {
+        background-color: #f8f9fa !important;
+    }
+    
+    .image-preview-large {
+        max-width: 100%;
+        max-height: 600px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .no-image-message {
+        text-align: center;
+        padding: 40px;
+        color: #95a5a6;
+    }
+    
+    .no-image-message i {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        display: block;
+    }
+    
+    .image-info-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 15px;
+    }
+    
+    .image-info-box p {
+        margin: 5px 0;
+        color: #2c3e50;
+    }
+    
+    .row-cancelled {
+        background-color: #ffebee !important;
+        opacity: 0.8;
+    }
+    
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-ativa {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-cancelada {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-andamento {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-aberto {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-concluida {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    /* Estilos do Dialog de Detalhes */
+    .detail-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .detail-section h4 {
+        margin: 0 0 12px 0;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 8px;
+    }
+    
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .detail-item {
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 3px solid #3498db;
+    }
+    
+    .detail-item label {
+        display: block;
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+    
+    .detail-item span {
+        font-size: 1rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .detail-full {
+        grid-column: 1 / -1;
+    }
+    
+    .info-cancelamento {
+        background: #ffebee;
+        border-left-color: #e74c3c !important;
+    }
+    
+    .info-cancelamento h4 {
+        color: #c0392b;
+        border-bottom-color: #e74c3c;
+    }
+</style>
+</h:head>
+
+<h:body>
+<div class="header">
+<h1>Cadastro de Máquinas e Equipamentos</h1>
+</div>
+<div class="header-actions">
+<button type="button" class="exit-button" onclick="window.history.back();">
+Voltar
+</button>
+</div>
+
+<div class="list-section">
+<h2 class="section-title">Equipamentos Cadastrados no Sistema</h2>
+
+<h:form id="listaForm">
+<p:dataTable id="tabelaEquipamentosTecnico"
+widgetVar="tabelaEquipamentosTecnicoWV"
+value="#{cadastroMaquinaEquipamentoBean.equipamentosTecnico}"
+var="equipamento"
+paginator="true"
+rows="10"
+rowStyleClass="#{cadastroMaquinaEquipamentoBean.isRegistroAtivo(equipamento) ? '' : 'linha-inativa'}"
+emptyMessage="Nenhum equipamento encontrado"
+paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+rowsPerPageTemplate="5,10,15,20"
+currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} equipamentos"
+styleClass="custom-datatable">
+
+<p:column headerText="Nº Patrimônio" 
+    sortBy="#{equipamento.numeroPatrimonio}"
+    filterBy="#{equipamento.numeroPatrimonio}"
+    filterMatchMode="contains"
+    style="width: 130px; text-align: center; background: #e8f4f8;">
+    <h:outputText 
+        value="#{equipamento.numeroPatrimonio}" 
+        styleClass="patrimonio-cell"
+        rendered="#{not empty equipamento.numeroPatrimonio}" />
+    <h:outputText 
+        value="Não informado" 
+        styleClass="patrimonio-vazio"
+        rendered="#{empty equipamento.numeroPatrimonio}" />
+</p:column>
+
+<p:column headerText="ID" 
+    sortBy="#{equipamento.id}"
+    style="width: 60px; text-align: center;">
+    <h:outputText value="#{equipamento.id}" />
+</p:column>
+
+<p:column headerText="Fabricante" 
+    sortBy="#{equipamento.fabricante}"
+    filterBy="#{equipamento.fabricante}"
+    filterMatchMode="contains"
+    style="width: 150px;">
+    <h:outputText value="#{equipamento.fabricante}" />
+</p:column>
+
+<p:column headerText="Modelo" 
+    sortBy="#{equipamento.modelo}"
+    filterBy="#{equipamento.modelo}"
+    filterMatchMode="contains"
+    style="width: 150px;">
+    <h:outputText value="#{equipamento.modelo}" />
+</p:column>
+
+<p:column headerText="Tipo" 
+    sortBy="#{equipamento.tipo}"
+    filterBy="#{equipamento.tipo}"
+    filterMatchMode="contains"
+    style="width: 130px;">
+    <h:outputText value="#{equipamento.tipo}" />
+</p:column>
+
+<p:column headerText="Ano Fab." 
+    sortBy="#{equipamento.anoFabricacao}"
+    style="width: 90px; text-align: center;">
+    <h:outputText value="#{equipamento.anoFabricacao}">
+        <f:convertDateTime pattern="yyyy" />
+    </h:outputText>
+</p:column>
+
+<p:column headerText="Potência" style="width: 100px;">
+    <h:outputText value="#{equipamento.potencia}" />
+</p:column>
+
+<p:column headerText="Observações" style="max-width: 150px;">
+    <h:outputText 
+        value="#{equipamento.observacoes}" 
+        style="display: block; 
+               overflow: hidden; 
+               text-overflow: ellipsis; 
+               white-space: nowrap;"
+        title="#{equipamento.observacoes}" />
+</p:column>
+
+<!-- ✅ COLUNA STATUS COM FILTRO (Todos / Ativo / Inativo) -->
+<p:column style="width: 140px; text-align: center;">
+    <f:facet name="header">
+        <div class="coluna-status-header">
+            <span class="coluna-status-titulo">Status</span>
+            <p:selectOneMenu value="#{cadastroMaquinaEquipamentoBean.filtroStatusTecnico}"
+                styleClass="coluna-status-select">
+                <f:selectItem itemLabel="Todos" itemValue="TODOS" />
+                <f:selectItem itemLabel="Ativo" itemValue="ATIVO" />
+                <f:selectItem itemLabel="Inativo" itemValue="INATIVO" />
+                <p:ajax event="change" process="@this"
+                    update=":listaForm:tabelaEquipamentosTecnico" />
+            </p:selectOneMenu>
+        </div>
+    </f:facet>
+    <h:outputText value="✓ Ativo" 
+        styleClass="status-ativo"
+        rendered="#{cadastroMaquinaEquipamentoBean.isRegistroAtivo(equipamento)}" />
+    <h:outputText value="✗ Inativo" 
+        styleClass="status-inativo"
+        rendered="#{not cadastroMaquinaEquipamentoBean.isRegistroAtivo(equipamento)}" />
+</p:column>
+
+<p:column headerText="Ações" style="width: 280px; text-align: center;">
+    <p:commandButton 
+        value="Histórico de Manutenções"
+        title="Ver Histórico de Manutenções"
+        styleClass="ui-button-warning"
+        style="margin-right: 5px;"
+        action="#{cadastroMaquinaEquipamentoBean.carregarManutencoes(equipamento)}"
+        oncomplete="PF('dlgHistoricoManutencoes').show();"
+        process="@this"
+        update=":historicoForm:historicoPanel" />
+    
+    <p:commandButton 
+        icon="pi pi-image" 
+        title="Ver Imagem"
+        styleClass="ui-button-rounded ui-button-info"
+        rendered="#{not empty equipamento.urlFoto}"
+        action="#{cadastroMaquinaEquipamentoBean.verImagem(equipamento)}"
+        process="@this"
+        update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+        oncomplete="PF('dlgVisualizarImagem').show();" />
+    
+    <h:outputText 
+        value="Sem foto"
+        style="color: #95a5a6; font-style: italic; font-size: 0.75rem;"
+        rendered="#{empty equipamento.urlFoto}" />
+</p:column>
+
+</p:dataTable>
+</h:form>
+</div>
+
+<p:dialog header="Histórico de Manutenções" 
+    widgetVar="dlgHistoricoManutencoes"
+    modal="true" 
+    resizable="true" 
+    width="950" 
+    height="550"
+    closable="true" 
+    showEffect="fade" 
+    hideEffect="fade">
+
+    <h:form id="historicoForm">
+        <h:panelGroup id="historicoPanel" layout="block">
+            <h:panelGroup layout="block"
+                rendered="#{cadastroMaquinaEquipamentoBean.equipamentoSelecionado != null}">
+
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #1565c0;">
+                        <i class="pi pi-cog"></i> 
+                        #{cadastroMaquinaEquipamentoBean.equipamentoSelecionado.tipo} - 
+                        #{cadastroMaquinaEquipamentoBean.equipamentoSelecionado.fabricante} 
+                        #{cadastroMaquinaEquipamentoBean.equipamentoSelecionado.modelo}
+                    </h4>
+                    <p style="margin: 0; color: #1976d2;">
+                        <strong>Patrimônio:</strong> 
+                        #{cadastroMaquinaEquipamentoBean.equipamentoSelecionado.numeroPatrimonio != null ? 
+                          cadastroMaquinaEquipamentoBean.equipamentoSelecionado.numeroPatrimonio : 'Não informado'}
+                    </p>
+                </div>
+
+                <p:dataTable value="#{cadastroMaquinaEquipamentoBean.manutencoesDoEquipamento}"
+                    var="manutencao"
+                    paginator="true"
+                    rows="8"
+                    emptyMessage="Nenhuma manutenção registrada para este equipamento."
+                    rowStyleClass="#{manutencao.cancelada ? 'row-cancelled' : ''}"
+                    paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                    currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords}">
+
+                    <p:column headerText="ID" style="width: 60px; text-align: center;">
+                        <h:outputText value="#{manutencao.id}" />
+                    </p:column>
+
+                    <p:column headerText="Tipo" style="width: 100px; text-align: center;">
+                        <h:outputText value="#{manutencao.tipoManutencao}" />
+                    </p:column>
+
+                    <p:column headerText="Falha">
+                        <h:outputText value="#{manutencao.falha}" 
+                            style="display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                            title="#{manutencao.falha}" />
+                    </p:column>
+
+                    <p:column headerText="Data" style="width: 100px; text-align: center;">
+                        <h:outputText value="#{manutencao.dataManutencao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Status" style="width: 100px; text-align: center;">
+                        <span class="status-badge #{cadastroMaquinaEquipamentoBean.getStatusClasseManutencao(manutencao)}">
+                            #{cadastroMaquinaEquipamentoBean.getStatusLabelManutencao(manutencao)}
+                        </span>
+                    </p:column>
+
+                    <p:column headerText="Risco" style="width: 70px; text-align: center;">
+                        <h:outputText value="#{manutencao.risco ? 'Sim' : 'Não'}" 
+                            style="color: #{manutencao.risco ? '#e74c3c' : '#27ae60'}; font-weight: bold;" />
+                    </p:column>
+
+                    <p:column headerText="Ações" style="width: 100px; text-align: center;">
+                        <p:commandButton 
+                            value="Detalhes"
+                            title="Ver Detalhes"
+                            styleClass="ui-button-info ui-button-sm"
+                            process="@this"
+                            action="#{detalhesManutencaoBean.abrirDetalhes(manutencao.id, 'MAQUINA')}"
+                            update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+                            oncomplete="PF('dlgDetalhesGlobal').show();">
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <p:commandButton 
+                        value="Fechar" 
+                        onclick="PF('dlgHistoricoManutencoes').hide();"
+                        type="button" 
+                        styleClass="ui-button-secondary" 
+                        icon="pi pi-times" />
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block"
+                rendered="#{cadastroMaquinaEquipamentoBean.equipamentoSelecionado == null}">
+                <div class="no-image-message">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    <p>Nenhum equipamento selecionado.</p>
+                </div>
+            </h:panelGroup>
+        </h:panelGroup>
+    </h:form>
+</p:dialog>
+
+	<!-- ===== DIALOG DE DETALHES (componente reutilizável) ===== -->
+	<ui:include src="/includes/detalhesManutencaoDialog.xhtml"/>
+
+<!-- O dialog de imagem agora e o GLOBAL, declarado em
+	     /includes/visualizarImagemDialog.xhtml (embutido no include de
+	     detalhes da manutencao acima). -->
+
+</h:body>
+</html>

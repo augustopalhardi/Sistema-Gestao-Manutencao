@@ -1,0 +1,200 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+	<!-- ============================================================
+	     Dialog GLOBAL de visualização de imagens.
+
+	     Já vem embutido no detalhesManutencaoDialog.xhtml, então toda
+	     página que inclui aquele dialog também recebe este. Para usar
+	     em uma página que NÃO inclui o de detalhes:
+
+	       <ui:include src="/includes/visualizarImagemDialog.xhtml"/>
+
+	     Para abrir, o botão precisa de:
+
+	       action="#{seuBean.verImagem(registro)}"
+	       process="@this"
+	       update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+	       oncomplete="PF('dlgVisualizarImagem').show();"
+
+	     E o bean chamador preenche o VisualizarImagemBean:
+
+	       visualizarImagemBean.abrir("Foto do Local", "locais/" + foto);
+	       visualizarImagemBean.addInfo("Nome", local.getNome());
+
+	     QUALQUER ajuste visual daqui vale para o sistema inteiro.
+	     ============================================================ -->
+
+	<style>
+		/* O dialog define a PRÓPRIA altura e rolagem, com !important e
+		   seletor mais específico, para não depender de regras soltas de
+		   cada página (algumas declaram .ui-dialog-content global, outras
+		   não, o que deixava o comportamento diferente em cada tela). */
+		.dlg-visualizar-imagem.ui-dialog {
+			max-height: 90vh;
+		}
+
+		.dlg-visualizar-imagem .ui-dialog-content {
+			max-height: 75vh;
+			overflow-y: auto !important;
+			overflow-x: hidden !important;
+		}
+
+		.dlg-img-container {
+			text-align: center;
+			padding: 15px;
+		}
+
+		.dlg-img-subtitulo {
+			font-size: 1.05rem;
+			font-weight: 600;
+			color: #2c3e50;
+			margin-bottom: 12px;
+		}
+
+		.dlg-img-foto {
+			max-width: 100%;
+			max-height: 55vh;
+			border-radius: 8px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+		.dlg-img-info-box {
+			background: #f8f9fa;
+			padding: 15px;
+			border-radius: 6px;
+			margin-top: 15px;
+			text-align: left;
+		}
+
+		.dlg-img-info-box p {
+			margin: 5px 0;
+			color: #2c3e50;
+		}
+
+		.dlg-img-sem-foto {
+			text-align: center;
+			padding: 40px;
+			color: #95a5a6;
+		}
+
+		.dlg-img-sem-foto i {
+			font-size: 4rem;
+			margin-bottom: 15px;
+			display: block;
+		}
+
+		.dlg-img-footer {
+			text-align: center;
+			margin-top: 20px;
+		}
+	</style>
+
+	<p:dialog header="#{visualizarImagemBean.titulo}"
+		widgetVar="dlgVisualizarImagem" modal="true" resizable="true"
+		width="800" height="auto" closable="true" showEffect="fade"
+		hideEffect="fade" responsive="true" position="center"
+		fitViewport="true" onShow="dlgImagemCentralizar();"
+		styleClass="dlg-visualizar-imagem">
+
+		<h:form id="dlgVisualizarImagemForm">
+			<p:panel id="dlgVisualizarImagemPanel">
+
+				<!-- ===== COM FOTO ===== -->
+				<h:panelGroup layout="block"
+					rendered="#{visualizarImagemBean.possuiFoto}">
+
+					<div class="dlg-img-container">
+						<h:outputText value="#{visualizarImagemBean.subtitulo}"
+							styleClass="dlg-img-subtitulo"
+							style="display: block;"
+							rendered="#{not empty visualizarImagemBean.subtitulo}" />
+
+						<h:graphicImage value="#{visualizarImagemBean.urlFotoCorrigida}"
+							styleClass="dlg-img-foto"
+							alt="#{visualizarImagemBean.titulo}" />
+					</div>
+
+					<h:panelGroup layout="block" styleClass="dlg-img-info-box"
+						rendered="#{visualizarImagemBean.possuiInformacoes}">
+						<ui:repeat value="#{visualizarImagemBean.informacoes}" var="info">
+							<p>
+								<strong>#{info.rotulo}:</strong>
+								<h:outputText value="#{info.valor}" />
+							</p>
+						</ui:repeat>
+					</h:panelGroup>
+				</h:panelGroup>
+
+				<!-- ===== SEM FOTO ===== -->
+				<h:panelGroup layout="block"
+					rendered="#{not visualizarImagemBean.possuiFoto}">
+					<div class="dlg-img-sem-foto">
+						<i class="pi pi-image"></i>
+						<p style="font-size: 1.1rem; margin: 0;">
+							<h:outputText value="#{visualizarImagemBean.mensagemSemFoto}" />
+						</p>
+					</div>
+				</h:panelGroup>
+
+				<div class="dlg-img-footer">
+					<p:commandButton value="Fechar"
+						onclick="PF('dlgVisualizarImagem').hide();" type="button"
+						styleClass="ui-button-secondary" icon="pi pi-times" />
+				</div>
+
+			</p:panel>
+		</h:form>
+	</p:dialog>
+	<h:outputScript target="body">
+		/*
+		 * O dialog é centralizado no momento em que abre, mas a imagem
+		 * ainda não terminou de baixar nessa hora. Quando ela carrega, a
+		 * altura do dialog muda e ele fica deslocado. Por isso
+		 * recentralizamos: ao abrir, quando cada imagem termina de
+		 * carregar e ao redimensionar a janela.
+		 */
+		function dlgImagemCentralizar() {
+			var widget = PF('dlgVisualizarImagem');
+
+			if (!widget) {
+				return;
+			}
+
+			widget.initPosition();
+
+			// Recentraliza assim que a imagem terminar de carregar
+			widget.jq.find('img').each(function () {
+				var img = this;
+
+				if (img.complete) {
+					widget.initPosition();
+				} else {
+					img.onload = function () {
+						widget.initPosition();
+					};
+				}
+			});
+
+			// Rede de segurança para fontes/estilos que assentam depois
+			setTimeout(function () {
+				widget.initPosition();
+			}, 250);
+		}
+
+		// Mantém centralizado ao redimensionar a janela
+		if (window.jQuery) {
+			jQuery(window).on('resize', function () {
+				var widget = PF('dlgVisualizarImagem');
+
+				if (widget &amp;&amp; widget.isVisible()) {
+					widget.initPosition();
+				}
+			});
+		}
+	</h:outputScript>
+
+</ui:composition>

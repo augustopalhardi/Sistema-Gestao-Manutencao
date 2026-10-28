@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+<h:head>
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}"
+		type="image/x-icon" />
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Cronograma de Manutenções Preventivas</title>
+	<h:outputStylesheet name="css/cronogramaPreventiva.css" />
+	<h:outputStylesheet name="css/todasSolicitacoes.css" />
+	<h:outputStylesheet name="css/detalhesDialog.css" />
+
+	<!-- ============================================================
+	     Faixa de filtros ativos, igual à da tela de compras.
+
+	     Sem ela, um filtro esquecido lá em cima deixa o cronograma
+	     vazio sem nenhuma explicação na tela.
+	     ============================================================ -->
+	<style>
+		.filtros-ativos {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			flex-wrap: wrap;
+			background: #eff6ff;
+			border: 1px solid #bfdbfe;
+			border-left: 4px solid #2563eb;
+			border-radius: 6px;
+			padding: 10px 14px;
+			margin-bottom: 14px;
+			font-size: 0.88rem;
+			color: #1e3a8a;
+		}
+
+		.filtros-ativos .pi {
+			color: #2563eb;
+		}
+
+		.filtros-ativos-texto {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.filtros-ativos-texto strong {
+			font-weight: 700;
+		}
+
+		/* Esclarece que os cards de status contam apenas as em aberto */
+		.stat-card .stat-hint {
+			display: block;
+			margin-top: 2px;
+			font-size: 0.68rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			opacity: 0.65;
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<f:view>
+		<div class="header-top">
+			<h1>&#128197; Cronograma de Preventivas</h1>
+			<p class="header-subtitle">Visualização de todas as manutenções
+				preventivas ativas no sistema</p>
+		</div>
+		<div class="header-actions">
+			<h:form style="margin: 0;">
+				<h:button outcome="/home/homeAdm.xhtml" styleClass="back-button"
+					value="Voltar" />
+			</h:form>
+		</div>
+
+		<div class="container">
+			<p:growl id="messages" showDetail="true" life="4500" sticky="false"/>
+
+			<h:form id="cronogramaForm">
+
+				<!-- ============================================================
+				     Os cards continuam, e todos já respeitam os filtros da barra
+				     abaixo. Os quatro do meio contam apenas as manutenções EM
+				     ABERTO — uma preventiva concluída não está "para fazer" nem
+				     "atrasada" — e agora isso está dito na tela, que era a real
+				     fonte de confusão.
+				     ============================================================ -->
+				<div class="stats-grid">
+					<div class="stat-card card-total">
+						<h3>Total Preventivas</h3>
+						<div class="stat-value">
+							<h:outputText
+								value="#{cronogramaPreventivaBean.totalPreventivas}" />
+						</div>
+					</div>
+					<div class="stat-card card-para-fazer">
+						<h3>
+							Para Fazer <span class="stat-hint">em aberto</span>
+						</h3>
+						<div class="stat-value">
+							<h:outputText value="#{cronogramaPreventivaBean.totalParaFazer}" />
+						</div>
+					</div>
+					<div class="stat-card card-em-andamento">
+						<h3>
+							Em Andamento <span class="stat-hint">em aberto</span>
+						</h3>
+						<div class="stat-value">
+							<h:outputText
+								value="#{cronogramaPreventivaBean.totalEmAndamento}" />
+						</div>
+					</div>
+					<div class="stat-card card-aguardando">
+						<h3>
+							Aguardando Compra <span class="stat-hint">em aberto</span>
+						</h3>
+						<div class="stat-value">
+							<h:outputText
+								value="#{cronogramaPreventivaBean.totalAguardandoCompra}" />
+						</div>
+					</div>
+					<div class="stat-card card-atrasadas">
+						<h3>
+							Atrasadas <span class="stat-hint">em aberto</span>
+						</h3>
+						<div class="stat-value valor-atrasadas">
+							<h:outputText value="#{cronogramaPreventivaBean.totalAtrasadas}" />
+						</div>
+					</div>
+					<div class="stat-card card-concluidas">
+						<h3>Concluídas</h3>
+						<div class="stat-value">
+							<h:outputText value="#{cronogramaPreventivaBean.totalConcluidas}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="filtros-bar">
+					<label>Buscar OS:</label>
+					<h:inputText value="#{cronogramaPreventivaBean.filtroId}"
+						styleClass="filtro-id" pt:placeholder="Ex: 4" />
+
+					<label>Filtrar por:</label>
+					<h:selectOneMenu
+						value="#{cronogramaPreventivaBean.filtroCategoria}"
+						styleClass="filtro-select">
+						<f:selectItem itemValue="" itemLabel="Todas as categorias" />
+						<f:selectItem itemValue="MAQUINA"
+							itemLabel="Máquinas e Equipamentos" />
+						<f:selectItem itemValue="PREDIAL" itemLabel="Manutenção Predial" />
+					</h:selectOneMenu>
+
+					<!-- Os dois campos de data ganharam timeZone.
+
+					     Sem ele o JSF interpreta a data em GMT (o projeto não
+					     define DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE
+					     no web.xml), enquanto as datas exibidas na tela estão em
+					     horário local. O filtro ficava 3 horas deslocado. -->
+					<label>De:</label>
+					<h:inputText value="#{cronogramaPreventivaBean.filtroDataInicio}"
+						styleClass="filtro-data" pt:type="date">
+						<f:convertDateTime pattern="yyyy-MM-dd" timeZone="America/Sao_Paulo" />
+					</h:inputText>
+
+					<label>Até:</label>
+					<h:inputText value="#{cronogramaPreventivaBean.filtroDataFim}"
+						styleClass="filtro-data" pt:type="date">
+						<f:convertDateTime pattern="yyyy-MM-dd" timeZone="America/Sao_Paulo" />
+					</h:inputText>
+
+					<h:commandButton value="Filtrar"
+						action="#{cronogramaPreventivaBean.filtrarPorCategoria}"
+						styleClass="btn-filtrar" />
+					<h:commandButton value="Limpar"
+						action="#{cronogramaPreventivaBean.limparFiltros}"
+						styleClass="btn-limpar" />
+				</div>
+
+				<div class="legenda">
+					<div class="legenda-item">
+						<span class="legenda-dot dot-para-fazer"></span> <span>Para
+							Fazer</span>
+					</div>
+					<div class="legenda-item">
+						<span class="legenda-dot dot-em-andamento"></span> <span>Em
+							Andamento</span>
+					</div>
+					<div class="legenda-item">
+						<span class="legenda-dot dot-aguardando"></span> <span>Aguardando
+							Compra</span>
+					</div>
+					<div class="legenda-item">
+						<span class="legenda-dot dot-atrasada"></span> <span>Atrasada</span>
+					</div>
+					<div class="legenda-item">
+						<span class="legenda-dot dot-concluida"></span> <span>Concluída</span>
+					</div>
+					<div class="legenda-item" style="margin-left: 1rem;">
+						<span class="legenda-dot dot-maquina"></span> <span>Máquina/Equip.</span>
+					</div>
+					<div class="legenda-item">
+						<span class="legenda-dot dot-predial"></span> <span>Predial</span>
+					</div>
+				</div>
+
+				<div class="cronograma-tabs">
+					<h:commandLink styleClass="cronograma-tab-button #{cronogramaPreventivaBean.abaAtiva == 'ABERTAS' ? 'active' : ''}"
+						actionListener="#{cronogramaPreventivaBean.mudarAba('ABERTAS')}">
+						Em Aberto / Ativas
+						<span class="cronograma-tab-badge">
+							<h:outputText value="#{cronogramaPreventivaBean.totalEmAberto}" />
+						</span>
+					</h:commandLink>
+					<h:commandLink styleClass="cronograma-tab-button #{cronogramaPreventivaBean.abaAtiva == 'CONCLUIDAS' ? 'active' : ''}"
+						actionListener="#{cronogramaPreventivaBean.mudarAba('CONCLUIDAS')}">
+						Concluídas
+						<span class="cronograma-tab-badge">
+							<h:outputText value="#{cronogramaPreventivaBean.totalConcluidas}" />
+						</span>
+					</h:commandLink>
+				</div>
+
+				<!-- Faixa de filtros ativos. Os cards e os badges acima
+				     já contam apenas o que passou por estes filtros. -->
+				<h:panelGroup layout="block" styleClass="filtros-ativos"
+					rendered="#{cronogramaPreventivaBean.filtrosAtivos}">
+					<i class="pi pi-filter-fill"></i>
+					<span class="filtros-ativos-texto"> <strong>Filtros
+							ativos:</strong> <h:outputText
+							value="#{cronogramaPreventivaBean.resumoFiltros}" />
+					</span>
+					<h:commandButton value="Limpar filtros"
+						action="#{cronogramaPreventivaBean.limparFiltros}"
+						styleClass="btn-limpar" />
+				</h:panelGroup>
+
+				<ui:fragment rendered="#{not cronogramaPreventivaBean.listaVazia}">
+					<ui:repeat value="#{cronogramaPreventivaBean.gruposPorMes}"
+						var="grupo">
+						<div class="cronograma-section">
+							<div class="mes-header">
+								<h2>
+									<h:outputText value="#{grupo.mesAno}" />
+								</h2>
+								<span class="mes-badge"> <h:outputText
+										value="#{grupo.quantidade}" /> <h:outputText value=" item"
+										rendered="#{grupo.quantidade == 1}" /> <h:outputText
+										value=" itens" rendered="#{grupo.quantidade != 1}" />
+								</span>
+							</div>
+
+							<div class="timeline">
+								<ui:repeat value="#{grupo.itens}" var="item">
+									<div class="timeline-item">
+										<div
+											class="timeline-date #{cronogramaPreventivaBean.isHoje(item.dataPrevista) ? 'date-hoje' : ''} #{item.atrasada ? 'date-atrasada' : ''}">
+											<div class="dia-semana">
+												<h:outputText
+													value="#{cronogramaPreventivaBean.getDiaSemana(item.dataPrevista)}" />
+											</div>
+											<div class="dia-numero">
+												<h:outputText
+													value="#{cronogramaPreventivaBean.getDiaNumero(item.dataPrevista)}" />
+											</div>
+											<div class="mes-abrev">
+												<h:outputText
+													value="#{cronogramaPreventivaBean.getMesAbreviado(item.dataPrevista)}" />
+											</div>
+										</div>
+
+										<div
+											class="timeline-dot #{item.atrasada ? 'dot-atrasada' : (item.status == 'CONCLUIDA' ? 'dot-concluida' : (item.status == 'EM_ANDAMENTO' ? 'dot-em-andamento' : (item.status == 'AGUARDANDO_COMPRA' ? 'dot-aguardando' : 'dot-para-fazer')))}"></div>
+
+										<div
+											class="timeline-card #{item.atrasada ? 'card-atrasada' : (item.status == 'CONCLUIDA' ? 'card-concluida' : (item.status == 'EM_ANDAMENTO' ? 'card-em-andamento' : (item.status == 'AGUARDANDO_COMPRA' ? 'card-aguardando' : 'card-para-fazer')))}">
+											<div class="card-header-row">
+												<span class="card-title"> <h:outputText
+														value="#{item.descricao}" />
+												</span>
+												<div class="card-badges">
+													<span
+														class="badge #{cronogramaPreventivaBean.getStatusClass(item)}">
+														<h:outputText
+															value="#{item.atrasada ? 'Atrasada' : cronogramaPreventivaBean.getStatusLabel(item.status)}" />
+													</span> <span
+														class="badge #{cronogramaPreventivaBean.getCategoriaClass(item.categoria)}">
+														<h:outputText
+															value="#{item.categoria == 'MAQUINA' ? 'Máquina' : 'Predial'}" />
+													</span>
+												</div>
+											</div>
+
+											<div class="card-info">
+												<div class="card-info-item">
+													<span class="info-icon">&#128205;</span>
+													<h:outputText value="#{item.localOuMaquina}" />
+												</div>
+												<h:panelGroup rendered="#{not empty item.solicitante}">
+													<div class="card-info-item">
+														<span class="info-icon">&#128100;</span>
+														<h:outputText value="#{item.solicitante}" />
+													</div>
+												</h:panelGroup>
+												<div class="card-info-item">
+													<span class="info-icon">&#128196;</span> <span
+														class="info-label">OS:</span>
+													<h:outputText
+														value="#{item.categoria == 'MAQUINA' ? 'M' : 'P'}-#{item.id}" />
+												</div>
+												<h:panelGroup rendered="#{not empty item.dataPrevista}">
+													<div class="card-info-item">
+														<span class="info-icon">&#128197;</span>
+														<h:outputText value="#{item.dataPrevista}">
+															<f:convertDateTime pattern="dd/MM/yyyy" />
+														</h:outputText>
+													</div>
+												</h:panelGroup>
+											</div>
+
+											<ui:fragment rendered="#{not empty item.observacoes}">
+												<div class="card-obs">
+													<h:outputText value="#{item.observacoes}" />
+												</div>
+											</ui:fragment>
+
+											<div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px;">
+												<p:commandButton value="Detalhes" icon="pi pi-eye"
+													process="@this"
+													update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+													action="#{detalhesManutencaoBean.abrirDetalhes(item.id, item.categoria)}"
+													oncomplete="PF('dlgDetalhesGlobal').show();"
+													styleClass="ui-button-info ui-button-sm"
+													style="font-size: 0.7rem !important; padding: 4px 10px !important; height: auto !important; line-height: 1 !important;" />
+												<p:commandButton icon="pi pi-arrow-right"
+													process="@this"
+													actionListener="#{cronogramaPreventivaBean.selecionarParaIniciar(item)}"
+													oncomplete="PF('dlgConfirmarIniciar').show();"
+													styleClass="ui-button-success ui-button-sm ui-button-icon-only"
+													title="Ir ao painel e iniciar"
+													style="font-size: 0.7rem !important; padding: 4px 8px !important; height: auto !important; line-height: 1 !important; width: auto !important; min-width: 0 !important;"
+													rendered="#{item.status ne 'CONCLUIDA' and item.status ne 'EM_ANDAMENTO' and item.status ne 'CANCELADA'}" />
+											</div>
+										</div>
+									</div>
+								</ui:repeat>
+							</div>
+						</div>
+					</ui:repeat>
+				</ui:fragment>
+
+				<!-- ✅ MELHORADO: o vazio agora diz se é por causa dos filtros.
+				     Antes a mensagem afirmava que não existiam preventivas no
+				     sistema, mesmo quando era só o filtro cortando tudo. -->
+				<ui:fragment rendered="#{cronogramaPreventivaBean.listaVazia}">
+					<div class="empty-state">
+						<div class="empty-icon">&#128203;</div>
+						<h3>Nenhuma manutenção preventiva encontrada</h3>
+						<p>
+							<h:outputText rendered="#{cronogramaPreventivaBean.filtrosAtivos}"
+								value="Nenhuma preventiva desta aba atende aos filtros aplicados. Tente limpar os filtros para ver todas." />
+							<h:outputText rendered="#{not cronogramaPreventivaBean.filtrosAtivos and cronogramaPreventivaBean.abaAtiva == 'CONCLUIDAS'}"
+								value="Não existem manutenções preventivas concluídas no momento." />
+							<h:outputText rendered="#{not cronogramaPreventivaBean.filtrosAtivos and cronogramaPreventivaBean.abaAtiva != 'CONCLUIDAS'}"
+								value="Não existem manutenções preventivas ativas no sistema no momento." />
+						</p>
+					</div>
+				</ui:fragment>
+
+			</h:form>
+		</div>
+
+
+	<!-- ===== DIALOG DE DETALHES (componente reutilizável) ===== -->
+	<ui:include src="/includes/detalhesManutencaoDialog.xhtml"/>
+
+	<p:dialog header="Confirmar Início" widgetVar="dlgConfirmarIniciar"
+		modal="true" resizable="false" closable="true" width="500"
+		showEffect="fade" hideEffect="fade" responsive="true"
+		style="top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; position: fixed !important; margin: 0 !important;">
+		<h:form id="confirmarIniciarForm">
+			<div style="padding: 20px; text-align: center;">
+				<p style="font-size: 1.05rem; color: #2d3748; margin-bottom: 25px;">
+					Deseja ir para o painel de manutenções e iniciar esta manutenção?
+				</p>
+				<div style="display: flex; justify-content: center; gap: 10px;">
+					<p:commandButton value="Sim, iniciar"
+						icon="pi pi-check"
+						action="#{cronogramaPreventivaBean.redirecionarParaIniciar()}"
+						styleClass="ui-button-success"
+						ajax="false" />
+					<p:commandButton value="Cancelar"
+						icon="pi pi-times"
+						onclick="PF('dlgConfirmarIniciar').hide();"
+						type="button"
+						styleClass="ui-button-secondary" />
+				</div>
+			</div>
+		</h:form>
+	</p:dialog>
+
+	</f:view>
+</h:body>
+</html>

@@ -1,0 +1,57 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f6f9;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #2c3e50;
+}
+
+.erro-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(44, 62, 80, 0.12);
+    padding: 2.5rem 2rem;
+    max-width: 420px;
+    width: calc(100% - 32px);
+    text-align: center;
+}
+
+.erro-card img {
+    width: 72px;
+    height: 72px;
+}
+
+.erro-codigo {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #ed8936;
+    margin: 0.75rem 0 0;
+}
+
+.erro-titulo {
+    font-size: 1.25rem;
+    margin: 0.25rem 0 0.75rem;
+}
+
+.erro-texto {
+    color: #5a6b7c;
+    line-height: 1.5;
+    margin-bottom: 1.75rem;
+}
+
+.erro-botao {
+    display: inline-block;
+    background: #2c3e50;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.erro-botao:hover {
+    background: #3d5469;
+}

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Consulta de Técnicos</title>
+	<h:outputStylesheet name="css/consultaTecnico.css" />
+	<h:outputStylesheet name="css/detalhesDialog.css" />
+</h:head>
+
+<h:body>
+	<div class="header">
+		<h1>Consulta de Técnicos</h1>
+	</div>
+	<div class="header-actions">
+		<button type="button" class="exit-button" onclick="window.history.back();">Voltar</button>
+	</div>
+
+	<div class="page-content">
+
+		<h:form id="mainForm">
+
+			<!-- ===== FILTROS ===== -->
+			<div class="filtros-bar">
+				<p:inputText value="#{consultaTecnicoBean.filtroNome}"
+					placeholder="Buscar por nome ou registro..."
+					styleClass="filtro-nome">
+					<p:ajax event="keyup" update="tecnicosPanel" listener="#{consultaTecnicoBean.aplicarFiltros()}" />
+				</p:inputText>
+
+				<p:selectOneMenu value="#{consultaTecnicoBean.filtroStatus}" styleClass="filtro-status">
+					<f:selectItem itemValue="TODOS" itemLabel="Todos" />
+					<f:selectItem itemValue="ATIVOS" itemLabel="Ativos" />
+					<f:selectItem itemValue="INATIVOS" itemLabel="Inativos" />
+					<p:ajax update="tecnicosPanel" listener="#{consultaTecnicoBean.aplicarFiltros()}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu value="#{consultaTecnicoBean.filtroPeriodoMeses}" styleClass="filtro-periodo">
+					<f:selectItem itemValue="0" itemLabel="Todo o período" />
+					<f:selectItem itemValue="3" itemLabel="Últimos 3 meses" />
+					<f:selectItem itemValue="6" itemLabel="Últimos 6 meses" />
+					<f:selectItem itemValue="12" itemLabel="Últimos 12 meses" />
+					<f:selectItem itemValue="24" itemLabel="Últimos 24 meses" />
+					<p:ajax update="tecnicosPanel detailPanel" listener="#{consultaTecnicoBean.aplicarFiltroPeriodo()}" />
+				</p:selectOneMenu>
+			</div>
+
+			<!-- ===== GRID DE CARDS DOS TÉCNICOS ===== -->
+			<h:panelGroup id="tecnicosPanel" layout="block">
+
+				<h:panelGroup rendered="#{empty consultaTecnicoBean.tecnicosFiltrados}" layout="block">
+					<div class="empty-message">
+						<i class="pi pi-users"></i>
+						<p>Nenhum técnico encontrado</p>
+					</div>
+				</h:panelGroup>
+
+				<div class="tecnicos-grid">
+					<ui:repeat value="#{consultaTecnicoBean.tecnicosFiltrados}" var="tecnico">
+						<p:commandLink styleClass="tecnico-card #{consultaTecnicoBean.tecnicoSelecionado != null and consultaTecnicoBean.tecnicoSelecionado.id == tecnico.id ? 'selecionado' : ''}"
+							update=":mainForm:tecnicosPanel :mainForm:detailPanel"
+							action="#{consultaTecnicoBean.selecionarTecnico(tecnico)}"
+							process="@this">
+
+							<div class="card-header">
+								<div class="avatar #{tecnico.ativo ? 'avatar-ativo' : 'avatar-inativo'}">
+									#{consultaTecnicoBean.getIniciais(tecnico)}
+								</div>
+								<div>
+									<p class="card-nome">#{tecnico.nome}</p>
+									<p class="card-funcao">#{tecnico.funcao}</p>
+								</div>
+							</div>
+
+							<span class="badge-status #{tecnico.ativo ? 'badge-ativo' : 'badge-inativo'}">
+								#{tecnico.ativo ? 'Ativo' : 'Inativo'}
+							</span>
+
+							<div class="card-stats">
+								<div>
+									<p class="card-stat-label">Horas totais</p>
+									<p class="card-stat-value">#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.getHorasResumo(tecnico))}</p>
+								</div>
+								<div>
+									<p class="card-stat-label">Manutenções</p>
+									<p class="card-stat-value">#{consultaTecnicoBean.getManutencoesResumo(tecnico)}</p>
+								</div>
+							</div>
+
+						</p:commandLink>
+					</ui:repeat>
+				</div>
+			</h:panelGroup>
+
+			<!-- ===== PAINEL DE DETALHES DO TÉCNICO ===== -->
+			<h:panelGroup id="detailPanel" layout="block">
+				<h:panelGroup rendered="#{consultaTecnicoBean.tecnicoSelecionado != null}" layout="block">
+					<div class="detail-panel">
+
+						<!-- Cabeçalho -->
+						<div class="detail-header-section">
+							<div class="detail-avatar">
+								#{consultaTecnicoBean.getIniciais(consultaTecnicoBean.tecnicoSelecionado)}
+							</div>
+							<div>
+								<p class="detail-nome">#{consultaTecnicoBean.tecnicoSelecionado.nome}</p>
+								<p class="detail-info-line">
+									Registro: #{consultaTecnicoBean.tecnicoSelecionado.nuRegistro} ·
+									#{consultaTecnicoBean.tecnicoSelecionado.funcao} ·
+									#{consultaTecnicoBean.tecnicoSelecionado.email}
+									<h:panelGroup rendered="#{not empty consultaTecnicoBean.tecnicoSelecionado.telefone}">
+										· #{consultaTecnicoBean.tecnicoSelecionado.telefone}
+									</h:panelGroup>
+								</p>
+								<p class="detail-info-line" style="margin-top: 4px;">
+									Valor/hora Máquina:
+									<h:outputText value="#{consultaTecnicoBean.tecnicoSelecionado.valorHoraMaquina}">
+										<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />
+									</h:outputText>
+									· Valor/hora Predial:
+									<h:outputText value="#{consultaTecnicoBean.tecnicoSelecionado.valorHoraPredial}">
+										<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />
+									</h:outputText>
+								</p>
+							</div>
+							<p:commandButton value="Voltar à lista"
+								styleClass="btn-voltar-lista"
+								action="#{consultaTecnicoBean.voltarParaLista()}"
+								update=":mainForm:tecnicosPanel :mainForm:detailPanel"
+								process="@this"
+								icon="pi pi-arrow-left" />
+						</div>
+
+						<!-- Cards de Estatísticas Linha 1 -->
+						<div class="stats-grid">
+							<div class="stat-card">
+								<p class="stat-label">Horas totais</p>
+								<p class="stat-value">#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.totalHorasTrabalhadas)}</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Manutenções</p>
+								<p class="stat-value">#{consultaTecnicoBean.totalManutencoes}</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Horas diagnóstico</p>
+								<p class="stat-value">#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.horasDiagnostico)}</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Custo mão de obra</p>
+								<p class="stat-value">
+									<h:outputText value="#{consultaTecnicoBean.custoMaoDeObra}">
+										<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />
+									</h:outputText>
+								</p>
+							</div>
+						</div>
+
+						<!-- Cards de Estatísticas Linha 2 -->
+						<div class="stats-grid">
+							<div class="stat-card">
+								<p class="stat-label">Corretivas</p>
+								<p class="stat-value">
+									#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.horasCorretiva)}
+									<span class="stat-sub">(#{consultaTecnicoBean.qtdCorretiva} man.)</span>
+								</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Preventivas</p>
+								<p class="stat-value">
+									#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.horasPreventiva)}
+									<span class="stat-sub">(#{consultaTecnicoBean.qtdPreventiva} man.)</span>
+								</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Preditivas</p>
+								<p class="stat-value">
+									#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.horasPreditiva)}
+									<span class="stat-sub">(#{consultaTecnicoBean.qtdPreditiva} man.)</span>
+								</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Horas máquinas</p>
+								<p class="stat-value">#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.horasMaquina)}</p>
+							</div>
+							<div class="stat-card">
+								<p class="stat-label">Horas predial</p>
+								<p class="stat-value">#{consultaTecnicoBean.formatarHoras(consultaTecnicoBean.horasPredial)}</p>
+							</div>
+						</div>
+
+						<!-- Tabela de Manutenções -->
+						<div class="manutencoes-section">
+							<div class="section-header">
+								<i class="pi pi-wrench" style="margin-right: 6px;"></i>
+								Manutenções (#{consultaTecnicoBean.totalManutencoes})
+							</div>
+
+							<p:dataTable value="#{consultaTecnicoBean.manutencoesTecnico}" var="item"
+								emptyMessage="Nenhuma manutenção encontrada para este técnico"
+								paginator="true" rows="10"
+								paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+								currentPageReportTemplate="{startRecord} a {endRecord} de {totalRecords}">
+
+								<p:column headerText="ID" style="width: 55px; text-align: center;">
+									<h:outputText value="##{item.solicitacaoId}" />
+								</p:column>
+
+								<p:column headerText="Tipo" style="width: 90px;">
+									<span class="tipo-badge #{item.tipoManutencaoRef.name() == 'MAQUINA' ? 'tipo-maquina' : 'tipo-predial'}">
+										#{consultaTecnicoBean.getTipoRefLabel(item.tipoManutencaoRef)}
+									</span>
+								</p:column>
+
+								<p:column headerText="Categoria" style="width: 90px;">
+									<h:outputText value="#{item.tipoManutencao}" />
+								</p:column>
+
+								<p:column headerText="Equipamento / Local">
+									<h:outputText value="#{item.equipamentoLocal}" />
+								</p:column>
+
+								<p:column headerText="Descrição">
+									<h:outputText value="#{item.descricao}" />
+								</p:column>
+
+								<p:column headerText="Data" style="width: 90px; text-align: center;">
+									<h:outputText value="#{item.dataManutencao}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</p:column>
+
+								<p:column headerText="Status" style="width: 120px; text-align: center;">
+									<span class="status-badge #{consultaTecnicoBean.getStatusClass(item.status)}">
+										#{consultaTecnicoBean.getStatusLabel(item.status)}
+									</span>
+								</p:column>
+
+								<p:column headerText="Horas" style="width: 70px; text-align: center;">
+									<h:outputText value="#{consultaTecnicoBean.formatarHoras(item.horasTecnico)}"
+										style="font-weight: 600;" />
+								</p:column>
+
+								<p:column headerText="" style="width: 55px; text-align: center;">
+									<p:commandButton process="@this"
+										update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+										action="#{detalhesManutencaoBean.abrirDetalhes(item.solicitacaoId, item.tipoManutencaoRef)}"
+										oncomplete="PF('dlgDetalhesGlobal').show();"
+										styleClass="ui-button-info action-button" icon="pi pi-eye"
+										title="Ver detalhes" />
+								</p:column>
+
+							</p:dataTable>
+						</div>
+
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
+
+		</h:form>
+	</div>
+
+	<!-- ===== DIALOG DE DETALHES (componente reutilizável) ===== -->
+	<ui:include src="/includes/detalhesManutencaoDialog.xhtml"/>
+
+</h:body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}"
+		type="image/x-icon" />
+	<title>Sistema de Gestão de Manutenção - Administrador</title>
+	<h:outputStylesheet name="css/homeAdm.css" />
+</h:head>
+
+<h:body>
+	<div class="header">
+		<div class="header-content">
+			<div class="header-left">
+				<h:graphicImage library="imagens" name="logo.png" alt="Gestão de Manutenção"
+					styleClass="header-logo" />
+				<div class="header-info">
+					<h1>Sistema de Gestão de Manutenção</h1>
+					<p>Painel do Administrador</p>
+				</div>
+			</div>
+			<div class="header-actions">
+				<div class="user-info">
+					<h:link outcome="/conta/minhaConta.xhtml"
+						styleClass="my-account-button" value="Minha Conta" />
+					<span class="user-label">Bem-vindo(a),</span>
+					<h:outputText value="#{usuarioLogado.nome}" styleClass="username" />
+				</div>
+
+				<h:form prependId="false" style="display: inline;">
+					<h:commandLink action="#{loginUsuarioBean.logout()}"
+						styleClass="exit-button" value="Sair" />
+				</h:form>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="hero-section">
+			<h2 class="hero-title">Principais Funcionalidades</h2>
+
+			<div class="hero-grid">
+				<div class="hero-card card-manutencao">
+					<h3>Solicitações de Manutenção</h3>
+					<p>Gerencie todas as solicitações de manutenção</p>
+
+					<div class="hero-buttons">
+						<h:link
+							outcome="/solicitacaoManutencao/solicitacaoManutencaoMaquina"
+							styleClass="hero-btn btn-equipamento"
+							value="Máquinas e Equipamentos" />
+
+						<h:link
+							outcome="/solicitacaoManutencao/solicitacaoManutencaoPredial"
+							styleClass="hero-btn btn-predial" value="Manutenção Predial" />
+
+						<h:link outcome="/solicitacaoManutencao/todasSolicitacoes.xhtml"
+							styleClass="hero-btn btn-todas" value="Todas as Solicitações" />
+					</div>
+				</div>
+
+				<div class="hero-card card-gerenciar">
+					<h3>Gerenciar Manutenções</h3>
+					<p>Gerencie todas as manutenções do sistema</p>
+
+					<div class="hero-buttons">
+						<h:link
+							outcome="/solicitacaoManutencao/manutencaoTecnico/manutencaoTecnicoCorretiva"
+							styleClass="hero-btn btn-gerenciar" value="Gerenciar Manutenções" />
+					</div>
+				</div>
+
+				<div class="hero-card card-compras">
+					<h3>Solicitações de Compras</h3>
+					<p>Gerencie compras de materiais e serviços</p>
+
+					<div class="hero-buttons">
+						<h:link outcome="/compras/comprarMateriaisServicos.xhtml"
+							styleClass="hero-btn btn-comprar" value="Verificar Compras" />
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="secondary-menu">
+			<div class="menu-section">
+				<details class="menu-collapse">
+					<summary class="collapse-header">
+						<span class="collapse-title">Cadastros do Sistema</span> <span
+							class="collapse-arrow">▼</span>
+					</summary>
+					<div class="collapse-content">
+						<div class="menu-list">
+							<h:link outcome="/usuario/usuario" styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Usuários</span> <span
+										class="menu-item-description">Gerencie usuários,
+										permissões e controle de acesso</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/maquinaEquipamento/maquinaEquipamento"
+								styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Máquinas e Equipamentos</span> <span
+										class="menu-item-description">Registre máquinas com
+										especificações técnicas</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/local/local" styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Locais</span> <span
+										class="menu-item-description">Organize locais e áreas
+										da empresa</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+						</div>
+					</div>
+				</details>
+			</div>
+
+			<div class="menu-section">
+				<details class="menu-collapse">
+					<summary class="collapse-header">
+						<span class="collapse-title">Consultas</span> <span
+							class="collapse-arrow">▼</span>
+					</summary>
+					<div class="collapse-content">
+						<div class="menu-list">
+							<h:link outcome="/maquinaEquipamento/maquinaEquipamentoTecnico"
+								styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Máquinas e Equipamentos</span> <span
+										class="menu-item-description">Consulte máquinas e
+										equipamentos com especificações técnicas</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/local/localTecnico" styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Locais</span> <span
+										class="menu-item-description">Consulte locais e áreas
+										da empresa</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/tecnico/consultaTecnico" styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Técnicos</span> <span
+										class="menu-item-description">Consulte estatísticas e
+										histórico de manutenções por técnico</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/cronograma/cronogramaPreventiva.xhtml"
+								styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Cronograma de Manuteções
+										Preventivas</span> <span class="menu-item-description">Consulte
+										o cronograma de todas as manutenções preventivas</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/relatorios/dashboard.xhtml"
+								styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Relatórios e Análises</span> <span
+										class="menu-item-description">Acesse relatórios e
+										indicadores de performance</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+
+							<h:link outcome="/relatorios/relatorioIndicadores.xhtml"
+								styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Relatório de Indicadores</span> <span
+										class="menu-item-description">Acesse relatórios e
+										indicadores de performance da manutenção</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+						</div>
+					</div>
+				</details>
+			</div>
+
+			<div class="menu-section">
+				<details class="menu-collapse">
+					<summary class="collapse-header">
+						<span class="collapse-title">Configurações</span> <span
+							class="collapse-arrow">▼</span>
+					</summary>
+					<div class="collapse-content">
+						<div class="menu-list">
+							<h:link outcome="/email/configuracaoEmail.xhtml"
+								styleClass="menu-item">
+								<div class="menu-item-content">
+									<span class="menu-item-title">Configuração de Emails</span> <span
+										class="menu-item-description">Configure notificações
+										automáticas por email</span>
+								</div>
+								<span class="menu-item-arrow">→</span>
+							</h:link>
+						</div>
+					</div>
+				</details>
+			</div>
+		</div>
+	</div>
+
+	<div class="footer">
+		<p>Sistema de Gestão de Manutenção - Versão 2.0 - 2026</p>
+	</div>
+</h:body>
+</html>

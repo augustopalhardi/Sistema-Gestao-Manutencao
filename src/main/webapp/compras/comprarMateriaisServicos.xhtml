@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Gerenciar Compras de Materiais e Serviços</title>
+	<h:outputStylesheet name="css/cronogramaPreventiva.css" />
+	<h:outputStylesheet name="css/compras.css" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<!-- ============================================================
+	     Faixa que mostra quais filtros estão ativos.
+
+	     Antes, com um filtro de data esquecido lá em cima, a lista
+	     ficava vazia sem nenhuma explicação na tela.
+	     ============================================================ -->
+	<style>
+		.filtros-ativos {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			flex-wrap: wrap;
+			background: #eff6ff;
+			border: 1px solid #bfdbfe;
+			border-left: 4px solid #2563eb;
+			border-radius: 6px;
+			padding: 10px 14px;
+			margin-bottom: 14px;
+			font-size: 0.88rem;
+			color: #1e3a8a;
+		}
+
+		.filtros-ativos .pi {
+			color: #2563eb;
+		}
+
+		.filtros-ativos-texto {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.filtros-ativos-texto strong {
+			font-weight: 700;
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<div class="header-top">
+		<h1>&#128722; Gerenciamento de Compras</h1>
+		<p class="header-subtitle">Solicitações de compra de materiais e
+			serviços para manutenção</p>
+	</div>
+	<div class="header-actions">
+		<h:form style="margin: 0;">
+			<h:button outcome="/home/homeAdm.xhtml" styleClass="back-button"
+				value="Voltar" />
+		</h:form>
+	</div>
+
+	<div class="container">
+		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+
+		<h:form id="formSolicitacoes">
+
+			<!-- ============================================================
+			     Os quatro cards de resumo que ficavam aqui foram removidos:
+			     mostravam exatamente os mesmos quatro números dos badges das
+			     abas logo abaixo, e ainda por cima pareciam clicáveis sem ser.
+			     Os badges das abas assumiram o papel.
+			     ============================================================ -->
+
+			<div class="filtros-bar">
+				<label>Buscar por Manutenção:</label>
+				<h:inputText value="#{solicitacaoCompraMateriaisServicosBean.filtroBuscaId}"
+					styleClass="filtro-id" pt:placeholder="Ex: 4" />
+
+				<label>Filtrar por:</label>
+				<h:selectOneMenu
+					value="#{solicitacaoCompraMateriaisServicosBean.filtroCategoria}"
+					styleClass="filtro-select">
+					<f:selectItem itemValue="" itemLabel="Todas as categorias" />
+					<f:selectItem itemValue="MAQUINA"
+						itemLabel="Máquinas e Equipamentos" />
+					<f:selectItem itemValue="PREDIAL" itemLabel="Manutenção Predial" />
+				</h:selectOneMenu>
+
+				<label>Tipo:</label>
+				<h:selectOneMenu
+					value="#{solicitacaoCompraMateriaisServicosBean.filtroTipoSolicitacao}"
+					styleClass="filtro-select">
+					<f:selectItem itemValue="" itemLabel="Todos os tipos" />
+					<f:selectItem itemValue="MATERIAL" itemLabel="Material" />
+					<f:selectItem itemValue="SERVICO" itemLabel="Serviço" />
+					<f:selectItem itemValue="AMBOS" itemLabel="Material e Serviço" />
+				</h:selectOneMenu>
+
+				<!-- Os dois campos de data ganharam timeZone.
+
+				     Sem ele o JSF interpreta a data em GMT (o projeto não
+				     define DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE
+				     no web.xml), enquanto o resto da página converte para
+				     America/Sao_Paulo. O filtro ficava 3 horas deslocado:
+				     "De 27/08" passava a valer das 21h do dia 26. -->
+				<label>De:</label>
+				<h:inputText value="#{solicitacaoCompraMateriaisServicosBean.filtroDataInicio}"
+					styleClass="filtro-data" pt:type="date">
+					<f:convertDateTime pattern="yyyy-MM-dd" timeZone="America/Sao_Paulo" />
+				</h:inputText>
+
+				<label>Até:</label>
+				<h:inputText value="#{solicitacaoCompraMateriaisServicosBean.filtroDataFim}"
+					styleClass="filtro-data" pt:type="date">
+					<f:convertDateTime pattern="yyyy-MM-dd" timeZone="America/Sao_Paulo" />
+				</h:inputText>
+
+				<h:commandButton value="Filtrar"
+					action="#{solicitacaoCompraMateriaisServicosBean.atualizarListas}"
+					styleClass="btn-filtrar" />
+				<h:commandButton value="Limpar"
+					action="#{solicitacaoCompraMateriaisServicosBean.limparFiltros}"
+					styleClass="btn-limpar" />
+			</div>
+
+			<div class="cronograma-tabs">
+				<h:commandLink
+					styleClass="cronograma-tab-button #{solicitacaoCompraMateriaisServicosBean.filtroStatus == 'TODAS' ? 'active' : ''}"
+					actionListener="#{solicitacaoCompraMateriaisServicosBean.mudarFiltroStatus('TODAS')}">
+					Todas
+					<span class="cronograma-tab-badge">
+						<h:outputText value="#{solicitacaoCompraMateriaisServicosBean.contadorTotal}" />
+					</span>
+				</h:commandLink>
+				<h:commandLink
+					styleClass="cronograma-tab-button #{solicitacaoCompraMateriaisServicosBean.filtroStatus == 'PENDENTE' ? 'active' : ''}"
+					actionListener="#{solicitacaoCompraMateriaisServicosBean.mudarFiltroStatus('PENDENTE')}">
+					Pendentes
+					<span class="cronograma-tab-badge">
+						<h:outputText value="#{solicitacaoCompraMateriaisServicosBean.contadorPendentes}" />
+					</span>
+				</h:commandLink>
+				<h:commandLink
+					styleClass="cronograma-tab-button #{solicitacaoCompraMateriaisServicosBean.filtroStatus == 'COMPRADO' ? 'active' : ''}"
+					actionListener="#{solicitacaoCompraMateriaisServicosBean.mudarFiltroStatus('COMPRADO')}">
+					Processadas
+					<span class="cronograma-tab-badge">
+						<h:outputText value="#{solicitacaoCompraMateriaisServicosBean.contadorProcessadas}" />
+					</span>
+				</h:commandLink>
+				<h:commandLink
+					styleClass="cronograma-tab-button #{solicitacaoCompraMateriaisServicosBean.filtroStatus == 'CANCELADA' ? 'active' : ''}"
+					actionListener="#{solicitacaoCompraMateriaisServicosBean.mudarFiltroStatus('CANCELADA')}">
+					Canceladas
+					<span class="cronograma-tab-badge">
+						<h:outputText value="#{solicitacaoCompraMateriaisServicosBean.contadorCanceladas}" />
+					</span>
+				</h:commandLink>
+			</div>
+
+			<!-- Faixa de filtros ativos. Os badges das abas acima já
+			     contam apenas o que passou por estes filtros. -->
+			<h:panelGroup layout="block" styleClass="filtros-ativos"
+				rendered="#{solicitacaoCompraMateriaisServicosBean.filtrosAtivos}">
+				<i class="pi pi-filter-fill"></i>
+				<span class="filtros-ativos-texto"> <strong>Filtros
+						ativos:</strong> <h:outputText
+						value="#{solicitacaoCompraMateriaisServicosBean.resumoFiltros}" />
+				</span>
+				<h:commandButton value="Limpar filtros"
+					action="#{solicitacaoCompraMateriaisServicosBean.limparFiltros}"
+					styleClass="btn-limpar" />
+			</h:panelGroup>
+
+			<h:panelGroup layout="block" styleClass="solicitacoes-list">
+				<ui:repeat
+					value="#{solicitacaoCompraMateriaisServicosBean.solicitacoesFiltradas}"
+					var="solicitacao">
+
+					<div class="solicitacao-card">
+
+						<div class="card-header-solicitacao">
+							<div>
+								<div class="solicitacao-id">
+									<i class="pi pi-hashtag"></i> Solicitação ##{solicitacao.id}
+								</div>
+								<div style="margin-top: 8px;">
+									<span class="tipo-badge"> <i
+										class="#{solicitacaoCompraMateriaisServicosBean.getIconeTipo(solicitacao.tipoSolicitacao)}"></i>
+										#{solicitacao.tipoSolicitacao.descricao}
+									</span>
+								</div>
+							</div>
+
+							<div
+								class="status-badge-solicitacao #{solicitacaoCompraMateriaisServicosBean.getClasseStatus(solicitacao.statusSolicitacao)}">
+								<i class="pi pi-circle-fill"></i>
+								#{solicitacao.statusSolicitacao.descricao}
+							</div>
+						</div>
+
+						<div class="info-grid-solicitacao">
+							<div class="info-item-solicitacao">
+								<span class="label">ID Manutenção</span> <span class="value">##{solicitacao.solicitacaoManutencaoId}</span>
+							</div>
+
+							<div class="info-item-solicitacao">
+								<span class="label">Tipo Manutenção</span> <span class="value">
+									<h:outputText value="Máquina"
+										rendered="#{solicitacao.tipoManutencaoReferencia.name() == 'MAQUINA'}" />
+									<h:outputText value="Predial"
+										rendered="#{solicitacao.tipoManutencaoReferencia.name() == 'PREDIAL'}" />
+								</span>
+							</div>
+
+							<div class="info-item-solicitacao">
+								<span class="label">Técnico Solicitante</span> <span
+									class="value">#{solicitacao.tecnicoSolicitante.nome}</span>
+							</div>
+
+							<div class="info-item-solicitacao">
+								<span class="label">Data Solicitação</span> <span class="value">
+									<h:outputText value="#{solicitacao.dataSolicitacao}">
+										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+									</h:outputText>
+								</span>
+							</div>
+						</div>
+
+						<div class="descricao-detalhada">
+							<h4>
+								<i class="pi pi-file-edit"></i> Itens Solicitados
+							</h4>
+							<div class="descricao-texto">
+								#{solicitacao.descricaoDetalhada}</div>
+						</div>
+
+							<h:panelGroup
+							rendered="#{solicitacao.statusSolicitacao != 'PENDENTE'}">
+							<div class="info-processamento">
+								<div class="info-grid-solicitacao">
+									<h:panelGroup
+										rendered="#{solicitacao.statusSolicitacao == 'COMPRADO' or (solicitacao.statusSolicitacao == 'CANCELADA' and solicitacao.valorGasto != null)}">
+										<div class="info-item-solicitacao">
+											<span class="label">Valor Total</span> <span
+												class="value valor-destaque"> R$ <h:outputText
+													value="#{solicitacao.valorGasto}">
+													<f:convertNumber pattern="#,##0.00" />
+												</h:outputText>
+											</span>
+										</div>
+									</h:panelGroup>
+									<h:panelGroup
+										rendered="#{solicitacao.tipoSolicitacao.name() == 'AMBOS' and solicitacao.valorGastoMaterial != null and solicitacao.valorGastoServico != null}">
+										<div class="info-item-solicitacao">
+											<span class="label">Valor Material</span> <span
+												class="value"> R$ <h:outputText
+													value="#{solicitacao.valorGastoMaterial}">
+													<f:convertNumber pattern="#,##0.00" />
+												</h:outputText>
+											</span>
+										</div>
+										<div class="info-item-solicitacao">
+											<span class="label">Valor Serviço</span> <span
+												class="value"> R$ <h:outputText
+													value="#{solicitacao.valorGastoServico}">
+													<f:convertNumber pattern="#,##0.00" />
+												</h:outputText>
+											</span>
+										</div>
+									</h:panelGroup>
+
+									<div class="info-item-solicitacao">
+										<span class="label">Processado por</span> <span class="value">
+											#{solicitacao.administradorProcessou != null ?
+											solicitacao.administradorProcessou.nome : 'N/A'} </span>
+									</div>
+
+									<h:panelGroup
+										rendered="#{solicitacao.dataProcessamento != null}">
+										<div class="info-item-solicitacao">
+											<span class="label">Data Processamento</span> <span
+												class="value"> <h:outputText
+													value="#{solicitacao.dataProcessamento}">
+													<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+												</h:outputText>
+											</span>
+										</div>
+									</h:panelGroup>
+								</div>
+
+								<h:panelGroup
+									rendered="#{solicitacao.statusSolicitacao != 'CANCELADA' and not empty solicitacao.observacoesAdministrador}">
+									<div class="observacoes-adm">
+										<strong>Observações do Administrador:</strong>
+										<p>#{solicitacao.observacoesAdministrador}</p>
+									</div>
+								</h:panelGroup>
+
+								<h:panelGroup
+									rendered="#{solicitacao.statusSolicitacao == 'CANCELADA'}">
+									<div class="observacoes-adm observacoes-cancelamento">
+										<strong>Motivo do Cancelamento:</strong>
+										<p>
+											<h:outputText
+												value="#{not empty solicitacao.motivoCancelamento ? solicitacao.motivoCancelamento : solicitacao.observacoesAdministrador}" />
+										</p>
+										<div class="info-cancelamento-detalhes">
+											<span> <i class="pi pi-user"></i> Cancelado por: <strong>
+													#{solicitacao.administradorCancelamento != null ?
+													solicitacao.administradorCancelamento.nome :
+													(solicitacao.administradorProcessou != null ?
+													solicitacao.administradorProcessou.nome : 'N/A')}
+											</strong>
+											</span>
+											<h:panelGroup rendered="#{solicitacao.dataCancelamento != null}">
+												<span> <i class="pi pi-calendar"></i> Em: <strong> <h:outputText
+															value="#{solicitacao.dataCancelamento}">
+															<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+														</h:outputText>
+												</strong>
+												</span>
+											</h:panelGroup>
+										</div>
+									</div>
+								</h:panelGroup>
+							</div>
+						</h:panelGroup>
+
+						<h:panelGroup
+							rendered="#{solicitacao.statusSolicitacao == 'PENDENTE'}">
+							<div class="card-actions-solicitacao">
+								<p:commandButton value="Processar Compra"
+									action="#{solicitacaoCompraMateriaisServicosBean.prepararProcessamento(solicitacao)}"
+									onclick="PF('dialogProcessamento').show();"
+									update=":formDialogProcessamento growlMsgs" icon="pi pi-check-circle"
+									styleClass="ui-button-success" />
+
+								<p:commandButton value="Cancelar"
+									action="#{solicitacaoCompraMateriaisServicosBean.prepararCancelamento(solicitacao)}"
+									onclick="PF('dialogCancelamento').show();"
+									update=":formDialogCancelamento growlMsgs" icon="pi pi-times-circle"
+									styleClass="ui-button-danger" />
+							</div>
+						</h:panelGroup>
+
+						<h:panelGroup
+							rendered="#{solicitacao.statusSolicitacao == 'COMPRADO'}">
+							<div class="card-actions-solicitacao">
+								<p:commandButton value="Cancelar Compra"
+									action="#{solicitacaoCompraMateriaisServicosBean.prepararCancelamentoCompraProcessada(solicitacao)}"
+									onclick="PF('dialogCancelamentoProcessada').show();"
+									update=":formDialogCancelamentoProcessada growlMsgs" icon="pi pi-ban"
+									styleClass="ui-button-danger" />
+							</div>
+						</h:panelGroup>
+
+					</div>
+				</ui:repeat>
+			</h:panelGroup>
+
+			<!-- ✅ MELHORADO: o vazio agora diz se é por causa dos filtros.
+			     Antes a mensagem era a mesma nos dois casos, e o usuário não
+			     tinha como saber que havia um filtro ativo. -->
+			<h:panelGroup
+				rendered="#{empty solicitacaoCompraMateriaisServicosBean.solicitacoesFiltradas}">
+				<div class="empty-state">
+					<i class="pi pi-inbox"></i>
+					<h3>Nenhuma solicitação encontrada</h3>
+					<p>
+						<h:outputText
+							value="Nenhuma solicitação atende aos filtros aplicados. Tente limpar os filtros para ver todas."
+							rendered="#{solicitacaoCompraMateriaisServicosBean.filtrosAtivos}" />
+						<h:outputText value="Não há solicitações pendentes no momento."
+							rendered="#{not solicitacaoCompraMateriaisServicosBean.filtrosAtivos and solicitacaoCompraMateriaisServicosBean.filtroStatus == 'PENDENTE'}" />
+						<h:outputText
+							value="Não há solicitações nesta aba."
+							rendered="#{not solicitacaoCompraMateriaisServicosBean.filtrosAtivos and solicitacaoCompraMateriaisServicosBean.filtroStatus != 'PENDENTE'}" />
+					</p>
+				</div>
+			</h:panelGroup>
+
+		</h:form>
+	</div>
+
+	<!-- Dialog de Processamento -->
+	<p:dialog id="dialogProcessamento" widgetVar="dialogProcessamento"
+		header="Processar Compra de Materiais/Serviços" modal="true"
+		closable="true" width="600" responsive="true">
+
+		<h:form id="formDialogProcessamento">
+			<!-- MENSAGENS DENTRO DO DIALOG -->
+
+			<div class="dialog-content">
+
+				<h:panelGroup
+					rendered="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada != null}">
+					<div class="info-header-dialog">
+						<h4>
+							<i class="pi pi-info-circle"></i> Informações da Solicitação
+						</h4>
+						<div class="info-grid-dialog">
+							<div>
+								<div class="info-label">ID Solicitação</div>
+								<div class="info-value-destaque">
+									##{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.id}
+								</div>
+							</div>
+							<div>
+								<div class="info-label">ID Manutenção</div>
+								<div class="info-value-destaque">
+									##{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.solicitacaoManutencaoId}
+								</div>
+							</div>
+						</div>
+						<div class="info-tecnico">
+							<div class="info-label">Técnico Solicitante</div>
+							<div class="info-value-secondary">
+								#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.tecnicoSolicitante.nome}
+							</div>
+						</div>
+					</div>
+
+					<div class="form-section-dialog">
+						<h4>Detalhes da Compra</h4>
+
+						<div class="field-group">
+							<h:outputLabel value="Administrador Responsável:"
+								for="administradorSelect" />
+							<p:selectOneMenu id="administradorSelect"
+								value="#{solicitacaoCompraMateriaisServicosBean.administradorProcessouId}"
+								required="true"
+								requiredMessage="Selecione o administrador que está processando a compra"
+								filter="true" filterMatchMode="contains">
+								<f:selectItem itemLabel="Selecione o administrador..."
+									itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItems
+									value="#{solicitacaoCompraMateriaisServicosBean.administradoresDisponiveis}"
+									var="admin"
+									itemLabel="#{solicitacaoCompraMateriaisServicosBean.getLabelAdministrador(admin)}"
+									itemValue="#{admin.id}" />
+							</p:selectOneMenu>
+						</div>
+
+						<!-- Campo único para MATERIAL ou SERVICO -->
+						<h:panelGroup rendered="#{not solicitacaoCompraMateriaisServicosBean.solicitacaoTipoAmbos}">
+							<div class="field-group">
+								<h:outputLabel value="Valor Gasto (R$):" for="valorGasto" />
+								<p:inputNumber id="valorGasto"
+									value="#{solicitacaoCompraMateriaisServicosBean.valorGasto}"
+									decimalSeparator="," thousandSeparator="." symbol="R$ "
+									minValue="0.01" required="true"
+									requiredMessage="Informe o valor gasto" />
+							</div>
+						</h:panelGroup>
+
+						<!-- Campos separados para AMBOS (Material e Serviço) -->
+						<h:panelGroup rendered="#{solicitacaoCompraMateriaisServicosBean.solicitacaoTipoAmbos}">
+							<div class="alert-info" style="margin-bottom: 12px;">
+								<div class="alert-content">
+									<i class="pi pi-info-circle"></i>
+									<p>Esta solicitação é de <strong>Material e Serviço</strong>.
+										Informe os valores separadamente.</p>
+								</div>
+							</div>
+							<div class="field-group">
+								<h:outputLabel value="Valor Gasto com Material (R$):" for="valorGastoMaterial" />
+								<p:inputNumber id="valorGastoMaterial"
+									value="#{solicitacaoCompraMateriaisServicosBean.valorGastoMaterial}"
+									decimalSeparator="," thousandSeparator="." symbol="R$ "
+									minValue="0.01" required="true"
+									requiredMessage="Informe o valor gasto com material" />
+							</div>
+							<div class="field-group">
+								<h:outputLabel value="Valor Gasto com Serviço (R$):" for="valorGastoServico" />
+								<p:inputNumber id="valorGastoServico"
+									value="#{solicitacaoCompraMateriaisServicosBean.valorGastoServico}"
+									decimalSeparator="," thousandSeparator="." symbol="R$ "
+									minValue="0.01" required="true"
+									requiredMessage="Informe o valor gasto com serviço" />
+							</div>
+						</h:panelGroup>
+
+						<div class="field-group">
+							<h:outputLabel value="Observações:" for="observacoesAdm" />
+							<p:inputTextarea id="observacoesAdm"
+								value="#{solicitacaoCompraMateriaisServicosBean.observacoesAdministrador}"
+								rows="4" maxlength="500"
+								placeholder="Informações adicionais sobre a compra (opcional)&#10;Ex: Fornecedor, número da nota fiscal, prazo de entrega, etc." />
+						</div>
+					</div>
+
+					<div class="alert-info">
+						<div class="alert-content">
+							<i class="pi pi-info-circle"></i>
+							<p>
+								Ao confirmar, a <strong>manutenção será liberada
+									automaticamente</strong> e o técnico poderá continuar o trabalho.
+							</p>
+						</div>
+					</div>
+
+				</h:panelGroup>
+
+				<div class="dialog-actions">
+					<p:commandButton value="Cancelar"
+						onclick="PF('dialogProcessamento').hide();" type="button"
+						styleClass="ui-button-secondary" icon="pi pi-times" />
+
+					<p:commandButton value="Confirmar Processamento"
+						action="#{solicitacaoCompraMateriaisServicosBean.processarCompra()}"
+						update="growlMsgs :formSolicitacoes"
+						oncomplete="if (args &amp;&amp; !args.validationFailed) { PF('dialogProcessamento').hide(); PF('formSolicitacoes').update(); }"
+						styleClass="ui-button-success" icon="pi pi-check" />
+				</div>
+			</div>
+		</h:form>
+	</p:dialog>
+
+	<!-- Dialog de Cancelamento -->
+	<p:dialog id="dialogCancelamento" widgetVar="dialogCancelamento"
+		header="Cancelar Solicitação de Compra" modal="true" closable="true"
+		width="600" responsive="true">
+
+		<h:form id="formDialogCancelamento">
+			<!-- MENSAGENS DENTRO DO DIALOG -->
+
+			<div class="dialog-content">
+
+				<h:panelGroup
+					rendered="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada != null}">
+
+					<div class="info-header-dialog">
+						<h4>
+							<i class="pi pi-info-circle"></i> Informações da Solicitação
+						</h4>
+						<div class="info-grid-dialog">
+							<div>
+								<div class="info-label">ID Solicitação</div>
+								<div class="info-value-destaque">
+									##{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.id}
+								</div>
+							</div>
+							<div>
+								<div class="info-label">Técnico</div>
+								<div class="info-value-destaque">
+									#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.tecnicoSolicitante.nome}
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="alert-danger">
+						<div class="alert-content">
+							<i class="pi pi-exclamation-triangle"></i>
+							<div>
+								<p class="alert-title">Atenção</p>
+								<p class="alert-text">Apenas a <strong>solicitação de compra</strong>
+									será cancelada. A manutenção <strong>NÃO será cancelada</strong>
+									e voltará para o status <strong>"Em Andamento"</strong>,
+									permitindo que o técnico continue o trabalho ou faça uma nova solicitação se necessário.</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-section-dialog">
+						<div class="field-group">
+							<h:outputLabel value="Administrador Responsável:"
+								for="administradorCancelamento" />
+							<p:selectOneMenu id="administradorCancelamento"
+								value="#{solicitacaoCompraMateriaisServicosBean.administradorCancelamentoId}"
+								required="true"
+								requiredMessage="Selecione o administrador responsável"
+								filter="true" filterMatchMode="contains">
+								<f:selectItem itemLabel="Selecione o administrador..."
+									itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItems
+									value="#{solicitacaoCompraMateriaisServicosBean.administradoresDisponiveis}"
+									var="admin"
+									itemLabel="#{solicitacaoCompraMateriaisServicosBean.getLabelAdministrador(admin)}"
+									itemValue="#{admin.id}" />
+							</p:selectOneMenu>
+						</div>
+
+						<div class="field-group">
+							<h:outputLabel value="Motivo do Cancelamento:"
+								for="motivoCancelamento" />
+							<p:inputTextarea id="motivoCancelamento"
+								value="#{solicitacaoCompraMateriaisServicosBean.motivoCancelamento}"
+								rows="4" required="true"
+								requiredMessage="Informe o motivo do cancelamento"
+								placeholder="Explique o motivo do cancelamento desta solicitação de compra..." />
+						</div>
+					</div>
+
+				</h:panelGroup>
+
+				<div class="dialog-actions">
+					<p:commandButton value="Voltar"
+						onclick="PF('dialogCancelamento').hide();" type="button"
+						styleClass="ui-button-secondary" icon="pi pi-times" />
+
+					<p:commandButton value="Confirmar Cancelamento"
+						action="#{solicitacaoCompraMateriaisServicosBean.cancelarSolicitacao()}"
+						update="growlMsgs :formSolicitacoes"
+						oncomplete="if (args &amp;&amp; !args.validationFailed) { PF('dialogCancelamento').hide(); PF('formSolicitacoes').update(); }"
+						styleClass="ui-button-danger" icon="pi pi-ban" />
+				</div>
+			</div>
+		</h:form>
+	</p:dialog>
+
+	<!-- Dialog de Cancelamento de Compra JÁ PROCESSADA -->
+	<p:dialog id="dialogCancelamentoProcessada"
+		widgetVar="dialogCancelamentoProcessada"
+		header="Cancelar Compra Já Processada" modal="true" closable="true"
+		width="600" responsive="true">
+
+		<h:form id="formDialogCancelamentoProcessada">
+			<div class="dialog-content">
+
+				<h:panelGroup
+					rendered="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada != null}">
+
+					<div class="info-header-dialog">
+						<h4>
+							<i class="pi pi-info-circle"></i> Informações da Compra
+						</h4>
+						<div class="info-grid-dialog">
+							<div>
+								<div class="info-label">ID Solicitação</div>
+								<div class="info-value-destaque">
+									##{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.id}
+								</div>
+							</div>
+							<div>
+								<div class="info-label">Valor Total</div>
+								<div class="info-value-destaque">
+									R$
+									<h:outputText
+										value="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.valorGasto}">
+										<f:convertNumber pattern="#,##0.00" />
+									</h:outputText>
+								</div>
+							</div>
+						</div>
+						<h:panelGroup rendered="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.tipoSolicitacao.name() == 'AMBOS'
+							and solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.valorGastoMaterial != null
+							and solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.valorGastoServico != null}">
+							<div class="info-grid-dialog" style="margin-top: 8px;">
+								<div>
+									<div class="info-label">Valor Material</div>
+									<div class="info-value-destaque">
+										R$
+										<h:outputText
+											value="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.valorGastoMaterial}">
+											<f:convertNumber pattern="#,##0.00" />
+										</h:outputText>
+									</div>
+								</div>
+								<div>
+									<div class="info-label">Valor Serviço</div>
+									<div class="info-value-destaque">
+										R$
+										<h:outputText
+											value="#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.valorGastoServico}">
+											<f:convertNumber pattern="#,##0.00" />
+										</h:outputText>
+									</div>
+								</div>
+							</div>
+						</h:panelGroup>
+						<div class="info-tecnico">
+							<div class="info-label">Processado por</div>
+							<div class="info-value-secondary">
+								#{solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.administradorProcessou != null ?
+								solicitacaoCompraMateriaisServicosBean.solicitacaoSelecionada.administradorProcessou.nome : 'N/A'}
+							</div>
+						</div>
+					</div>
+
+					<div class="alert-danger">
+						<div class="alert-content">
+							<i class="pi pi-exclamation-triangle"></i>
+							<div>
+								<p class="alert-title">Atenção</p>
+								<p class="alert-text">Esta compra <strong>já havia sido processada</strong>.
+									Ao confirmar, ela será marcada como <strong>Cancelada</strong> e o
+									valor, o administrador e a data da compra original serão
+									<strong>preservados em um histórico</strong> junto com o motivo
+									informado abaixo, para fins de auditoria.</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-section-dialog">
+						<div class="field-group">
+							<h:outputLabel value="Administrador Responsável pelo Cancelamento:"
+								for="administradorCancelamentoProcessada" />
+							<p:selectOneMenu id="administradorCancelamentoProcessada"
+								value="#{solicitacaoCompraMateriaisServicosBean.administradorCancelamentoProcessadaId}"
+								required="true"
+								requiredMessage="Selecione o administrador responsável"
+								filter="true" filterMatchMode="contains">
+								<f:selectItem itemLabel="Selecione o administrador..."
+									itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItems
+									value="#{solicitacaoCompraMateriaisServicosBean.administradoresDisponiveis}"
+									var="admin"
+									itemLabel="#{solicitacaoCompraMateriaisServicosBean.getLabelAdministrador(admin)}"
+									itemValue="#{admin.id}" />
+							</p:selectOneMenu>
+						</div>
+
+						<div class="field-group">
+							<h:outputLabel value="Motivo do Cancelamento:"
+								for="motivoCancelamentoProcessada" />
+							<p:inputTextarea id="motivoCancelamentoProcessada"
+								value="#{solicitacaoCompraMateriaisServicosBean.motivoCancelamentoProcessada}"
+								rows="4" required="true"
+								requiredMessage="Informe o motivo do cancelamento"
+								placeholder="Explique o motivo do cancelamento desta compra já processada..." />
+						</div>
+					</div>
+
+				</h:panelGroup>
+
+				<div class="dialog-actions">
+					<p:commandButton value="Voltar"
+						onclick="PF('dialogCancelamentoProcessada').hide();" type="button"
+						styleClass="ui-button-secondary" icon="pi pi-times" />
+
+					<p:commandButton value="Confirmar Cancelamento"
+						action="#{solicitacaoCompraMateriaisServicosBean.confirmarCancelamentoCompraProcessada()}"
+						update="growlMsgs :formSolicitacoes"
+						oncomplete="if (args &amp;&amp; !args.validationFailed) { PF('dialogCancelamentoProcessada').hide(); PF('formSolicitacoes').update(); }"
+						styleClass="ui-button-danger" icon="pi pi-ban" />
+				</div>
+			</div>
+		</h:form>
+	</p:dialog>
+
+</h:body>
+</html>

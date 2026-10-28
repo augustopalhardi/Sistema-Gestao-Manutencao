@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Cadastro de Usuário</title>
+	<h:outputStylesheet name="css/usuario.css" />
+	<style>
+		/* Estilos dos botões de ação (mesmo estilo de maquinaEquipamento) */
+		.action-buttons {
+			display: flex;
+			gap: 5px;
+			justify-content: center;
+			align-items: center;
+			flex-wrap: nowrap;
+		}
+		.action-button {
+			width: 32px !important;
+			height: 32px !important;
+			min-width: 32px !important;
+			padding: 0 !important;
+			border-radius: 6px !important;
+			transition: all 0.2s ease !important;
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+		}
+		.action-button:hover:enabled {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+		}
+		.action-button .ui-button-text {
+			padding: 0 !important;
+			display: none !important;
+		}
+		.action-button .ui-button-icon-left {
+			margin: 0 !important;
+			position: static !important;
+			font-size: 14px !important;
+		}
+		.action-button.ui-button-info {
+			background: #3498db !important;
+			border-color: #3498db !important;
+		}
+		.action-button.ui-button-info:hover:enabled {
+			background: #2980b9 !important;
+			border-color: #2980b9 !important;
+		}
+		.action-button.ui-button-danger {
+			background: #e74c3c !important;
+			border-color: #e74c3c !important;
+		}
+		.action-button.ui-button-danger:hover:enabled {
+			background: #c0392b !important;
+			border-color: #c0392b !important;
+		}
+		/* Status ativo/inativo */
+		.status-ativo {
+			color: #16a34a;
+			font-weight: bold;
+			background: #dcfce7;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+		.status-inativo {
+			color: #dc2626;
+			font-weight: bold;
+			background: #fee2e2;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+		/* Badge tipo usuário */
+		.tipo-admin {
+			color: #9333ea;
+			font-weight: bold;
+			background: #f3e8ff;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+		.tipo-tecnico {
+			color: #2563eb;
+			font-weight: bold;
+			background: #dbeafe;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+		.tipo-funcionario {
+			color: #16a34a;
+			font-weight: bold;
+			background: #dcfce7;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+		}
+	</style>
+</h:head>
+
+<h:body>
+		<p:growl id="growlMsgs" showDetail="true" life="4500" sticky="false"/>
+
+	<div class="header">
+		<h1>Cadastro de Usuários</h1>
+	</div>
+	<div class="header-actions">
+		<h:link outcome="/home/homeAdm.xhtml" styleClass="exit-button"
+			value="Voltar" />
+	</div>
+
+	<div class="container">
+		<!-- Seção do Formulário -->
+		<div class="form-section">
+			<h2 class="section-title">Dados do Usuário</h2>
+
+			<h:form id="cadastroForm" enctype="multipart/form-data">
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="nome">Nome Completo:</label>
+						<p:inputText id="nome" value="#{cadastroUsuarioBean.nome}"
+							required="true" requiredMessage="Nome é obrigatório" />
+					</div>
+
+					<div class="field">
+						<label for="nuRegistro">Número de Registro:</label>
+						<p:inputText id="nuRegistro"
+							value="#{cadastroUsuarioBean.nuRegistro}" required="true"
+							requiredMessage="Número de registro é obrigatório" />
+					</div>
+
+					<div class="field">
+						<label for="email">E-mail:</label>
+						<p:inputText id="email" value="#{cadastroUsuarioBean.email}"
+							required="true" requiredMessage="Email é obrigatório" />
+					</div>
+
+					<div class="field">
+						<label for="senha">Senha:</label>
+						<p:password id="senha" value="#{cadastroUsuarioBean.senha}"
+							required="true" requiredMessage="Senha é obrigatória" />
+					</div>
+
+					<div class="field">
+						<label for="funcao">Função:</label>
+						<p:inputText id="funcao" value="#{cadastroUsuarioBean.funcao}" />
+					</div>
+
+					<div class="field">
+						<label for="telefone">Telefone:</label>
+						<p:inputMask id="telefone"
+							value="#{cadastroUsuarioBean.telefone}" mask="(99) 99999-9999"
+							placeholder="(00) 00000-0000" />
+					</div>
+
+					<div class="field">
+						<p:outputLabel for="tipoUsuario" value="Tipo de Usuário:" />
+						<p:selectOneMenu id="tipoUsuario"
+							value="#{cadastroUsuarioBean.tipoUsuario}" required="true">
+							<f:selectItem itemLabel="Selecione" itemValue="" />
+							<f:selectItem itemLabel="Administrador" itemValue="ADMINISTRADOR" />
+							<f:selectItem itemLabel="Funcionário" itemValue="FUNCIONARIO" />
+							<f:selectItem itemLabel="Técnico" itemValue="TECNICO" />
+							<p:ajax update="valorHoraField" />
+						</p:selectOneMenu>
+					</div>
+
+					<p:outputPanel id="valorHoraField" styleClass="field">
+						<div style="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO' ? '' : 'display:none;'}">
+							<p:outputLabel for="valorHoraMaquina" value="Valor da Hora - Máquina (R$):" />
+							<p:inputNumber id="valorHoraMaquina"
+								value="#{cadastroUsuarioBean.valorHoraMaquina}"
+								decimalPlaces="2"
+								decimalSeparator=","
+								thousandSeparator="."
+								symbol="R$ "
+								required="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO'}"
+								requiredMessage="Valor da hora (Máquina) é obrigatório para técnicos"
+								placeholder="Ex: R$ 20,00" />
+						</div>
+						<div style="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO' ? 'margin-top: 10px;' : 'display:none;'}">
+							<p:outputLabel for="valorHoraPredial" value="Valor da Hora - Predial (R$):" />
+							<p:inputNumber id="valorHoraPredial"
+								value="#{cadastroUsuarioBean.valorHoraPredial}"
+								decimalPlaces="2"
+								decimalSeparator=","
+								thousandSeparator="."
+								symbol="R$ "
+								required="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO'}"
+								requiredMessage="Valor da hora (Predial) é obrigatório para técnicos"
+								placeholder="Ex: R$ 20,00" />
+						</div>
+					</p:outputPanel>
+				</div>
+
+				<div class="form-grid">
+					<div class="field">
+						<label for="foto">Foto do Usuário:</label>
+						<div class="upload-section">
+							<p:fileUpload id="foto" mode="simple"
+								value="#{cadastroUsuarioBean.uploadedPhoto}" skinSimple="true"
+								accept=".jpg,.jpeg,.png,.gif" chooseLabel="Selecionar Foto" />
+							<p>
+								<small>Formatos aceitos: JPG, JPEG, PNG, GIF (máx. 5MB)</small>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="buttons">
+					<p:commandButton value="Salvar Usuário"
+						action="#{cadastroUsuarioBean.salvar()}"
+						update="cadastroForm listaForm growlMsgs" styleClass="btn btn-primary"
+						icon="pi pi-save" />
+
+					<p:commandButton value="Limpar Campos"
+						action="#{cadastroUsuarioBean.limpar()}" update="cadastroForm growlMsgs"
+						immediate="true" styleClass="btn btn-secondary"
+						icon="pi pi-refresh" type="button" />
+
+					<p:commandButton value="Cancelar Edição"
+						action="#{cadastroUsuarioBean.prepararNovo()}"
+						update="cadastroForm growlMsgs" immediate="true" styleClass="btn btn-info"
+						icon="pi pi-times"
+						rendered="#{cadastroUsuarioBean.usuarioSelecionado != null}" />
+				</div>
+			</h:form>
+		</div>
+
+		<!-- Seção da Lista -->
+		<div class="list-section">
+			<h2 class="section-title">Usuários Cadastrados no Sistema</h2>
+
+			<h:form id="listaForm">
+				<p:dataTable id="tabelaUsuarios"
+					value="#{cadastroUsuarioBean.cadastroUsuariosFiltradosPorStatus}"
+					var="usuario" paginator="true" rows="10"
+					widgetVar="tabelaUsuariosWV"
+					sortBy="#{usuario.id}" sortOrder="ascending"
+					emptyMessage="Nenhum usuário cadastrado no sistema"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+					currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} usuários"
+					filteredValue="#{cadastroUsuarioBean.cadastroUsuariosFiltrados}"
+					rowStyleClass="#{usuario.ativo eq false ? 'linha-inativa' : ''}"
+					>
+
+					<p:column headerText="ID" sortBy="#{usuario.id}"
+						filterBy="#{usuario.id}" filterMatchMode="contains"
+						style="width: 60px; text-align: center;">
+						<h:outputText value="#{usuario.id}" />
+					</p:column>
+
+
+					<p:column headerText="Nome" sortBy="#{usuario.nome}"
+						filterBy="#{usuario.nome}" filterMatchMode="contains">
+						<h:outputText value="#{usuario.nome}" />
+					</p:column>
+
+					<p:column headerText="Registro"
+						filterBy="#{usuario.nuRegistro}" filterMatchMode="contains"
+						style="width: 90px;">
+						<h:outputText value="#{usuario.nuRegistro}"
+							style="font-weight: bold; color: #2c3e50;" />
+					</p:column>
+
+
+					<p:column headerText="Tipo" style="width: 130px; text-align: center;"
+						sortBy="#{usuario.tipoUsuario}"
+						filterBy="#{usuario.tipoUsuario}" filterMatchMode="exact">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="PF('tabelaUsuariosWV').filter()"
+								style="width: 100%;">
+								<f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItem itemLabel="Administrador" itemValue="ADMINISTRADOR" />
+								<f:selectItem itemLabel="Funcionário" itemValue="FUNCIONARIO" />
+								<f:selectItem itemLabel="Técnico" itemValue="TECNICO" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="Administrador"
+							styleClass="tipo-admin"
+							rendered="#{usuario.tipoUsuario == 'ADMINISTRADOR'}" />
+						<h:outputText value="Técnico"
+							styleClass="tipo-tecnico"
+							rendered="#{usuario.tipoUsuario == 'TECNICO'}" />
+						<h:outputText value="Funcionário"
+							styleClass="tipo-funcionario"
+							rendered="#{usuario.tipoUsuario == 'FUNCIONARIO'}" />
+					</p:column>
+
+					<p:column headerText="V/H Máquina" style="width: 110px; text-align: right;">
+						<h:outputText value="#{usuario.valorHoraMaquina}"
+							rendered="#{usuario.tipoUsuario == 'TECNICO' and usuario.valorHoraMaquina != null}">
+							<f:convertNumber type="currency" currencySymbol="R$ "
+								minFractionDigits="2" maxFractionDigits="2" />
+						</h:outputText>
+						<h:outputText value="-"
+							rendered="#{usuario.tipoUsuario != 'TECNICO' or usuario.valorHoraMaquina == null}" />
+					</p:column>
+
+					<p:column headerText="V/H Predial" style="width: 110px; text-align: right;">
+						<h:outputText value="#{usuario.valorHoraPredial}"
+							rendered="#{usuario.tipoUsuario == 'TECNICO' and usuario.valorHoraPredial != null}">
+							<f:convertNumber type="currency" currencySymbol="R$ "
+								minFractionDigits="2" maxFractionDigits="2" />
+						</h:outputText>
+						<h:outputText value="-"
+							rendered="#{usuario.tipoUsuario != 'TECNICO' or usuario.valorHoraPredial == null}" />
+					</p:column>
+
+					<p:column headerText="Status" style="width: 100px; text-align: center;">
+						<h:outputText value="✓ Ativo"
+							styleClass="status-ativo"
+							rendered="#{usuario.ativo ne false}" />
+						<h:outputText value="✗ Inativo"
+							styleClass="status-inativo"
+							rendered="#{usuario.ativo eq false}" />
+					</p:column>
+
+					<p:column headerText="Ações"
+						style="width: 110px; text-align: center;">
+						<div class="action-buttons">
+							<p:commandButton
+								action="#{cadastroUsuarioBean.prepararEdicao(usuario)}"
+								update="dialogForm growlMsgs"
+								styleClass="ui-button-info action-button"
+								icon="pi pi-pencil" title="Editar usuário"
+								oncomplete="PF('editarDialog').show();" />
+
+							<p:commandButton
+								action="#{cadastroUsuarioBean.alternarStatus(usuario)}"
+								update="listaForm cadastroForm growlMsgs"
+								icon="pi pi-power-off"
+								title="#{usuario.ativo eq false ? 'Ativar usuário' : 'Desativar usuário'}"
+								styleClass="#{usuario.ativo eq false ? 'ui-button-success' : 'ui-button-warning'} action-button"
+								onclick="return confirm('Deseja #{usuario.ativo eq false ? 'ativar' : 'desativar'} o usuário #{usuario.nome}?');" />
+
+							<p:commandButton
+								action="#{cadastroUsuarioBean.excluir(usuario)}"
+								update="listaForm cadastroForm growlMsgs"
+								styleClass="ui-button-danger action-button"
+								icon="pi pi-trash" title="Excluir usuário"
+								onclick="return confirm('Tem certeza que deseja excluir o usuário #{usuario.nome}?');" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</div>
+	</div>
+
+	<!-- Dialog de Edição -->
+	<p:dialog header="Editar Usuário" widgetVar="editarDialog" modal="true"
+		width="700" height="650" closable="true" resizable="false"
+		responsive="true" appendTo="@(body)" dynamic="true">
+
+		<h:form id="dialogForm" prependId="false">
+
+			<div class="dialog-form-grid">
+				<div class="dialog-field">
+					<label for="dialogNome">Nome Completo:</label>
+					<p:inputText id="dialogNome" value="#{cadastroUsuarioBean.nome}"
+						required="true" requiredMessage="Nome é obrigatório" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogNuRegistro">Número de Registro:</label>
+					<p:inputText id="dialogNuRegistro"
+						value="#{cadastroUsuarioBean.nuRegistro}" required="true"
+						requiredMessage="Número de registro é obrigatório" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogEmail">E-mail:</label>
+					<p:inputText id="dialogEmail" value="#{cadastroUsuarioBean.email}"
+						required="true" requiredMessage="Email é obrigatório" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogSenha">Nova Senha:</label>
+					<p:password id="dialogSenha" value="#{cadastroUsuarioBean.senha}"
+						required="false" />
+					<small>Deixe vazio para manter a senha atual</small>
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogFuncao">Função:</label>
+					<p:inputText id="dialogFuncao"
+						value="#{cadastroUsuarioBean.funcao}" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogTelefone">Telefone:</label>
+					<p:inputMask id="dialogTelefone"
+						value="#{cadastroUsuarioBean.telefone}" mask="(99) 99999-9999"
+						placeholder="(00) 00000-0000" />
+				</div>
+
+				<div class="dialog-field">
+					<label for="dialogTipoUsuario">Tipo de Usuário:</label>
+					<p:selectOneMenu id="dialogTipoUsuario"
+						value="#{cadastroUsuarioBean.tipoUsuario}" required="true"
+						requiredMessage="Tipo de usuário é obrigatório">
+						<f:selectItem itemLabel="Selecione o tipo de usuário..."
+							itemValue="" />
+						<f:selectItem itemLabel="Administrador" itemValue="ADMINISTRADOR" />
+						<f:selectItem itemLabel="Funcionário" itemValue="FUNCIONARIO" />
+						<f:selectItem itemLabel="Técnico" itemValue="TECNICO" />
+						<p:ajax update="dialogValorHoraField" />
+					</p:selectOneMenu>
+				</div>
+
+				<p:outputPanel id="dialogValorHoraField" styleClass="dialog-field">
+					<div style="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO' ? '' : 'display:none;'}">
+						<label for="dialogValorHoraMaquina">Valor da Hora - Máquina (R$):</label>
+						<p:inputNumber id="dialogValorHoraMaquina"
+							value="#{cadastroUsuarioBean.valorHoraMaquina}"
+							decimalPlaces="2"
+							decimalSeparator=","
+							thousandSeparator="."
+							symbol="R$ "
+							required="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO'}"
+							requiredMessage="Valor da hora (Máquina) é obrigatório para técnicos"
+							placeholder="Ex: R$ 20,00" />
+					</div>
+					<div style="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO' ? 'margin-top: 10px;' : 'display:none;'}">
+						<label for="dialogValorHoraPredial">Valor da Hora - Predial (R$):</label>
+						<p:inputNumber id="dialogValorHoraPredial"
+							value="#{cadastroUsuarioBean.valorHoraPredial}"
+							decimalPlaces="2"
+							decimalSeparator=","
+							thousandSeparator="."
+							symbol="R$ "
+							required="#{cadastroUsuarioBean.tipoUsuario == 'TECNICO'}"
+							requiredMessage="Valor da hora (Predial) é obrigatório para técnicos"
+							placeholder="Ex: R$ 20,00" />
+					</div>
+				</p:outputPanel>
+
+				<div class="dialog-field">
+					<label for="dialogFoto">Nova Foto:</label>
+					<p:fileUpload id="dialogFoto" mode="simple"
+						value="#{cadastroUsuarioBean.uploadedPhoto}" skinSimple="true"
+						accept=".jpg,.jpeg,.png,.gif" chooseLabel="Selecionar Nova Foto" />
+					<small>Deixe vazio para manter a foto atual</small>
+				</div>
+			</div>
+
+			<div class="dialog-buttons">
+				<p:commandButton value="Salvar Alterações"
+					action="#{cadastroUsuarioBean.salvar()}"
+					update="dialogForm :listaForm :cadastroForm growlMsgs"
+					styleClass="btn btn-primary" icon="pi pi-save"
+					oncomplete="if (args &amp;&amp; !args.validationFailed) PF('editarDialog').hide();" />
+
+				<p:commandButton value="Cancelar"
+					onclick="PF('editarDialog').hide();"
+					action="#{cadastroUsuarioBean.limpar()}"
+					styleClass="btn btn-secondary" icon="pi pi-times" type="button"
+					immediate="true" />
+			</div>
+		</h:form>
+	</p:dialog>
+
+</h:body>
+</html>

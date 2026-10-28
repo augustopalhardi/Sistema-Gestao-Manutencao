@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+
+	<persistence-unit name="gestaoManutencaoPU" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+		<!-- Entidades -->
+		<class>com.augustopalhardi.manutencao.model.CadastroUsuario</class>
+		<class>com.augustopalhardi.manutencao.model.CadastroLocal</class>
+		<class>com.augustopalhardi.manutencao.model.CadastroMaquinaEquipamento</class>
+		<class>com.augustopalhardi.manutencao.model.SolicitacaoManutencaoMaquina</class>
+		<class>com.augustopalhardi.manutencao.model.SolicitacaoManutencaoPredial</class>
+		<class>com.augustopalhardi.manutencao.model.ControleStatusManutencao</class>
+		<class>com.augustopalhardi.manutencao.model.PeriodoTrabalhoManutencao</class>
+		<class>com.augustopalhardi.manutencao.model.SolicitacaoCompraMateriaisServicos</class>
+		<class>com.augustopalhardi.manutencao.model.HistoricoReprogramacao</class>
+		<class>com.augustopalhardi.manutencao.model.HistoricoCancelamentoCompra</class>
+		<class>com.augustopalhardi.manutencao.model.ConfiguracaoEmail</class>
+
+		<properties>
+			<!--
+				url, user e password NÃO ficam aqui: são injetados em tempo de
+				execução pelo EntityManagerProducer, a partir do config.properties
+				externo (ver util.Config).
+			-->
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+
+			<!-- Hibernate -->
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="false" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect" />
+			<property name="hibernate.jdbc.time_zone" value="America/Sao_Paulo" />
+
+			<!-- Pool de conexões (c3p0) -->
+			<property name="hibernate.c3p0.initialPoolSize" value="5" />
+			<property name="hibernate.c3p0.minPoolSize" value="5" />
+			<property name="hibernate.c3p0.maxPoolSize" value="20" />
+			<property name="hibernate.c3p0.maxIdleTime" value="300" />
+			<property name="hibernate.c3p0.testConnectionOnCheckout" value="false" />
+			<property name="hibernate.c3p0.testConnectionOnCheckin" value="true" />
+			<property name="hibernate.c3p0.idleConnectionTestPeriod" value="60" />
+			<property name="hibernate.c3p0.acquireRetryAttempts" value="1" />
+			<property name="hibernate.c3p0.acquireRetryDelay" value="250" />
+
+			<!-- Estabilidade -->
+			<property name="hibernate.connection.autocommit" value="false" />
+			<property name="hibernate.current_session_context_class" value="thread" />
+		</properties>
+	</persistence-unit>
+</persistence>

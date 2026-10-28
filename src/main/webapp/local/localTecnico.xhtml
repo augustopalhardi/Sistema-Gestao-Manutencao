@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="#{resource['imagens/favicon.ico']}" type="image/x-icon" />
+	<title>Consulta de Local</title>
+	<h:outputStylesheet name="css/local.css" />
+	<h:outputStylesheet name="css/detalhesDialog.css" />
+	<style>
+		/* Ajustes globais válidos apenas nesta tela: barra de rolagem dentro
+		   dos dialogs e destaque da linha sob o cursor. Os demais estilos
+		   estão em css/local.css. */
+		.ui-dialog-content {
+			overflow-y: auto !important;
+		}
+
+		.ui-datatable tbody tr:hover {
+			background-color: #f8f9fa !important;
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<div class="header">
+		<h1>Cadastro de Locais</h1>
+	</div>
+
+	<div class="header-actions">
+		<button type="button" class="exit-button" onclick="window.history.back();">
+			Voltar
+		</button>
+	</div>
+
+	<!-- ========== LISTAGEM ========== -->
+	<div class="list-section">
+		<h2 class="section-title">Locais Cadastrados no Sistema</h2>
+
+		<h:form id="listaForm">
+			<p:dataTable id="tabelaLocaisTecnico"
+				widgetVar="tabelaLocaisTecnicoWV"
+				value="#{cadastroLocalBean.locaisTecnico}"
+				var="local"
+				paginator="true"
+				rows="10"
+				rowStyleClass="#{cadastroLocalBean.isRegistroAtivo(local) ? '' : 'linha-inativa'}"
+				emptyMessage="Nenhum local encontrado"
+				paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15,20"
+				currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords} locais"
+				styleClass="custom-datatable">
+
+				<p:column headerText="ID"
+					sortBy="#{local.id}"
+					style="width: 60px; text-align: center;">
+					<h:outputText value="#{local.id}" />
+				</p:column>
+
+				<p:column headerText="Nome do Local"
+					sortBy="#{local.nome}"
+					filterBy="#{local.nome}"
+					filterMatchMode="contains">
+					<h:outputText value="#{local.nome}" />
+				</p:column>
+
+				<p:column headerText="Área (m²)"
+					sortBy="#{local.area}"
+					style="width: 120px; text-align: right;">
+					<h:outputText value="#{local.area}">
+						<f:convertNumber type="number" groupingUsed="true" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Observações"
+					style="max-width: 200px;">
+					<h:outputText
+						value="#{local.observacoes}"
+						style="display: block;
+							   overflow: hidden;
+							   text-overflow: ellipsis;
+							   white-space: nowrap;"
+						title="#{local.observacoes}" />
+				</p:column>
+
+				<!-- O filtro Todos/Ativo/Inativo fica no próprio cabeçalho e é
+				     resolvido no bean por filtroStatusTecnico, não pelo filtro
+				     nativo do dataTable. -->
+				<p:column style="width: 140px; text-align: center;">
+					<f:facet name="header">
+						<div class="coluna-status-header">
+							<span class="coluna-status-titulo">Status</span>
+							<p:selectOneMenu value="#{cadastroLocalBean.filtroStatusTecnico}"
+								styleClass="coluna-status-select">
+								<f:selectItem itemLabel="Todos" itemValue="TODOS" />
+								<f:selectItem itemLabel="Ativo" itemValue="ATIVO" />
+								<f:selectItem itemLabel="Inativo" itemValue="INATIVO" />
+								<p:ajax event="change" process="@this"
+									update=":listaForm:tabelaLocaisTecnico" />
+							</p:selectOneMenu>
+						</div>
+					</f:facet>
+					<h:outputText value="✓ Ativo"
+						styleClass="status-ativo"
+						rendered="#{cadastroLocalBean.isRegistroAtivo(local)}" />
+					<h:outputText value="✗ Inativo"
+						styleClass="status-inativo"
+						rendered="#{not cadastroLocalBean.isRegistroAtivo(local)}" />
+				</p:column>
+
+				<p:column headerText="Ações"
+					style="width: 280px; text-align: center;">
+
+					<p:commandButton
+						value="Histórico de Manutenções"
+						title="Ver Histórico de Manutenções"
+						styleClass="ui-button-warning"
+						style="margin-right: 5px;"
+						action="#{cadastroLocalBean.carregarManutencoes(local)}"
+						oncomplete="PF('dlgHistoricoManutencoes').show();"
+						process="@this"
+						update=":historicoForm:historicoPanel" />
+
+					<p:commandButton
+						icon="pi pi-image"
+						title="Ver Imagem"
+						styleClass="ui-button-rounded ui-button-info"
+						rendered="#{not empty local.urlFoto}"
+						action="#{cadastroLocalBean.verImagem(local)}"
+						process="@this"
+						update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+						oncomplete="PF('dlgVisualizarImagem').show();" />
+
+					<h:outputText
+						value="Sem foto"
+						style="color: #95a5a6; font-style: italic; font-size: 0.75rem;"
+						rendered="#{empty local.urlFoto}" />
+				</p:column>
+
+			</p:dataTable>
+		</h:form>
+	</div>
+
+	<!-- ========== DIALOG DO HISTÓRICO DE MANUTENÇÕES ========== -->
+	<p:dialog header="Histórico de Manutenções"
+		widgetVar="dlgHistoricoManutencoes"
+		modal="true"
+		resizable="true"
+		width="950"
+		height="550"
+		closable="true"
+		showEffect="fade"
+		hideEffect="fade">
+
+		<h:form id="historicoForm">
+			<h:panelGroup id="historicoPanel" layout="block">
+				<h:panelGroup layout="block"
+					rendered="#{cadastroLocalBean.localSelecionado != null}">
+
+					<div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+						<h4 style="margin: 0 0 10px 0; color: #2e7d32;">
+							<i class="pi pi-building"></i>
+							#{cadastroLocalBean.localSelecionado.nome}
+						</h4>
+						<p style="margin: 0; color: #388e3c;">
+							<strong>Área:</strong>
+							<h:outputText value="#{cadastroLocalBean.localSelecionado.area}">
+								<f:convertNumber type="number" groupingUsed="true" />
+							</h:outputText> m²
+						</p>
+					</div>
+
+					<p:dataTable value="#{cadastroLocalBean.manutencoesDoLocal}"
+						var="manutencao"
+						paginator="true"
+						rows="8"
+						emptyMessage="Nenhuma manutenção registrada para este local."
+						rowStyleClass="#{manutencao.cancelada ? 'row-cancelled' : ''}"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+						currentPageReportTemplate="Exibindo {startRecord} a {endRecord} de {totalRecords}">
+
+						<p:column headerText="ID" style="width: 60px; text-align: center;">
+							<h:outputText value="#{manutencao.id}" />
+						</p:column>
+
+						<p:column headerText="Tipo" style="width: 100px; text-align: center;">
+							<h:outputText value="#{manutencao.tipoManutencao}" />
+						</p:column>
+
+						<p:column headerText="Problema">
+							<h:outputText value="#{manutencao.problema}"
+								style="display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+								title="#{manutencao.problema}" />
+						</p:column>
+
+						<p:column headerText="Data" style="width: 100px; text-align: center;">
+							<h:outputText value="#{manutencao.dataManutencao}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Status" style="width: 100px; text-align: center;">
+							<span class="status-badge #{cadastroLocalBean.getStatusClasseManutencao(manutencao)}">
+								#{cadastroLocalBean.getStatusLabelManutencao(manutencao)}
+							</span>
+						</p:column>
+
+						<p:column headerText="Urgente" style="width: 70px; text-align: center;">
+							<h:outputText value="#{manutencao.urgente ? 'Sim' : 'Não'}"
+								style="color: #{manutencao.urgente ? '#f39c12' : '#27ae60'}; font-weight: bold;" />
+						</p:column>
+
+						<p:column headerText="Ações" style="width: 100px; text-align: center;">
+							<p:commandButton
+								value="Detalhes"
+								title="Ver Detalhes"
+								styleClass="ui-button-info ui-button-sm"
+								process="@this"
+								action="#{detalhesManutencaoBean.abrirDetalhes(manutencao.id, 'PREDIAL')}"
+								update=":dlgDetalhesGlobalForm:dlgDetalhesGlobalPanel"
+								oncomplete="PF('dlgDetalhesGlobal').show();">
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+
+					<div style="text-align: center; margin-top: 20px;">
+						<p:commandButton
+							value="Fechar"
+							onclick="PF('dlgHistoricoManutencoes').hide();"
+							type="button"
+							styleClass="ui-button-secondary"
+							icon="pi pi-times" />
+					</div>
+				</h:panelGroup>
+
+				<h:panelGroup layout="block"
+					rendered="#{cadastroLocalBean.localSelecionado == null}">
+					<div class="no-image-message">
+						<i class="pi pi-exclamation-triangle"></i>
+						<p>Nenhum local selecionado.</p>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
+		</h:form>
+	</p:dialog>
+
+	<!-- Dialog de detalhes da manutenção (componente reutilizável). O dialog
+	     global de imagem vem embutido neste include. -->
+	<ui:include src="/includes/detalhesManutencaoDialog.xhtml" />
+
+</h:body>
+</html>

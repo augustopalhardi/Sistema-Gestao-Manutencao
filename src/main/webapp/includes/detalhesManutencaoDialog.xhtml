@@ -1,0 +1,630 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+	<style>
+		/*
+		 * Título de seção que carrega o botão "Ver foto".
+		 * Flex (e não float) para o botão não sair do fluxo e
+		 * desalinhar a borda inferior do título.
+		 */
+		.dlg-det-section-title.dlg-det-title-com-acao {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+		}
+
+		/*
+		 * Cores fixas no próprio botão. NÃO usar ui-button-info /
+		 * ui-button-success aqui: cada página redefine essas classes no
+		 * seu CSS, e o botão saía de uma cor diferente em cada tela.
+		 */
+		.dlg-det-btn-foto.ui-button,
+		.dlg-det-btn-foto.ui-button:link,
+		.dlg-det-btn-foto.ui-button:visited {
+			flex: 0 0 auto;
+			background: #1a73a7 !important;
+			background-image: none !important;
+			border: 1px solid #1a73a7 !important;
+			color: #ffffff !important;
+			padding: 4px 12px !important;
+			font-size: 0.72rem !important;
+			font-weight: 600 !important;
+			border-radius: 14px !important;
+			line-height: 1.4 !important;
+			height: auto !important;
+			min-height: 0 !important;
+			box-shadow: none !important;
+		}
+
+		.dlg-det-btn-foto.ui-button:hover,
+		.dlg-det-btn-foto.ui-button:focus,
+		.dlg-det-btn-foto.ui-button:active {
+			background: #155e88 !important;
+			background-image: none !important;
+			border-color: #155e88 !important;
+			color: #ffffff !important;
+		}
+
+		.dlg-det-btn-foto.ui-button .ui-button-text {
+			padding: 0 0 0 4px !important;
+			display: inline !important;
+			color: #ffffff !important;
+		}
+
+		.dlg-det-btn-foto.ui-button .ui-icon,
+		.dlg-det-btn-foto.ui-button .ui-button-icon-left {
+			position: static !important;
+			margin: 0 !important;
+			font-size: 0.75rem !important;
+			color: #ffffff !important;
+		}
+	</style>
+
+
+	<!-- ============================================================
+	     Dialog reutilizável de Detalhes da Manutenção.
+	     
+	     Inclua em qualquer página com:
+	       <ui:include src="/WEB-INF/includes/detalhesManutencaoDialog.xhtml"/>
+	     
+	     Antes de abrir, chame no bean da página:
+	       detalhesManutencaoBean.abrirDetalhes(id, tipo)
+	     
+	     Depois abra com:
+	       PF('dlgDetalhesGlobal').show();
+	     ============================================================ -->
+
+	<p:dialog header="Detalhes da Solicitação" widgetVar="dlgDetalhesGlobal"
+		styleClass="dlg-detalhes-rico"
+		modal="true" resizable="false" width="850" height="auto"
+		closable="true" showEffect="fade" hideEffect="fade" responsive="true">
+
+		<h:form id="dlgDetalhesGlobalForm">
+			<p:panel id="dlgDetalhesGlobalPanel">
+				<h:panelGroup layout="block" styleClass="dlg-det-container"
+					rendered="#{detalhesManutencaoBean.aberto}">
+
+					<!-- ===== CABEÇALHO ===== -->
+					<div class="dlg-det-header">
+						<div>
+							<h3 class="dlg-det-titulo">
+								Solicitação ##{detalhesManutencaoBean.solicitacaoId}
+								<span class="dlg-det-tipo-label">#{detalhesManutencaoBean.tipoLabel}</span>
+							</h3>
+							<h:panelGroup rendered="#{not empty detalhesManutencaoBean.solicitante}">
+								<span class="dlg-det-solicitante">
+									<i class="pi pi-user"></i> #{detalhesManutencaoBean.solicitante}
+								</span>
+							</h:panelGroup>
+						</div>
+						<span class="dlg-det-status-badge"
+							style="background: #{detalhesManutencaoBean.statusColor};">
+							#{detalhesManutencaoBean.statusLabel}
+						</span>
+					</div>
+
+					<p:tabView>
+
+						<!-- ==================== ABA 1: SOLICITAÇÃO ==================== -->
+						<p:tab title="Solicitação">
+							<div class="dlg-det-tab-content">
+
+								<!-- Solicitante -->
+								<div class="dlg-det-info-card dlg-det-border-purple">
+									<strong class="dlg-det-label">
+										<i class="pi pi-user" style="margin-right: 4px;"></i>Solicitante
+									</strong>
+									#{detalhesManutencaoBean.solicitante}
+								</div>
+
+								<!-- Grid: ID, Tipo, Data, Categoria -->
+								<div class="dlg-det-grid-2">
+									<div class="dlg-det-info-card">
+										<strong class="dlg-det-label">ID</strong>
+										#{detalhesManutencaoBean.solicitacaoId}
+									</div>
+									<div class="dlg-det-info-card">
+										<strong class="dlg-det-label">Tipo Manutenção</strong>
+										#{detalhesManutencaoBean.tipoManutencao}
+									</div>
+									<div class="dlg-det-info-card">
+										<strong class="dlg-det-label">Data Manutenção</strong>
+										<h:outputText value="#{detalhesManutencaoBean.dataManutencao}">
+											<f:convertDateTime pattern="dd/MM/yyyy" />
+										</h:outputText>
+									</div>
+									<div class="dlg-det-info-card">
+										<strong class="dlg-det-label">Categoria</strong>
+										#{detalhesManutencaoBean.tipoLabel}
+									</div>
+								</div>
+
+								<!-- ===== DADOS DE MÁQUINA ===== -->
+								<h:panelGroup rendered="#{detalhesManutencaoBean.tipoMaquina and detalhesManutencaoBean.maquina ne null}">
+									<h4 class="dlg-det-section-title dlg-det-title-com-acao dlg-det-border-blue">
+										Dados da Máquina
+										<!-- ✅ Ver foto da máquina relacionada -->
+										<p:commandButton value="Ver foto"
+											rendered="#{not empty detalhesManutencaoBean.maquina.urlFoto}"
+											action="#{detalhesManutencaoBean.verFotoMaquina()}"
+											process="@this"
+											update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+											oncomplete="PF('dlgVisualizarImagem').show();"
+											styleClass="dlg-det-btn-foto"
+											icon="pi pi-image" />
+									</h4>
+									<div class="dlg-det-grid-2">
+										<div class="dlg-det-info-card dlg-det-border-blue">
+											<strong class="dlg-det-label">Nº Patrimônio</strong>
+											<span class="dlg-det-mono">
+												#{detalhesManutencaoBean.maquina.numeroPatrimonio != null
+													? detalhesManutencaoBean.maquina.numeroPatrimonio : 'Não informado'}
+											</span>
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Tipo</strong>
+											#{detalhesManutencaoBean.maquina.tipo}
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Fabricante</strong>
+											#{detalhesManutencaoBean.maquina.fabricante}
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Modelo</strong>
+											#{detalhesManutencaoBean.maquina.modelo}
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Operando</strong>
+											#{detalhesManutencaoBean.operando ? 'Sim' : 'Não'}
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Risco</strong>
+											#{detalhesManutencaoBean.risco ? 'Sim' : 'Não'}
+										</div>
+									</div>
+
+									<div class="dlg-det-text-block">
+										<strong>Falha Identificada:</strong>
+										<div class="dlg-det-info-card dlg-det-border-red">
+											#{detalhesManutencaoBean.falha}
+										</div>
+									</div>
+
+									<h:panelGroup rendered="#{detalhesManutencaoBean.risco and not empty detalhesManutencaoBean.descrRisco}">
+										<div class="dlg-det-text-block">
+											<strong>Descrição do Risco:</strong>
+											<div class="dlg-det-info-card dlg-det-bg-red dlg-det-border-red">
+												#{detalhesManutencaoBean.descrRisco}
+											</div>
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{not empty detalhesManutencaoBean.descrOperando}">
+										<div class="dlg-det-text-block">
+											<strong>Condições de Operação / Limitações:</strong>
+											<div class="dlg-det-info-card dlg-det-border-blue">
+												#{detalhesManutencaoBean.descrOperando}
+											</div>
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{not empty detalhesManutencaoBean.observacoes}">
+										<div class="dlg-det-text-block">
+											<strong>Observações:</strong>
+											<div class="dlg-det-info-card dlg-det-border-gray">
+												#{detalhesManutencaoBean.observacoes}
+											</div>
+										</div>
+									</h:panelGroup>
+								</h:panelGroup>
+
+								<!-- ===== DADOS PREDIAIS ===== -->
+								<h:panelGroup rendered="#{detalhesManutencaoBean.tipoPredial}">
+									<h4 class="dlg-det-section-title dlg-det-title-com-acao dlg-det-border-green">
+										Dados Prediais
+										<!-- ✅ Ver foto do local relacionado -->
+										<p:commandButton value="Ver foto"
+											rendered="#{not empty detalhesManutencaoBean.local.urlFoto}"
+											action="#{detalhesManutencaoBean.verFotoLocal()}"
+											process="@this"
+											update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+											oncomplete="PF('dlgVisualizarImagem').show();"
+											styleClass="dlg-det-btn-foto"
+											icon="pi pi-image" />
+									</h4>
+									<div class="dlg-det-grid-3">
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Local</strong>
+											#{detalhesManutencaoBean.local.nome}
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Área</strong>
+											#{detalhesManutencaoBean.local.area} m²
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Urgente</strong>
+											#{detalhesManutencaoBean.urgente ? 'Sim' : 'Não'}
+										</div>
+										<div class="dlg-det-info-card">
+											<strong class="dlg-det-label">Risco de Segurança</strong>
+											#{detalhesManutencaoBean.riscoSeguranca ? 'Sim' : 'Não'}
+										</div>
+									</div>
+
+									<div class="dlg-det-text-block">
+										<strong>Problema Identificado:</strong>
+										<div class="dlg-det-info-card dlg-det-border-green">
+											#{detalhesManutencaoBean.problema}
+										</div>
+									</div>
+
+									<h:panelGroup rendered="#{detalhesManutencaoBean.riscoSeguranca and not empty detalhesManutencaoBean.descrRisco}">
+										<div class="dlg-det-text-block">
+											<strong>Descrição do Risco:</strong>
+											<div class="dlg-det-info-card dlg-det-bg-red dlg-det-border-red">
+												#{detalhesManutencaoBean.descrRisco}
+											</div>
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{detalhesManutencaoBean.urgente and not empty detalhesManutencaoBean.descrUrgente}">
+										<div class="dlg-det-text-block">
+											<strong>Descrição da Urgência:</strong>
+											<div class="dlg-det-info-card dlg-det-bg-yellow dlg-det-border-yellow">
+												#{detalhesManutencaoBean.descrUrgente}
+											</div>
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{not empty detalhesManutencaoBean.observacoes}">
+										<div class="dlg-det-text-block">
+											<strong>Observações:</strong>
+											<div class="dlg-det-info-card dlg-det-border-gray">
+												#{detalhesManutencaoBean.observacoes}
+											</div>
+										</div>
+									</h:panelGroup>
+								</h:panelGroup>
+
+							</div>
+						</p:tab>
+
+						<!-- ==================== ABA 2: MANUTENÇÃO TÉCNICA ==================== -->
+						<p:tab title="Manutenção Técnica"
+							rendered="#{detalhesManutencaoBean.temDadosTecnicos}">
+							<div class="dlg-det-tab-content">
+
+								<!-- Datas de Início e Conclusão -->
+								<div class="dlg-det-grid-2" style="margin-bottom: 20px;">
+									<h:panelGroup rendered="#{detalhesManutencaoBean.controleStatus.dataInicio != null}">
+										<div class="dlg-det-info-card dlg-det-bg-yellow dlg-det-border-orange">
+											<strong class="dlg-det-label">
+												<i class="pi pi-play" style="margin-right: 4px;"></i> Data de Início
+											</strong>
+											<h:outputText value="#{detalhesManutencaoBean.controleStatus.dataInicio}">
+												<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+											</h:outputText>
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{detalhesManutencaoBean.controleStatus.dataConclusao != null}">
+										<div class="dlg-det-info-card dlg-det-bg-green dlg-det-border-green">
+											<strong class="dlg-det-label">
+												<i class="pi pi-check-circle" style="margin-right: 4px;"></i> Data de Conclusão
+											</strong>
+											<h:outputText value="#{detalhesManutencaoBean.controleStatus.dataConclusao}">
+												<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+											</h:outputText>
+										</div>
+									</h:panelGroup>
+								</div>
+
+								<!-- Horímetro e Manutenção Elétrica (máquina) -->
+								<h:panelGroup rendered="#{detalhesManutencaoBean.tipoMaquina and (detalhesManutencaoBean.horimetroFalha != null or detalhesManutencaoBean.manutencaoEletrica != null)}">
+									<div class="dlg-det-grid-2" style="margin-bottom: 20px;">
+										<h:panelGroup rendered="#{detalhesManutencaoBean.horimetroFalha != null}">
+											<div class="dlg-det-info-card" style="background: #f3e8ff; border-left: 4px solid #9333ea;">
+												<strong class="dlg-det-label">
+													<i class="pi pi-gauge" style="margin-right: 4px;"></i> Horímetro no Momento da Falha
+												</strong>
+												<h:outputText value="#{detalhesManutencaoBean.horimetroFalha}" />
+											</div>
+										</h:panelGroup>
+										<h:panelGroup rendered="#{detalhesManutencaoBean.manutencaoEletrica != null}">
+											<div class="dlg-det-info-card" style="background: #fff7ed; border-left: 4px solid #ea580c;">
+												<strong class="dlg-det-label">
+													<i class="pi pi-bolt" style="margin-right: 4px;"></i> Manutenção Elétrica
+												</strong>
+												#{detalhesManutencaoBean.manutencaoEletrica ? 'Sim' : 'Não'}
+											</div>
+										</h:panelGroup>
+									</div>
+								</h:panelGroup>
+
+								<!-- Técnicos e Total de Horas -->
+								<div class="dlg-det-grid-2" style="margin-bottom: 20px;">
+									<h:panelGroup rendered="#{not empty detalhesManutencaoBean.tecnicosResponsaveis}">
+										<div class="dlg-det-info-card" style="background: #e3f2fd; border-left: 4px solid #2196f3;">
+											<strong class="dlg-det-label">
+												<i class="pi pi-users" style="margin-right: 4px;"></i> Técnicos Responsáveis
+											</strong>
+											<h:outputText value="#{detalhesManutencaoBean.tecnicosResponsaveis}" />
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{detalhesManutencaoBean.totalHorasTrabalhadas gt 0}">
+										<div class="dlg-det-info-card" style="background: #e8eaf6; border-left: 4px solid #3f51b5;">
+											<strong class="dlg-det-label">
+												<i class="pi pi-clock" style="margin-right: 4px;"></i> Total de Horas
+											</strong>
+											<span style="font-size: 1.1rem; font-weight: 600; color: #3f51b5;">
+												<h:outputText value="#{detalhesManutencaoBean.totalHorasFormatado}" />
+											</span>
+										</div>
+									</h:panelGroup>
+								</div>
+
+								<!-- Solução Aplicada -->
+								<h:panelGroup rendered="#{not empty detalhesManutencaoBean.controleStatus.solucao}">
+									<div class="info-expandida" style="margin-bottom: 15px;">
+										<div class="info-expandida-header" style="background-color: #e8f5e9;">
+											<label style="color: #27ae60; font-weight: 600;">
+												<i class="pi pi-check-circle" style="margin-right: 6px;"></i>Solução Aplicada
+											</label>
+										</div>
+										<div class="info-expandida-content">
+											<p class="info-text">
+												<h:outputText value="#{detalhesManutencaoBean.controleStatus.solucao}" />
+											</p>
+										</div>
+									</div>
+								</h:panelGroup>
+
+								<!-- Observações Finais -->
+								<h:panelGroup rendered="#{not empty detalhesManutencaoBean.controleStatus.observacoesFinais}">
+									<div class="info-expandida" style="margin-bottom: 15px; border-left-color: #ff9800;">
+										<div class="info-expandida-header" style="background-color: #fff3e0;">
+											<label style="color: #e65100; font-weight: 600;">
+												<i class="pi pi-info-circle" style="margin-right: 6px;"></i>Observações Finais
+											</label>
+										</div>
+										<div class="info-expandida-content">
+											<p class="info-text">
+												<h:outputText value="#{detalhesManutencaoBean.controleStatus.observacoesFinais}" />
+											</p>
+										</div>
+									</div>
+								</h:panelGroup>
+
+								<!-- BBS / Near Miss -->
+								<h:panelGroup rendered="#{detalhesManutencaoBean.bbsNearMiss}">
+									<div class="dlg-det-bbs-banner">
+										<span style="font-size: 1.4rem;">&#x26A0;&#xFE0F;</span>
+										<div>
+											<strong style="color: #5d4037; font-size: 0.95rem;">Esta solicitação se refere a um BBS/Near Miss</strong>
+											<p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #795548;">Comportamento Baseado em Segurança / Quase Acidente</p>
+										</div>
+									</div>
+								</h:panelGroup>
+
+								<!-- Solicitações de Compra -->
+								<h:panelGroup rendered="#{not empty detalhesManutencaoBean.compras}">
+									<h4 class="dlg-det-section-title" style="color: #9b59b6; border-bottom-color: #9b59b6;">
+										<i class="pi pi-shopping-cart" style="margin-right: 6px;"></i>Solicitações de Compra nesta Manutenção
+									</h4>
+									<ui:repeat value="#{detalhesManutencaoBean.compras}" var="compra">
+										<div class="info-expandida" style="border-left-color: #9b59b6; margin-bottom: 12px;">
+											<div class="info-expandida-header" style="background-color: #f8f4ff;">
+												<label style="color: #9b59b6; font-weight: 600;">
+													<i class="pi pi-shopping-cart" style="margin-right: 6px;"></i>
+													<h:outputText value="#{compra.tipoSolicitacao.descricao}" /> —
+													<h:outputText value="#{compra.statusSolicitacao.descricao}" />
+												</label>
+											</div>
+											<div class="info-expandida-content">
+												<p class="info-text" style="font-weight: bold; margin: 0 0 6px 0;">
+													Solicitado em:
+													<h:outputText value="#{compra.dataSolicitacao}">
+														<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+													</h:outputText>
+												</p>
+												<p class="info-text" style="margin: 0 0 6px 0;">
+													<strong>Descrição:</strong>
+													<h:outputText value="#{compra.descricaoDetalhada}" />
+												</p>
+												<h:panelGroup rendered="#{compra.valorGasto ne null and compra.valorGasto gt 0}">
+													<p class="info-text" style="margin: 0 0 4px 0;">
+														<strong>Valor total:</strong>
+														<h:outputText value="#{compra.valorGasto}">
+															<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+														</h:outputText>
+													</p>
+												</h:panelGroup>
+												<h:panelGroup rendered="#{compra.tipoSolicitacao.name() == 'AMBOS' and compra.valorGastoMaterial ne null and compra.valorGastoServico ne null}">
+													<div style="display: flex; gap: 16px; margin-top: 4px; padding-left: 2px;">
+														<p class="info-text" style="margin: 0; font-size: 0.88rem; color: #555;">
+															<i class="pi pi-box" style="margin-right: 4px; color: #8b5cf6; font-size: 0.8rem;"></i>
+															<strong>Material:</strong>
+															<h:outputText value="#{compra.valorGastoMaterial}">
+																<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+															</h:outputText>
+														</p>
+														<p class="info-text" style="margin: 0; font-size: 0.88rem; color: #555;">
+															<i class="pi pi-wrench" style="margin-right: 4px; color: #ec4899; font-size: 0.8rem;"></i>
+															<strong>Serviço:</strong>
+															<h:outputText value="#{compra.valorGastoServico}">
+																<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2" />
+															</h:outputText>
+														</p>
+													</div>
+												</h:panelGroup>
+											</div>
+										</div>
+									</ui:repeat>
+								</h:panelGroup>
+
+								<!-- Períodos de Trabalho -->
+								<h:panelGroup rendered="#{not empty detalhesManutencaoBean.periodos}">
+									<h4 class="dlg-det-section-title" style="color: #2c3e50; border-bottom-color: #6c757d;">
+										<i class="pi pi-list" style="margin-right: 6px;"></i>Períodos de Trabalho
+									</h4>
+									<p:dataTable value="#{detalhesManutencaoBean.periodos}" var="periodo"
+										styleClass="historico-table" style="margin-top: 10px;">
+										<p:column headerText="Técnico" style="text-align: center;">
+											<h:outputText value="#{periodo.nomeTecnicoResponsavel}" />
+										</p:column>
+										<p:column headerText="Início" style="text-align: center;" width="130">
+											<h:outputText value="#{periodo.dataHoraInicio}">
+												<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+											</h:outputText>
+										</p:column>
+										<p:column headerText="Fim" style="text-align: center;" width="130">
+											<h:outputText value="#{periodo.dataHoraFim}">
+												<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+											</h:outputText>
+										</p:column>
+										<p:column headerText="Duração" style="text-align: center;" width="80">
+											<h:outputText value="#{periodo.duracaoFormatada}" />
+										</p:column>
+										<p:column headerText="Atividade">
+											<h:outputText value="#{periodo.descricaoAtividade}" />
+										</p:column>
+									</p:dataTable>
+								</h:panelGroup>
+
+								<!-- Sem dados técnicos -->
+								<h:panelGroup rendered="#{empty detalhesManutencaoBean.controleStatus.solucao and empty detalhesManutencaoBean.periodos and detalhesManutencaoBean.controleStatus.dataInicio == null}">
+									<div class="dlg-det-empty-state">
+										<i class="pi pi-info-circle" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+										A manutenção foi iniciada mas ainda não possui detalhes técnicos registrados.
+									</div>
+								</h:panelGroup>
+
+							</div>
+						</p:tab>
+
+						<!-- ==================== ABA 3: REPROGRAMAÇÕES ==================== -->
+						<p:tab title="Reprogramações"
+							rendered="#{not empty detalhesManutencaoBean.historicoReprogramacoes}">
+							<div class="dlg-det-tab-content">
+								<h4 class="dlg-det-section-title" style="color: #d97706; border-bottom-color: #d97706; margin-top: 0;">
+									<i class="pi pi-history" style="margin-right: 6px;"></i>Histórico de Reprogramações
+								</h4>
+
+								<ui:repeat value="#{detalhesManutencaoBean.historicoReprogramacoes}" var="hist">
+									<div class="dlg-det-reprog-card">
+										<div class="dlg-det-grid-2" style="margin-bottom: 12px;">
+											<div class="dlg-det-reprog-field">
+												<strong class="dlg-det-label-sm">
+													<i class="pi pi-calendar-times" style="margin-right: 4px;"></i>Data Anterior
+												</strong>
+												<h:outputText value="#{hist.dataAnterior}">
+													<f:convertDateTime pattern="dd/MM/yyyy" />
+												</h:outputText>
+											</div>
+											<div class="dlg-det-reprog-field">
+												<strong class="dlg-det-label-sm">
+													<i class="pi pi-calendar-plus" style="margin-right: 4px;"></i>Nova Data
+												</strong>
+												<h:outputText value="#{hist.dataNova}" style="font-weight: 600; color: #b45309;">
+													<f:convertDateTime pattern="dd/MM/yyyy" />
+												</h:outputText>
+											</div>
+										</div>
+
+										<div class="dlg-det-reprog-field" style="margin-bottom: 12px;">
+											<strong class="dlg-det-label-sm">
+												<i class="pi pi-comment" style="margin-right: 4px;"></i>Motivo
+											</strong>
+											<span style="color: #2c3e50; font-size: 0.9rem;">
+												<h:outputText value="#{hist.motivoReprogramacao}" />
+											</span>
+										</div>
+
+										<div class="dlg-det-reprog-footer">
+											<span>
+												<i class="pi pi-user" style="margin-right: 4px;"></i>
+												<h:outputText value="#{hist.usuarioReprogramacao}" />
+											</span>
+											<span>
+												<i class="pi pi-clock" style="margin-right: 4px;"></i>
+												<h:outputText value="#{hist.dataHoraReprogramacao}">
+													<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+												</h:outputText>
+											</span>
+										</div>
+									</div>
+								</ui:repeat>
+							</div>
+						</p:tab>
+
+						<!-- ==================== ABA 4: CANCELAMENTO ==================== -->
+						<p:tab title="Cancelamento"
+							rendered="#{detalhesManutencaoBean.cancelada}">
+							<div class="dlg-det-tab-content">
+								<div class="dlg-det-cancel-container">
+									<div class="dlg-det-cancel-header">
+										<i class="pi pi-ban" style="font-size: 1.5rem; color: #e74c3c;"></i>
+										<h4 style="margin: 0; color: #c0392b;">Esta solicitação foi cancelada</h4>
+									</div>
+
+									<div class="dlg-det-grid-2" style="margin-bottom: 15px;">
+										<div class="dlg-det-cancel-field">
+											<strong class="dlg-det-label">
+												<i class="pi pi-calendar" style="margin-right: 4px;"></i> Data do Cancelamento
+											</strong>
+											<h:outputText value="#{detalhesManutencaoBean.dataCancelamento}">
+												<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+											</h:outputText>
+										</div>
+										<div class="dlg-det-cancel-field">
+											<strong class="dlg-det-label">
+												<i class="pi pi-tag" style="margin-right: 4px;"></i> Status
+											</strong>
+											<span style="color: #e74c3c; font-weight: 600;">Cancelada</span>
+										</div>
+									</div>
+
+									<div class="dlg-det-cancel-motivo">
+										<strong class="dlg-det-label">
+											<i class="pi pi-comment" style="margin-right: 4px;"></i> Motivo do Cancelamento
+										</strong>
+										<p style="margin: 0; line-height: 1.6; color: #2c3e50; font-size: 0.95rem; white-space: pre-wrap;">
+											<h:outputText value="#{detalhesManutencaoBean.motivoCancelamento}" />
+										</p>
+									</div>
+								</div>
+							</div>
+						</p:tab>
+
+					</p:tabView>
+
+					<!-- ===== RODAPÉ ===== -->
+					<div class="dlg-det-footer">
+						<p:commandButton value="Ver Imagem"
+							rendered="#{not empty detalhesManutencaoBean.urlFoto}"
+							action="#{detalhesManutencaoBean.verImagem()}"
+							process="@this"
+							update=":dlgVisualizarImagemForm:dlgVisualizarImagemPanel"
+							oncomplete="PF('dlgVisualizarImagem').show();"
+							styleClass="ui-button-success" icon="pi pi-image"
+							style="margin-right: 10px;" />
+						<p:commandButton value="Fechar"
+							onclick="PF('dlgDetalhesGlobal').hide();" type="button"
+							immediate="true" styleClass="btn btn-secondary"
+							icon="pi pi-times" />
+					</div>
+
+				</h:panelGroup>
+			</p:panel>
+		</h:form>
+	</p:dialog>
+
+	<!-- Dialog GLOBAL de imagem (usado por todo o sistema) -->
+	<ui:include src="/includes/visualizarImagemDialog.xhtml" />
+
+</ui:composition>
